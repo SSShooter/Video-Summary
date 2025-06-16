@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Storage } from "@plasmohq/storage"
 import type { AIConfig } from "~utils/ai-service"
+import iconBase64 from "data-base64:~assets/icon.png"
 
 function IndexPopup() {
   const [aiEnabled, setAiEnabled] = useState(false)
@@ -61,16 +62,16 @@ function IndexPopup() {
     <div
       style={{
         width: 320,
-        padding: 16,
+        padding: 0,
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        marginBottom: 16
+        marginBottom: 8
       }}>
         <img 
-          src="assets/icon.png" 
+          src={iconBase64} 
           alt="Video Mindmap" 
           style={{ width: 32, height: 32, marginRight: 12 }}
         />
@@ -85,7 +86,7 @@ function IndexPopup() {
         backgroundColor: '#f8f9fa',
         padding: 12,
         borderRadius: 6,
-        marginBottom: 16
+        marginBottom: 8
       }}>
         <div style={{
           fontSize: 14,
@@ -145,7 +146,7 @@ function IndexPopup() {
       </div>
       
       <div style={{
-        marginBottom: 16
+        marginBottom: 8
       }}>
         <div style={{
           fontSize: 14,

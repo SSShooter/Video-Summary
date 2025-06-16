@@ -1,8 +1,8 @@
 {
   "name": "video-mindmap",
-  "displayName": "Video mindmap",
+  "displayName": "Video Summary",
   "version": "0.0.1",
-  "description": "video to mindmap",
+  "description": "Summary video, or convert video to mindmap",
   "author": "Dexter",
   "scripts": {
     "dev": "plasmo dev",
