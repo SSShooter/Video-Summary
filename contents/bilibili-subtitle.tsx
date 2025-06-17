@@ -1,4 +1,4 @@
-import type { PlasmoCSConfig } from "plasmo"
+import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client"
 
@@ -8,11 +8,19 @@ import MindElixirReact, {
   type MindElixirReactRef
 } from "~components/MindElixirReact"
 
+import styleText from "data-text:mind-elixir/style"
+
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.bilibili.com/video/*"],
-  all_frames: false
+  all_frames: false,
+}
+
+export const getStyle: PlasmoGetStyle = () => {
+  const style = document.createElement("style")
+  style.textContent = styleText
+  return style
 }
 
 interface SubtitleItem {
@@ -580,7 +588,7 @@ function SubtitlePanel() {
             onClick={() => {
               setActiveTab("mindmap")
               setTimeout(() => {
-                mindmapRef.current.instance.toCenter()
+                mindmapRef.current?.instance.toCenter()
               }, 200)
             }}
             style={{

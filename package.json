@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@plasmohq/storage": "^1.15.0",
-    "mind-elixir": "5.0.0-beta.34",
+    "mind-elixir": "5.0.0-beta.35",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0"
