@@ -1,3 +1,5 @@
+import styleText from "data-text:mind-elixir/style"
+import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client"
@@ -8,13 +10,11 @@ import MindElixirReact, {
   type MindElixirReactRef
 } from "~components/MindElixirReact"
 
-import styleText from "data-text:mind-elixir/style"
-
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.bilibili.com/video/*"],
-  all_frames: false,
+  all_frames: false
 }
 
 export const getStyle: PlasmoGetStyle = () => {
@@ -35,45 +35,9 @@ interface VideoInfo {
   title: string
 }
 
-interface NodeObj {
-  topic: string
-  id: string
-  children?: NodeObj[]
-}
-
-interface Summary {
-  id: string
-  label: string
-  parent: string
-  start: number
-  end: number
-}
-
-interface Arrow {
-  id: string
-  label: string
-  from: string
-  to: string
-  delta1: {
-    x: number
-    y: number
-  }
-  delta2: {
-    x: number
-    y: number
-  }
-  bidirectional?: boolean
-}
-
-interface MindmapData {
-  nodeData: NodeObj
-  arrows?: Arrow[]
-  summaries?: Summary[]
-}
-
 interface CachedData {
   aiSummary: SubtitleSummary | null
-  mindmapData: MindmapData | null
+  mindmapData: MindElixirData | null
   timestamp: number
 }
 
@@ -85,7 +49,7 @@ function SubtitlePanel() {
   const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
-  const [mindmapData, setMindmapData] = useState<MindmapData | null>(null)
+  const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
   const [mindmapLoading, setMindmapLoading] = useState(false)
   const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<
@@ -906,36 +870,33 @@ function SubtitlePanel() {
           <>
             {/* 思维导图功能按钮 */}
             {subtitles.length > 0 && (
-              <div
-                style={{ padding: "12px", borderBottom: "1px solid #f1f2f3" }}>
+              <div style={{ padding: "12px" }}>
                 <div
                   style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-                  <button
-                    onClick={() => generateMindmap(false)}
-                    disabled={mindmapLoading}
-                    style={{
-                      flex: 1,
-                      padding: "8px 16px",
-                      fontSize: "13px",
-                      backgroundColor: mindmapLoading ? "#ccc" : "#722ed1",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: mindmapLoading ? "not-allowed" : "pointer",
-                      transition: "background-color 0.2s"
-                    }}>
-                    {mindmapLoading
-                      ? "生成中..."
-                      : mindmapData
-                        ? "查看导图"
-                        : "生成思维导图"}
-                  </button>
-                  {mindmapData && (
+                  {!mindmapData ? (
+                    <button
+                      onClick={() => generateMindmap(false)}
+                      disabled={mindmapLoading}
+                      style={{
+                        flex: 1,
+                        padding: "8px 16px",
+                        fontSize: "13px",
+                        backgroundColor: mindmapLoading ? "#ccc" : "#722ed1",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: mindmapLoading ? "not-allowed" : "pointer",
+                        transition: "background-color 0.2s"
+                      }}>
+                      {mindmapLoading ? "生成中..." : "生成思维导图"}
+                    </button>
+                  ) : (
                     <button
                       onClick={() => generateMindmap(true)}
                       disabled={mindmapLoading}
                       style={{
-                        padding: "8px 12px",
+                        flex: 1,
+                        padding: "8px 16px",
                         fontSize: "13px",
                         backgroundColor: mindmapLoading ? "#ccc" : "#52c41a",
                         color: "white",
@@ -1010,70 +971,22 @@ function SubtitlePanel() {
 
             {mindmapData && (
               <>
-                <MindElixirReact data={mindmapData} ref={mindmapRef} />
-                <div
-                  style={{
-                    padding: "12px",
-                    backgroundColor: "#f9f0ff",
-                    border: "1px solid #d3adf7",
-                    borderRadius: "6px"
-                  }}>
-                  <div
+                {cacheLoaded && (
+                  <span
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "12px"
-                    }}>
-                    <h4
-                      style={{
-                        margin: "0",
-                        fontSize: "14px",
-                        color: "#722ed1",
-                        fontWeight: "600"
-                      }}>
-                      思维导图JSON
-                    </h4>
-                    {cacheLoaded && (
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "#722ed1",
-                          backgroundColor: "#f9f0ff",
-                          padding: "2px 6px",
-                          borderRadius: "10px",
-                          border: "1px solid #d3adf7"
-                        }}>
-                        已缓存
-                      </span>
-                    )}
-                  </div>
-
-                  <div
-                    style={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #d9d9d9",
-                      borderRadius: "4px",
-                      padding: "8px",
+                      display: "inline-block",
                       fontSize: "11px",
-                      fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                      maxHeight: "400px",
-                      overflow: "auto",
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-all"
+                      color: "#722ed1",
+                      backgroundColor: "#f9f0ff",
+                      padding: "2px 6px",
+                      margin: "8px",
+                      borderRadius: "10px",
+                      border: "1px solid #d3adf7"
                     }}>
-                    {JSON.stringify(mindmapData, null, 2)}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      fontSize: "12px",
-                      color: "#666"
-                    }}>
-                    点击"复制JSON"按钮将数据复制到剪贴板
-                  </div>
-                </div>
+                    已缓存
+                  </span>
+                )}
+                <MindElixirReact data={mindmapData} ref={mindmapRef} />
               </>
             )}
           </>
