@@ -1,4 +1,5 @@
 import styleText from "data-text:mind-elixir/style"
+import styleOverride from "data-text:./mind-elixir-css-override.css"
 import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
@@ -13,13 +14,16 @@ import MindElixirReact, {
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://www.bilibili.com/video/*"],
+  matches: [
+    "https://www.bilibili.com/video/*",
+    "https://www.bilibili.com/list/watchlater*"
+  ],
   all_frames: false
 }
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = styleText
+  style.textContent = styleText + styleOverride
   return style
 }
 
@@ -63,8 +67,14 @@ function SubtitlePanel() {
   // 从URL中提取BVID
   const extractBVID = (): string | null => {
     const url = window.location.href
-    const match = url.match(/\/video\/(BV[a-zA-Z0-9]+)/)
-    return match ? match[1] : null
+    // 匹配标准视频页面 /video/BVxxxxxx
+    const videoMatch = url.match(/\/video\/(BV[a-zA-Z0-9]+)/)
+    if (videoMatch) {
+      return videoMatch[1]
+    }
+    // 匹配稍后再看等页面的 bvid 参数
+    const bvidMatch = url.match(/[?&]bvid=(BV[a-zA-Z0-9]+)/)
+    return bvidMatch ? bvidMatch[1] : null
   }
 
   // 获取视频信息
@@ -517,6 +527,7 @@ function SubtitlePanel() {
             style={{
               flex: 1,
               padding: "8px 12px",
+              margin: "0",
               fontSize: "13px",
               backgroundColor: "transparent",
               color: activeTab === "subtitles" ? "#00a1d6" : "#61666d",
@@ -535,6 +546,7 @@ function SubtitlePanel() {
             style={{
               flex: 1,
               padding: "8px 12px",
+              margin: "0",
               fontSize: "13px",
               backgroundColor: "transparent",
               color: activeTab === "summary" ? "#00a1d6" : "#61666d",
@@ -558,6 +570,7 @@ function SubtitlePanel() {
             style={{
               flex: 1,
               padding: "8px 12px",
+              margin: "0",
               fontSize: "13px",
               backgroundColor: "transparent",
               color: activeTab === "mindmap" ? "#00a1d6" : "#61666d",
@@ -651,14 +664,15 @@ function SubtitlePanel() {
             {/* AI总结功能按钮 */}
             {subtitles.length > 0 && (
               <div
-                style={{ padding: "12px", borderBottom: "1px solid #f1f2f3" }}>
+                style={{ padding: "12px" }}>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button
                     onClick={() => summarizeWithAI(false)}
                     disabled={aiLoading}
                     style={{
                       flex: 1,
-                      padding: "8px 16px",
+                      padding: "8px 12px",
+                      margin: "0",
                       fontSize: "13px",
                       backgroundColor: aiLoading ? "#ccc" : "#00a1d6",
                       color: "white",
@@ -679,6 +693,7 @@ function SubtitlePanel() {
                       disabled={aiLoading}
                       style={{
                         padding: "8px 12px",
+                        margin: "0",
                         fontSize: "13px",
                         backgroundColor: aiLoading ? "#ccc" : "#52c41a",
                         color: "white",
@@ -879,7 +894,8 @@ function SubtitlePanel() {
                       disabled={mindmapLoading}
                       style={{
                         flex: 1,
-                        padding: "8px 16px",
+                        padding: "8px 12px",
+                        margin: "0",
                         fontSize: "13px",
                         backgroundColor: mindmapLoading ? "#ccc" : "#722ed1",
                         color: "white",
@@ -896,7 +912,8 @@ function SubtitlePanel() {
                       disabled={mindmapLoading}
                       style={{
                         flex: 1,
-                        padding: "8px 16px",
+                        padding: "8px 12px",
+                        margin: "0",
                         fontSize: "13px",
                         backgroundColor: mindmapLoading ? "#ccc" : "#52c41a",
                         color: "white",
@@ -915,7 +932,8 @@ function SubtitlePanel() {
                       onClick={copyMindmapJSON}
                       style={{
                         flex: 1,
-                        padding: "6px 12px",
+                        padding: "8px 12px",
+                        margin: "0",
                         fontSize: "12px",
                         backgroundColor: "#13c2c2",
                         color: "white",
@@ -924,6 +942,23 @@ function SubtitlePanel() {
                         cursor: "pointer"
                       }}>
                       复制JSON
+                    </button>
+                    <button
+                      onClick={()=>{
+                        mindmapRef.current?.instance.el.requestFullscreen()
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        margin: "0",
+                        fontSize: "12px",
+                        backgroundColor: "#13c2c2",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                      }}>
+                      全屏
                     </button>
                   </div>
                 )}
@@ -970,24 +1005,11 @@ function SubtitlePanel() {
             )}
 
             {mindmapData && (
-              <>
-                {cacheLoaded && (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      fontSize: "11px",
-                      color: "#722ed1",
-                      backgroundColor: "#f9f0ff",
-                      padding: "2px 6px",
-                      margin: "8px",
-                      borderRadius: "10px",
-                      border: "1px solid #d3adf7"
-                    }}>
-                    已缓存
-                  </span>
-                )}
-                <MindElixirReact data={mindmapData} ref={mindmapRef} />
-              </>
+              <MindElixirReact data={mindmapData} ref={mindmapRef}
+                options={{
+                  editable: false,
+                  toolBar: false
+                }} />
             )}
           </>
         )}
