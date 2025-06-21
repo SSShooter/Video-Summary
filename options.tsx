@@ -43,13 +43,14 @@ const AI_PROVIDERS: AIProvider[] = [
     supportsModelFetch: false
   },
   {
-    id: "zhipu",
-    name: "智谱AI",
+    id: "openai-compatible",
+    name: "OpenAI兼容API",
     apiKeyLabel: "API Key",
-    baseUrl: "https://open.bigmodel.cn/api/paas/v4",
-    models: ["glm-4", "glm-3-turbo"],
-    defaultModel: "glm-3-turbo",
-    supportsModelFetch: false
+    baseUrl: "https://api.example.com/v1",
+    models: ["gpt-3.5-turbo", "gpt-4"],
+    defaultModel: "gpt-3.5-turbo",
+    modelsEndpoint: "/models",
+    supportsModelFetch: true
   },
   {
     id: "qwen",
@@ -68,7 +69,7 @@ interface AIConfig {
     openai?: string
     gemini?: string
     claude?: string
-    zhipu?: string
+    "openai-compatible"?: string
     qwen?: string
   }
   model: string
@@ -156,7 +157,7 @@ function OptionsPage() {
         'Content-Type': 'application/json'
       }
 
-      if (provider.id === 'openai') {
+      if (provider.id === 'openai' || provider.id === 'openai-compatible') {
         headers['Authorization'] = `Bearer ${apiKey}`
       } else if (provider.id === 'gemini') {
         // Gemini uses API key as query parameter and different endpoint
@@ -173,9 +174,9 @@ function OptionsPage() {
       const response = await fetch(url, { headers })
       const data = await response.json()
       
-      if (provider.id === 'openai') {
+      if (provider.id === 'openai' || provider.id === 'openai-compatible') {
         return data.data?.map((m: any) => m.id).filter((id: string) => 
-          id.includes('gpt') || id.includes('text-davinci')
+          id.includes('gpt') || id.includes('text-davinci') || id.includes('claude') || id.includes('llama')
         ) || provider.models
       }
       
@@ -476,8 +477,8 @@ function OptionsPage() {
                 }}>API地址 (可选)</label>
                 <input
                   type="text"
-                  value={aiConfig.baseUrl || currentProvider.baseUrl}
-                  onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value })}
+                  value={aiConfig.baseUrl || ""}
+                  onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value || undefined })}
                   placeholder={currentProvider.baseUrl}
                   style={{
                     width: "100%",
@@ -538,7 +539,7 @@ function OptionsPage() {
               <li>OpenAI: 访问 platform.openai.com</li>
               <li>Google Gemini: 访问 ai.google.dev</li>
               <li>Anthropic Claude: 访问 console.anthropic.com</li>
-              <li>智谱AI: 访问 open.bigmodel.cn</li>
+              <li>OpenAI兼容API: 根据具体服务商要求获取</li>
               <li>通义千问: 访问 dashscope.console.aliyun.com</li>
             </ul>
           </li>

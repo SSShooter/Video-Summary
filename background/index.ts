@@ -9,7 +9,7 @@ interface AIConfig {
     openai?: string
     gemini?: string
     claude?: string
-    zhipu?: string
+    "openai-compatible"?: string
     qwen?: string
   }
   model: string
@@ -61,6 +61,7 @@ ${subtitles}
 export interface NodeObj {
   topic: string
   id: string
+  tags: string[]
   children?: NodeObj[]
 }
 // 总结父id的第start到end个节点的内容
@@ -128,9 +129,14 @@ export interface Arrow {
 
 - 节点 ID 使用递增数字即可
 - 注意不要一昧使用兄弟节点关系，适当应用父子级别的分层
+- 只能向根节点插入 tags，tag 必须是普适的，不是独特的，用于用户快速找到同类内容
 - Summary 是总结多个同父节点的子节点的工具，会使用花括号把总结文本显示在指定子节点侧边，因为节点存在两侧分布的情况，禁止总结根节点
 - Arrow 可以添加连接任意节点的箭头，label 间接说明两个节点的联系，delta 的默认值为 50,50。**直接的父子关系不需要链接**。
 - 适当添加 Summary 和 Arrow
+
+**注意事项：**
+- 使用中文输出
+- 确保JSON格式正确，不要返回任何JSON以外的内容
 `
 
   async getConfig(): Promise<AIConfig | null> {
@@ -154,13 +160,12 @@ export interface Arrow {
 
     switch (config.provider) {
       case "openai":
+      case "openai-compatible":
         return this.callOpenAI(config, subtitles, model, apiKey)
       case "gemini":
         return this.callGemini(config, subtitles, model, apiKey)
       case "claude":
         return this.callClaude(config, subtitles, model, apiKey)
-      case "zhipu":
-        return this.callZhipu(config, subtitles, model, apiKey)
       case "qwen":
         return this.callQwen(config, subtitles, model, apiKey)
       default:
@@ -179,13 +184,12 @@ export interface Arrow {
 
     switch (config.provider) {
       case "openai":
+      case "openai-compatible":
         return this.callOpenAIForMindmap(config, subtitles, model, apiKey)
       case "gemini":
         return this.callGeminiForMindmap(config, subtitles, model, apiKey)
       case "claude":
         return this.callClaudeForMindmap(config, subtitles, model, apiKey)
-      case "zhipu":
-        return this.callZhipuForMindmap(config, subtitles, model, apiKey)
       case "qwen":
         return this.callQwenForMindmap(config, subtitles, model, apiKey)
       default:
@@ -304,44 +308,7 @@ export interface Arrow {
     }
   }
 
-  private async callZhipu(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<SubtitleSummary> {
-    const baseUrl = config.baseUrl || "https://open.bigmodel.cn/api/paas/v4"
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          {
-            role: "system",
-            content: this.SYSTEM_PROMPT
-          },
-          {
-            role: "user",
-            content: this.USER_PROMPT_TEMPLATE(subtitles)
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 1500
-      })
-    })
 
-    if (!response.ok) {
-      throw new Error(`智谱AI API请求失败: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-    
-    try {
-      return this.parseJSONResponse(content)
-    } catch {
-      return this.parseTextResponse(content)
-    }
-  }
 
   private async callQwen(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<SubtitleSummary> {
     const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"
@@ -485,40 +452,7 @@ export interface Arrow {
     return this.parseMindmapResponse(content)
   }
 
-  private async callZhipuForMindmap(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<any> {
-    const baseUrl = config.baseUrl || "https://open.bigmodel.cn/api/paas/v4"
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [
-          {
-            role: "system",
-            content: this.MINDMAP_PROMPT
-          },
-          {
-            role: "user",
-            content: `请根据以下视频字幕内容生成思维导图：\n\n${subtitles}`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000
-      })
-    })
 
-    if (!response.ok) {
-      throw new Error(`智谱AI API请求失败: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const content = data.choices[0]?.message?.content
-    
-    return this.parseMindmapResponse(content)
-  }
 
   private async callQwenForMindmap(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<any> {
     const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"

@@ -1008,7 +1008,9 @@ function SubtitlePanel() {
               <MindElixirReact data={mindmapData} ref={mindmapRef}
                 options={{
                   editable: false,
-                  toolBar: false
+                  draggable: false,
+                  toolBar: false,
+                  mouseSelectionButton: 2
                 }} />
             )}
           </>
