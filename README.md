@@ -14,8 +14,7 @@
 - **OpenAI**: GPT-4, GPT-4-turbo, GPT-3.5-turbo
 - **Google Gemini**: Gemini-pro, Gemini-pro-vision
 - **Anthropic Claude**: Claude-3-opus, Claude-3-sonnet, Claude-3-haiku
-- **智谱AI**: GLM-4, GLM-3-turbo
-- **通义千问**: Qwen-turbo, Qwen-plus, Qwen-max
+- **GPT 兼容**
 
 ### 📱 用户界面
 - **浮动面板**: 在视频页面右侧显示字幕面板
@@ -58,6 +57,15 @@
 
 ### AI服务配置
 
+> 📖 **详细指引**: 查看 [AI服务使用指引](./guide/index.md) 获取完整的AI服务选择和配置建议
+
+**快速推荐：**
+- 🌟 **首选**: Google Gemini（免费，效果好）
+- 🔄 **备选**: 硅基流动（国内访问，部分免费）
+- 💰 **高级**: OpenAI GPT 或 Anthropic Claude（付费，性能最佳）
+
+**基本配置步骤：**
+
 1. **打开配置页面**
    - 点击插件图标，在弹出窗口中点击"配置AI总结"按钮
    - 或者右键插件图标选择"选项"
@@ -74,6 +82,7 @@
      - **Anthropic Claude**: 访问 [console.anthropic.com](https://console.anthropic.com)
      - **智谱AI**: 访问 [open.bigmodel.cn](https://open.bigmodel.cn)
      - **通义千问**: 访问 [dashscope.console.aliyun.com](https://dashscope.console.aliyun.com)
+     - **硅基流动**: 访问 [cloud.siliconflow.cn](https://cloud.siliconflow.cn)
 
 4. **选择模型**
    - 根据需要选择合适的AI模型
