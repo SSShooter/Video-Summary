@@ -14,6 +14,7 @@ import MindElixirReact, {
 
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 import { fullscreen } from "~utils/fullscreen"
+import { openAppWithFallback } from "~utils/mind-elixir"
 
 export const config: PlasmoCSConfig = {
   matches: [
@@ -58,6 +59,8 @@ function SubtitlePanel() {
   const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
   const [mindmapLoading, setMindmapLoading] = useState(false)
   const [mindmapError, setMindmapError] = useState<string | null>(null)
+  const [mindElixirLoading, setMindElixirLoading] = useState(false)
+  const [mindElixirError, setMindElixirError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<
     "subtitles" | "summary" | "mindmap"
   >("subtitles")
@@ -404,18 +407,72 @@ function SubtitlePanel() {
     }
   }
 
-  // 复制思维导图JSON
-  const copyMindmapJSON = () => {
+  // 等待服务可用的Promise函数
+  const waitForService = (url: string, timeout: number = 10000): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now()
+
+      const checkService = async () => {
+        try {
+          const response = await fetch(url)
+          if (response.ok) {
+            resolve()
+            return
+          }
+        } catch (error) {
+          // 服务还未启动，继续等待
+        }
+
+        // 检查是否超时
+        if (Date.now() - startTime > timeout) {
+          reject(new Error('服务启动超时'))
+          return
+        }
+
+        // 100ms后再次检查
+        setTimeout(checkService, 100)
+      }
+
+      checkService()
+    })
+  }
+
+  const openInMindElixir = async () => {
     if (mindmapData) {
-      navigator.clipboard
-        .writeText(JSON.stringify(mindmapData, null, 2))
-        .then(() => {
-          // 可以添加一个临时的成功提示
-          console.log("思维导图JSON已复制到剪贴板")
+      setMindElixirLoading(true)
+      setMindElixirError(null)
+      
+      try {
+        // 打开 Mind Elixir 应用
+        await openAppWithFallback('mind-elixird://open')
+        // await openAppWithFallback('mind-elixir://open')
+
+        // 等待服务可用
+        await waitForService('http://127.0.0.1:6595/ping')
+
+        // 发送思维导图数据
+        const response = await fetch('http://127.0.0.1:6595/create-mindmap', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mindmap: JSON.stringify(mindmapData),
+            source: window.location.href.split('?')[0]
+          })
         })
-        .catch((err) => {
-          console.error("复制失败:", err)
-        })
+
+        if (!response.ok) {
+          throw new Error('发送思维导图数据失败')
+        }
+
+        console.log('思维导图已成功发送到 Mind Elixir')
+      } catch (error) {
+        console.error('打开 Mind Elixir 失败:', error)
+        setMindElixirError(error instanceof Error ? error.message : '打开 Mind Elixir 失败')
+      } finally {
+        setMindElixirLoading(false)
+      }
     }
   }
 
@@ -479,16 +536,16 @@ function SubtitlePanel() {
           <button
             onClick={() => setActiveTab("subtitles")}
             className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "subtitles"
-                ? "text-blue-500 border-blue-500"
-                : "text-gray-600 border-transparent hover:text-blue-400"
+              ? "text-blue-500 border-blue-500"
+              : "text-gray-600 border-transparent hover:text-blue-400"
               }`}>
             字幕
           </button>
           <button
             onClick={() => setActiveTab("summary")}
             className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "summary"
-                ? "text-blue-500 border-blue-500"
-                : "text-gray-600 border-transparent hover:text-blue-400"
+              ? "text-blue-500 border-blue-500"
+              : "text-gray-600 border-transparent hover:text-blue-400"
               }`}>
             AI总结
           </button>
@@ -500,8 +557,8 @@ function SubtitlePanel() {
               }, 200)
             }}
             className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "mindmap"
-                ? "text-blue-500 border-blue-500"
-                : "text-gray-600 border-transparent hover:text-blue-400"
+              ? "text-blue-500 border-blue-500"
+              : "text-gray-600 border-transparent hover:text-blue-400"
               }`}>
             思维导图
           </button>
@@ -681,17 +738,27 @@ function SubtitlePanel() {
                 {mindmapData && (
                   <div className="flex gap-2">
                     <button
-                      onClick={copyMindmapJSON}
-                      className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600">
-                      复制JSON
+                      onClick={openInMindElixir}
+                      disabled={mindElixirLoading}
+                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded ${
+                        mindElixirLoading
+                          ? 'bg-gray-400 text-white cursor-not-allowed'
+                          : 'bg-cyan-500 text-white cursor-pointer hover:bg-cyan-600'
+                      }`}>
+                      {mindElixirLoading ? '正在打开...' : '在 Mind Elixir 打开'}
                     </button>
                     <button
-                      onClick={()=>{
+                      onClick={() => {
                         fullscreen(mindmapRef.current?.instance!)
                       }}
                       className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600">
                       全屏
                     </button>
+                  </div>
+                )}
+                {mindElixirError && (
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-500">
+                    {mindElixirError}
                   </div>
                 )}
                 {mindmapError && (
