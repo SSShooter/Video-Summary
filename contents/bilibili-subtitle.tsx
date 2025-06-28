@@ -13,6 +13,7 @@ import MindElixirReact, {
 } from "~components/MindElixirReact"
 
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
+import { fullscreen } from "~utils/fullscreen"
 
 export const config: PlasmoCSConfig = {
   matches: [
@@ -477,20 +478,18 @@ function SubtitlePanel() {
         <div className="flex border-b border-gray-300">
           <button
             onClick={() => setActiveTab("subtitles")}
-            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
-              activeTab === "subtitles"
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "subtitles"
                 ? "text-blue-500 border-blue-500"
                 : "text-gray-600 border-transparent hover:text-blue-400"
-            }`}>
+              }`}>
             字幕
           </button>
           <button
             onClick={() => setActiveTab("summary")}
-            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
-              activeTab === "summary"
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "summary"
                 ? "text-blue-500 border-blue-500"
                 : "text-gray-600 border-transparent hover:text-blue-400"
-            }`}>
+              }`}>
             AI总结
           </button>
           <button
@@ -500,11 +499,10 @@ function SubtitlePanel() {
                 mindmapRef.current?.instance.toCenter()
               }, 200)
             }}
-            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
-              activeTab === "mindmap"
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${activeTab === "mindmap"
                 ? "text-blue-500 border-blue-500"
                 : "text-gray-600 border-transparent hover:text-blue-400"
-            }`}>
+              }`}>
             思维导图
           </button>
         </div>
@@ -556,9 +554,8 @@ function SubtitlePanel() {
                   <button
                     onClick={() => summarizeWithAI(false)}
                     disabled={aiLoading}
-                    className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
-                      aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-                    } text-white`}>
+                    className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                      } text-white`}>
                     {aiLoading
                       ? "总结中..."
                       : aiSummary
@@ -569,9 +566,8 @@ function SubtitlePanel() {
                     <button
                       onClick={() => summarizeWithAI(true)}
                       disabled={aiLoading}
-                      className={`py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
-                        aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                      } text-white`}>
+                      className={`py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                        } text-white`}>
                       重新生成
                     </button>
                   )}
@@ -668,18 +664,16 @@ function SubtitlePanel() {
                     <button
                       onClick={() => generateMindmap(false)}
                       disabled={mindmapLoading}
-                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
-                        mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
-                      } text-white`}>
+                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
+                        } text-white`}>
                       {mindmapLoading ? "生成中..." : "生成思维导图"}
                     </button>
                   ) : (
                     <button
                       onClick={() => generateMindmap(true)}
                       disabled={mindmapLoading}
-                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
-                        mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                      } text-white`}>
+                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                        } text-white`}>
                       重新生成
                     </button>
                   )}
@@ -692,8 +686,8 @@ function SubtitlePanel() {
                       复制JSON
                     </button>
                     <button
-                      onClick={() => {
-                        mindmapRef.current?.instance.el.requestFullscreen()
+                      onClick={()=>{
+                        fullscreen(mindmapRef.current?.instance!)
                       }}
                       className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600">
                       全屏

@@ -12,6 +12,7 @@ import MindElixirReact, {
 } from "~components/MindElixirReact"
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
+import { fullscreen } from "~utils/fullscreen"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -34,7 +35,7 @@ interface CachedData {
   timestamp: number
 }
 
-function ArticleMindmapPanel({ key }: { key: string }) {
+function ArticleMindmapPanel() {
   const [articleInfo, setArticleInfo] = useState<ArticleInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -216,6 +217,17 @@ function ArticleMindmapPanel({ key }: { key: string }) {
               {showMindmap ? '隐藏思维导图' : '显示思维导图'}
             </button>
           )}
+
+          {mindmapData && showMindmap && (
+            <button
+              onClick={() => {
+                fullscreen(mindElixirRef.current?.instance!)
+              }}
+              className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600"
+            >
+              全屏
+            </button>
+          )}
         </div>
 
         {mindmapError && (
@@ -243,81 +255,5 @@ function ArticleMindmapPanel({ key }: { key: string }) {
   )
 }
 
-// Wrapper组件，监听地址变化并重新运行ArticleMindmapPanel
-function ArticleMindmapWrapper() {
-  const [locationKey, setLocationKey] = useState(window.location.href)
-
-  useEffect(() => {
-    console.log('ArticleMindmapWrapper: 初始化地址监听器', window.location.href)
-    
-    // 监听地址变化
-    const handleLocationChange = () => {
-      const newLocation = window.location.href
-      console.log('ArticleMindmapWrapper: 检测到地址变化', { from: locationKey, to: newLocation })
-      setLocationKey(newLocation)
-    }
-
-    // 监听pushstate和replacestate事件
-    const originalPushState = history.pushState
-    const originalReplaceState = history.replaceState
-
-    history.pushState = function(...args) {
-      originalPushState.apply(history, args)
-      console.log('ArticleMindmapWrapper: pushState触发')
-      setTimeout(handleLocationChange, 0) // 使用setTimeout确保URL已更新
-    }
-
-    history.replaceState = function(...args) {
-      originalReplaceState.apply(history, args)
-      console.log('ArticleMindmapWrapper: replaceState触发')
-      setTimeout(handleLocationChange, 0) // 使用setTimeout确保URL已更新
-    }
-
-    // 监听popstate事件（浏览器前进后退）
-    const handlePopState = () => {
-      console.log('ArticleMindmapWrapper: popstate触发')
-      setTimeout(handleLocationChange, 0)
-    }
-    
-    window.addEventListener('popstate', handlePopState)
-
-    // 使用MutationObserver监听DOM变化（适用于某些SPA框架）
-    const observer = new MutationObserver(() => {
-      const currentLocation = window.location.href
-      if (currentLocation !== locationKey) {
-        console.log('ArticleMindmapWrapper: MutationObserver检测到地址变化')
-        handleLocationChange()
-      }
-    })
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    })
-
-    // 定期检查地址变化（兜底方案）
-    const intervalId = setInterval(() => {
-      const currentLocation = window.location.href
-      if (currentLocation !== locationKey) {
-        console.log('ArticleMindmapWrapper: 定期检查发现地址变化')
-        handleLocationChange()
-      }
-    }, 1000)
-
-    // 清理函数
-    return () => {
-      history.pushState = originalPushState
-      history.replaceState = originalReplaceState
-      window.removeEventListener('popstate', handlePopState)
-      observer.disconnect()
-      clearInterval(intervalId)
-      console.log('ArticleMindmapWrapper: 清理地址监听器')
-    }
-  }, []) // 移除locationKey依赖，避免重复设置监听器
-
-  // 使用locationKey作为key，确保地址变化时组件重新挂载
-  console.log('ArticleMindmapWrapper: 渲染组件，当前地址key:', locationKey)
-  return <ArticleMindmapPanel key={locationKey} />
-}
-
-export default ArticleMindmapWrapper
+ 
+export default ArticleMindmapPanel
