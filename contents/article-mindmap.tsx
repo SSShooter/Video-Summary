@@ -3,7 +3,6 @@ import styleOverride from "data-text:./mind-elixir-css-override.css"
 import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
-import { createRoot } from "react-dom/client"
 
 import { Storage } from "@plasmohq/storage"
 
@@ -446,13 +445,4 @@ const styleText2 = `
   height: 100%;
 }
 `
-
-// 创建并挂载组件
-const container = document.createElement('div')
-container.id = 'article-mindmap-extension'
-document.body.appendChild(container)
-
-const root = createRoot(container)
-root.render(<ArticleMindmapPanel />)
-
 export default ArticleMindmapPanel
