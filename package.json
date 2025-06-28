@@ -28,6 +28,7 @@
   "manifest": {
     "host_permissions": [
       "https://*/*",
+      "http://*/*",
       "https://api.bilibili.com/*",
       "https://www.bilibili.com/*",
       "https://www.youtube.com/*",
@@ -35,7 +36,8 @@
     ],
     "permissions": [
       "activeTab",
-      "storage"
+      "storage",
+      "scripting"
     ],
     "options_page": "options.html",
     "content_security_policy": {

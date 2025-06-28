@@ -48,7 +48,7 @@ class BackgroundAIService {
 - 避免重复内容
 - 确保JSON格式正确`
 
-  private readonly USER_PROMPT_TEMPLATE = (subtitles: string) => 
+  private readonly USER_PROMPT_TEMPLATE = (subtitles: string) =>
     `请分析以下视频字幕内容：
 
 **字幕内容：**
@@ -197,6 +197,30 @@ export interface Arrow {
     }
   }
 
+  async generateArticleMindmap(content: string, title: string): Promise<any> {
+    const config = await this.getConfig()
+    const apiKey = config?.apiKeys?.[config.provider as keyof typeof config.apiKeys]
+    if (!config || !config.enabled || !apiKey) {
+      throw new Error("AI功能未配置或未启用")
+    }
+
+    const model = config.customModel || config.model
+
+    switch (config.provider) {
+      case "openai":
+      case "openai-compatible":
+        return this.callOpenAIForArticleMindmap(config, content, title, model, apiKey)
+      case "gemini":
+        return this.callGeminiForArticleMindmap(config, content, title, model, apiKey)
+      case "claude":
+        return this.callClaudeForArticleMindmap(config, content, title, model, apiKey)
+      case "qwen":
+        return this.callQwenForArticleMindmap(config, content, title, model, apiKey)
+      default:
+        throw new Error(`不支持的AI服务商: ${config.provider}`)
+    }
+  }
+
   private async callOpenAI(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<SubtitleSummary> {
     const baseUrl = config.baseUrl || "https://api.openai.com/v1"
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -228,7 +252,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.choices[0]?.message?.content
-    
+
     try {
       return this.parseJSONResponse(content)
     } catch {
@@ -264,7 +288,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.candidates[0]?.content?.parts[0]?.text
-    
+
     try {
       return this.parseJSONResponse(content)
     } catch {
@@ -300,7 +324,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.content[0]?.text
-    
+
     try {
       return this.parseJSONResponse(content)
     } catch {
@@ -345,7 +369,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.output?.text
-    
+
     try {
       return this.parseJSONResponse(content)
     } catch {
@@ -385,7 +409,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.choices[0]?.message?.content
-    
+
     return this.parseMindmapResponse(content)
   }
 
@@ -405,7 +429,48 @@ export interface Arrow {
         }],
         generationConfig: {
           temperature: 0.3,
-          maxOutputTokens: 2000
+          maxOutputTokens: 2000,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              topic: {
+                type: "string",
+                description: "思维导图的主题"
+              },
+              nodeData: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  topic: { type: "string" },
+                  children: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        topic: { type: "string" },
+                        children: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              id: { type: "string" },
+                              topic: { type: "string" }
+                            },
+                            required: ["id", "topic"]
+                          }
+                        }
+                      },
+                      required: ["id", "topic"]
+                    }
+                  }
+                },
+                required: ["id", "topic"]
+              }
+            },
+            required: ["topic", "nodeData"]
+          }
         }
       })
     })
@@ -416,7 +481,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.candidates[0]?.content?.parts[0]?.text
-    
+
     return this.parseMindmapResponse(content)
   }
 
@@ -448,7 +513,7 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.content[0]?.text
-    
+
     return this.parseMindmapResponse(content)
   }
 
@@ -489,8 +554,146 @@ export interface Arrow {
 
     const data = await response.json()
     const content = data.output?.text
-    
+
     return this.parseMindmapResponse(content)
+  }
+
+  // 文章思维导图API调用方法
+  private async callOpenAIForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
+    const baseUrl = config.baseUrl || "https://api.openai.com/v1"
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [
+          {
+            role: "system",
+            content: this.MINDMAP_PROMPT
+          },
+          {
+            role: "user",
+            content: `请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API请求失败: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const responseContent = data.choices[0]?.message?.content
+
+    return this.parseMindmapResponse(responseContent)
+  }
+
+  private async callGeminiForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
+    const baseUrl = config.baseUrl || "https://generativelanguage.googleapis.com/v1beta"
+    const fullModelName = model.startsWith('models/') ? model : `models/${model}`
+    const response = await fetch(`${baseUrl}/${fullModelName}:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${this.MINDMAP_PROMPT}\n\n请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+          responseMimeType: "application/json",
+        }
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Gemini API请求失败: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const responseContent = data.candidates[0]?.content?.parts[0]?.text
+
+    return this.parseMindmapResponse(responseContent)
+  }
+
+  private async callClaudeForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
+    const baseUrl = config.baseUrl || "https://api.anthropic.com/v1"
+    const response = await fetch(`${baseUrl}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: model,
+        max_tokens: 2000,
+        system: this.MINDMAP_PROMPT,
+        messages: [
+          {
+            role: "user",
+            content: `请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
+          }
+        ]
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Claude API请求失败: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const responseContent = data.content[0]?.text
+
+    return this.parseMindmapResponse(responseContent)
+  }
+
+  private async callQwenForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
+    const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"
+    const response = await fetch(`${baseUrl}/services/aigc/text-generation/generation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        input: {
+          messages: [
+            {
+              role: "system",
+              content: this.MINDMAP_PROMPT
+            },
+            {
+              role: "user",
+              content: `请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
+            }
+          ]
+        },
+        parameters: {
+          temperature: 0.3,
+          max_tokens: 2000
+        }
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`通义千问 API请求失败: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const responseContent = data.output?.text
+
+    return this.parseMindmapResponse(responseContent)
   }
 
   /**
@@ -504,6 +707,7 @@ export interface Arrow {
     // 尝试直接解析
     try {
       const parsed = JSON.parse(content)
+      console.log(parsed, 'parsed')
       if (this.isValidMindmapData(parsed)) {
         return parsed
       }
@@ -545,12 +749,12 @@ export interface Arrow {
    * 验证思维导图数据格式
    */
   private isValidMindmapData(obj: any): boolean {
-    return obj && 
-           typeof obj === 'object' &&
-           obj.nodeData &&
-           typeof obj.nodeData === 'object' &&
-           typeof obj.nodeData.topic === 'string' &&
-           typeof obj.nodeData.id === 'string'
+    return obj &&
+      typeof obj === 'object' &&
+      obj.nodeData &&
+      typeof obj.nodeData === 'object' &&
+      typeof obj.nodeData.topic === 'string' &&
+      typeof obj.nodeData.id === 'string'
   }
 
   /**
@@ -605,13 +809,13 @@ export interface Arrow {
    * 验证解析结果是否符合SubtitleSummary接口
    */
   private isValidSubtitleSummary(obj: any): obj is SubtitleSummary {
-    return obj && 
-           typeof obj === 'object' &&
-           typeof obj.summary === 'string' &&
-           Array.isArray(obj.keyPoints) &&
-           Array.isArray(obj.topics) &&
-           obj.keyPoints.every((item: any) => typeof item === 'string') &&
-           obj.topics.every((item: any) => typeof item === 'string')
+    return obj &&
+      typeof obj === 'object' &&
+      typeof obj.summary === 'string' &&
+      Array.isArray(obj.keyPoints) &&
+      Array.isArray(obj.topics) &&
+      obj.keyPoints.every((item: any) => typeof item === 'string') &&
+      obj.topics.every((item: any) => typeof item === 'string')
   }
 
   /**
@@ -619,9 +823,9 @@ export interface Arrow {
    */
   private parseTextResponse(content: string): SubtitleSummary {
     console.warn('JSON解析失败，使用文本解析备用方案')
-    
+
     const lines = content.split('\n').filter(line => line.trim())
-    
+
     // 尝试从文本中提取结构化信息
     let summary = ''
     let keyPoints: string[] = []
@@ -654,7 +858,7 @@ export interface Arrow {
     const topicsSection = content.match(/(?:话题|topics?)[：:]([\s\S]*?)$/i)
     if (topicsSection) {
       topics = topicsSection[1]
-        .split(/[,，\n]/) 
+        .split(/[,，\n]/)
         .map(topic => topic.replace(/^[\d\-\*\s]+/, '').trim())
         .filter(topic => topic.length > 0)
         .slice(0, 5)
@@ -721,10 +925,10 @@ export interface Arrow {
     const truncated = formattedText.substring(0, 8000)
     const lastPeriod = truncated.lastIndexOf('。')
     const lastSpace = truncated.lastIndexOf(' ')
-    
-    const cutPoint = lastPeriod > 7000 ? lastPeriod + 1 : 
-                    lastSpace > 7000 ? lastSpace : 8000
-    
+
+    const cutPoint = lastPeriod > 7000 ? lastPeriod + 1 :
+      lastSpace > 7000 ? lastSpace : 8000
+
     return formattedText.substring(0, cutPoint).trim()
   }
 }
@@ -758,5 +962,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "formatSubtitles") {
     const formatted = backgroundAIService.formatSubtitlesForAI(request.subtitles)
     sendResponse({ success: true, data: formatted })
+  }
+
+  if (request.action === "generateArticleMindmap") {
+    backgroundAIService.generateArticleMindmap(request.content, request.title)
+      .then(result => {
+        sendResponse({ success: true, data: result })
+      })
+      .catch(error => {
+        sendResponse({ success: false, error: error.message })
+      })
+    return true // Keep the message channel open for async response
   }
 })
