@@ -39,8 +39,7 @@
     ],
     "permissions": [
       "activeTab",
-      "storage",
-      "scripting"
+      "storage"
     ],
     "options_page": "options.html",
     "content_security_policy": {
