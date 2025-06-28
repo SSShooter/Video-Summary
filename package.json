@@ -1,7 +1,7 @@
 {
   "name": "video-mindmap",
   "displayName": "Video Summary",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Summary video, or convert video to mindmap",
   "author": "Dexter",
   "scripts": {
