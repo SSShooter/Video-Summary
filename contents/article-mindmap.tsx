@@ -11,6 +11,7 @@ import MindElixirReact, {
   type MindElixirReactRef
 } from "~components/MindElixirReact"
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
+import { detectArticle, type ArticleInfo } from "~utils/article-detector"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -28,18 +29,12 @@ export const getStyle: PlasmoGetStyle = () => {
   return style
 }
 
-interface ArticleInfo {
-  title: string
-  content: string
-  url: string
-}
-
 interface CachedData {
   mindmapData: MindElixirData | null
   timestamp: number
 }
 
-function ArticleMindmapPanel() {
+function ArticleMindmapPanel({ key }: { key: string }) {
   const [articleInfo, setArticleInfo] = useState<ArticleInfo | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,90 +43,8 @@ function ArticleMindmapPanel() {
   const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [showMindmap, setShowMindmap] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const [isEnabled, setIsEnabled] = useState(true)
   const storage = new Storage()
   const mindElixirRef = useRef<MindElixirReactRef>(null)
-
-  // 检测页面是否包含文章内容
-  const detectArticle = (): ArticleInfo | null => {
-    // 常见的文章容器选择器
-    const articleSelectors = [
-      'article',
-      '[role="main"]',
-      '.post-content',
-      '.article-content',
-      '.entry-content',
-      '.content',
-      '.post-body',
-      '.article-body',
-      'main',
-      '.markdown-body',
-      '.prose'
-    ]
-
-    // 常见的标题选择器
-    const titleSelectors = [
-      'h1',
-      '.title',
-      '.post-title',
-      '.article-title',
-      '.entry-title',
-      'title'
-    ]
-
-    let articleElement: Element | null = null
-    let titleElement: Element | null = null
-
-    // 查找文章容器
-    for (const selector of articleSelectors) {
-      const element = document.querySelector(selector)
-      if (element && element.textContent && element.textContent.trim().length > 500) {
-        articleElement = element
-        break
-      }
-    }
-
-    // 如果没找到明确的文章容器，尝试查找包含大量文本的元素
-    if (!articleElement) {
-      const allElements = document.querySelectorAll('div, section, main')
-      for (const element of allElements) {
-        const textContent = element.textContent || ''
-        const childElements = element.children.length
-        // 判断是否为文章：文本长度 > 1000 且子元素不太多（避免选中整个页面）
-        if (textContent.trim().length > 1000 && childElements < 50) {
-          articleElement = element
-          break
-        }
-      }
-    }
-
-    // 查找标题
-    for (const selector of titleSelectors) {
-      const element = document.querySelector(selector)
-      if (element && element.textContent && element.textContent.trim().length > 0) {
-        titleElement = element
-        break
-      }
-    }
-
-    if (!articleElement) {
-      return null
-    }
-
-    const title = titleElement?.textContent?.trim() || document.title || '未知标题'
-    const content = articleElement.textContent?.trim() || ''
-
-    // 最终验证：确保内容足够长
-    if (content.length < 500) {
-      return null
-    }
-
-    return {
-      title,
-      content,
-      url: window.location.href
-    }
-  }
 
   // 使用智能HTML到Markdown转换
 
@@ -183,7 +96,7 @@ function ArticleMindmapPanel() {
       setShowMindmap(true)
 
       // 缓存结果
-      const cacheKey = `article_mindmap_${btoa(articleInfo.url).slice(0, 20)}`
+      const cacheKey = `article_mindmap_${btoa(articleInfo.url)}`
       const cacheData: CachedData = {
         mindmapData: response,
         timestamp: Date.now()
@@ -201,7 +114,7 @@ function ArticleMindmapPanel() {
   // 检查缓存
   const checkCache = async (url: string): Promise<MindElixirData | null> => {
     try {
-      const cacheKey = `article_mindmap_${btoa(url).slice(0, 20)}`
+      const cacheKey = `article_mindmap_${btoa(url)}`
       const cached = await storage.get<CachedData>(cacheKey)
 
       if (cached && cached.mindmapData) {
@@ -216,26 +129,13 @@ function ArticleMindmapPanel() {
     return null
   }
 
-  // 加载开关状态
-  const loadEnabledStatus = async () => {
-    try {
-      const enabled = await storage.get<boolean>("articleMindmapEnabled")
-      setIsEnabled(enabled !== false) // 默认为true
-    } catch (error) {
-      console.error("加载文章思维导图开关状态失败:", error)
-    }
-  }
+
 
   // 监听来自popup的消息
   useEffect(() => {
     const messageListener = (message: any) => {
-      if (message.type === "TOGGLE_ARTICLE_MINDMAP") {
-        setIsEnabled(message.enabled)
-        if (!message.enabled) {
-          setIsVisible(false)
-        } else if (articleInfo) {
-          setIsVisible(true)
-        }
+      if (message.type === "SHOW_ARTICLE_MINDMAP_PANEL") {
+        setIsVisible(true)
       }
     }
 
@@ -243,25 +143,16 @@ function ArticleMindmapPanel() {
     return () => chrome.runtime.onMessage.removeListener(messageListener)
   }, [articleInfo])
 
-  // 初始化检测
+  // 初始化检测文章信息（但不显示面板）
   useEffect(() => {
     const initDetection = async () => {
       setLoading(true)
       setError(null)
 
       try {
-        // 先加载开关状态
-        await loadEnabledStatus()
-        
         const detected = detectArticle()
         if (detected) {
           setArticleInfo(detected)
-          
-          // 只有在开关启用时才显示浮框
-          const enabled = await storage.get<boolean>("articleMindmapEnabled")
-          if (enabled !== false) {
-            setIsVisible(true)
-          }
 
           // 检查缓存
           const cachedMindmap = await checkCache(detected.url)
@@ -283,7 +174,7 @@ function ArticleMindmapPanel() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!isVisible || !articleInfo || !isEnabled) {
+  if (!isVisible || !articleInfo) {
     return null
   }
 
@@ -352,5 +243,81 @@ function ArticleMindmapPanel() {
   )
 }
 
+// Wrapper组件，监听地址变化并重新运行ArticleMindmapPanel
+function ArticleMindmapWrapper() {
+  const [locationKey, setLocationKey] = useState(window.location.href)
 
-export default ArticleMindmapPanel
+  useEffect(() => {
+    console.log('ArticleMindmapWrapper: 初始化地址监听器', window.location.href)
+    
+    // 监听地址变化
+    const handleLocationChange = () => {
+      const newLocation = window.location.href
+      console.log('ArticleMindmapWrapper: 检测到地址变化', { from: locationKey, to: newLocation })
+      setLocationKey(newLocation)
+    }
+
+    // 监听pushstate和replacestate事件
+    const originalPushState = history.pushState
+    const originalReplaceState = history.replaceState
+
+    history.pushState = function(...args) {
+      originalPushState.apply(history, args)
+      console.log('ArticleMindmapWrapper: pushState触发')
+      setTimeout(handleLocationChange, 0) // 使用setTimeout确保URL已更新
+    }
+
+    history.replaceState = function(...args) {
+      originalReplaceState.apply(history, args)
+      console.log('ArticleMindmapWrapper: replaceState触发')
+      setTimeout(handleLocationChange, 0) // 使用setTimeout确保URL已更新
+    }
+
+    // 监听popstate事件（浏览器前进后退）
+    const handlePopState = () => {
+      console.log('ArticleMindmapWrapper: popstate触发')
+      setTimeout(handleLocationChange, 0)
+    }
+    
+    window.addEventListener('popstate', handlePopState)
+
+    // 使用MutationObserver监听DOM变化（适用于某些SPA框架）
+    const observer = new MutationObserver(() => {
+      const currentLocation = window.location.href
+      if (currentLocation !== locationKey) {
+        console.log('ArticleMindmapWrapper: MutationObserver检测到地址变化')
+        handleLocationChange()
+      }
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+
+    // 定期检查地址变化（兜底方案）
+    const intervalId = setInterval(() => {
+      const currentLocation = window.location.href
+      if (currentLocation !== locationKey) {
+        console.log('ArticleMindmapWrapper: 定期检查发现地址变化')
+        handleLocationChange()
+      }
+    }, 1000)
+
+    // 清理函数
+    return () => {
+      history.pushState = originalPushState
+      history.replaceState = originalReplaceState
+      window.removeEventListener('popstate', handlePopState)
+      observer.disconnect()
+      clearInterval(intervalId)
+      console.log('ArticleMindmapWrapper: 清理地址监听器')
+    }
+  }, []) // 移除locationKey依赖，避免重复设置监听器
+
+  // 使用locationKey作为key，确保地址变化时组件重新挂载
+  console.log('ArticleMindmapWrapper: 渲染组件，当前地址key:', locationKey)
+  return <ArticleMindmapPanel key={locationKey} />
+}
+
+export default ArticleMindmapWrapper

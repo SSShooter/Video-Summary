@@ -6,15 +6,11 @@ import "~style.css"
 
 function IndexPopup() {
   const [aiEnabled, setAiEnabled] = useState(false)
-  const [subtitleEnabled, setSubtitleEnabled] = useState(true)
-  const [articleMindmapEnabled, setArticleMindmapEnabled] = useState(true)
   const [loading, setLoading] = useState(true)
   const storage = new Storage()
 
   useEffect(() => {
     loadAIStatus()
-    loadSubtitleStatus()
-    loadArticleMindmapStatus()
   }, [])
 
   const loadAIStatus = async () => {
@@ -28,63 +24,26 @@ function IndexPopup() {
     }
   }
 
-  const loadSubtitleStatus = async () => {
-    try {
-      const enabled = await storage.get<boolean>("subtitleEnabled")
-      setSubtitleEnabled(enabled !== false) // 默认为true
-    } catch (error) {
-      console.error("加载字幕配置失败:", error)
-    }
-  }
 
-  const loadArticleMindmapStatus = async () => {
-    try {
-      const enabled = await storage.get<boolean>("articleMindmapEnabled")
-      setArticleMindmapEnabled(enabled !== false) // 默认为true
-    } catch (error) {
-      console.error("加载文章思维导图配置失败:", error)
-    }
-  }
 
-  const toggleSubtitle = async () => {
-    const newStatus = !subtitleEnabled
-    setSubtitleEnabled(newStatus)
+  const triggerPanel = async () => {
     try {
-      await storage.set("subtitleEnabled", newStatus)
-      // 通知content script更新字幕显示状态
+      // 通知content script显示字幕面板
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
           chrome.tabs.sendMessage(tabs[0].id, {
-            type: "TOGGLE_SUBTITLE",
-            enabled: newStatus
+            type: "SHOW_SUBTITLE_PANEL"
+          })
+          chrome.tabs.sendMessage(tabs[0].id, {
+            type: "SHOW_ARTICLE_MINDMAP_PANEL"
           })
         }
       })
     } catch (error) {
-      console.error("保存字幕配置失败:", error)
-      setSubtitleEnabled(!newStatus) // 回滚状态
+      console.error("显示字幕面板失败:", error)
     }
   }
 
-  const toggleArticleMindmap = async () => {
-    const newStatus = !articleMindmapEnabled
-    setArticleMindmapEnabled(newStatus)
-    try {
-      await storage.set("articleMindmapEnabled", newStatus)
-      // 通知content script更新文章思维导图显示状态
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            type: "TOGGLE_ARTICLE_MINDMAP",
-            enabled: newStatus
-          })
-        }
-      })
-    } catch (error) {
-      console.error("保存文章思维导图配置失败:", error)
-      setArticleMindmapEnabled(!newStatus) // 回滚状态
-    }
-  }
 
   const openOptionsPage = () => {
     chrome.runtime.openOptionsPage()
@@ -93,59 +52,39 @@ function IndexPopup() {
   return (
     <div className="w-80 p-3">
       <div className="flex items-center mb-2">
-        <img 
-          src={iconBase64} 
-          alt="Video Mindmap" 
+        <img
+          src={iconBase64}
+          alt="Video Mindmap"
           className="w-8 h-8 mr-3"
         />
         <h2 className="m-0 text-lg text-gray-800">视频字幕助手</h2>
       </div>
-      
+
       <div className="bg-gray-50 p-3 rounded-md mb-2">
         <div className="text-sm text-gray-600 mb-2">功能状态</div>
-        
+
         <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-gray-800">字幕显示</span>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={subtitleEnabled}
-              onChange={toggleSubtitle}
-              className="mr-1.5 scale-110"
-            />
-            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
-              subtitleEnabled ? 'bg-green-500' : 'bg-gray-400'
-            }`}>{subtitleEnabled ? '已启用' : '已禁用'}</span>
-          </label>
-        </div>
-        
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-gray-800">AI总结</span>
+          <span className="text-xs text-gray-800">AI 配置</span>
           {loading ? (
             <span className="text-xs text-gray-600">加载中...</span>
           ) : (
-            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
-              aiEnabled ? 'bg-green-500' : 'bg-orange-500'
-            }`}>{aiEnabled ? '已启用' : '未配置'}</span>
+            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${aiEnabled ? 'bg-green-500' : 'bg-orange-500'
+              }`}>{aiEnabled ? '已启用' : '未配置'}</span>
           )}
         </div>
-        
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-gray-800">文章思维导图</span>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={articleMindmapEnabled}
-              onChange={toggleArticleMindmap}
-              className="mr-1.5 scale-110"
-            />
-            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
-              articleMindmapEnabled ? 'bg-green-500' : 'bg-gray-400'
-            }`}>{articleMindmapEnabled ? '已启用' : '已禁用'}</span>
-          </label>
+
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-gray-800">AI 面板</span>
+          <button
+            onClick={triggerPanel}
+            className="py-1 px-3 text-white text-xs rounded bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
+          >
+            显示
+          </button>
         </div>
+
       </div>
-      
+
       <div className="mb-2">
         <div className="text-sm text-gray-600 mb-2">使用说明</div>
         <ul className="m-0 pl-4 text-xs text-gray-600 leading-relaxed">
@@ -156,17 +95,14 @@ function IndexPopup() {
           <li>访问文章页面可生成思维导图</li>
         </ul>
       </div>
-      
+
       <button
         onClick={openOptionsPage}
         className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white border-none rounded text-sm cursor-pointer mb-3"
       >
         {aiEnabled ? 'AI配置管理' : '配置AI总结'}
       </button>
-      
-      <div className="text-center text-xs text-gray-400">
-        支持平台: YouTube • Bilibili
-      </div>
+
     </div>
   )
 }

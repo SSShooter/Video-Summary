@@ -236,13 +236,10 @@ function YouTubeSubtitlePanel() {
       }, 2000)
     }
 
-    // 加载字幕显示状态
-    loadSubtitleVisibility()
-
     // 监听来自popup的消息
     const messageListener = (message: any) => {
-      if (message.type === 'TOGGLE_SUBTITLE') {
-        setIsVisible(message.enabled)
+      if (message.type === "SHOW_SUBTITLE_PANEL") {
+        setIsVisible(true)
       }
     }
 
@@ -253,14 +250,7 @@ function YouTubeSubtitlePanel() {
     }
   }, [])
 
-  const loadSubtitleVisibility = async () => {
-    try {
-      const enabled = await storage.get<boolean>("subtitleEnabled")
-      setIsVisible(enabled !== false) // 默认为true
-    } catch (error) {
-      console.error("加载字幕显示状态失败:", error)
-    }
-  }
+
 
   // 监听页面变化
   useEffect(() => {
