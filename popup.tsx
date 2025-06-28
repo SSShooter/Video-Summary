@@ -7,12 +7,14 @@ import "~style.css"
 function IndexPopup() {
   const [aiEnabled, setAiEnabled] = useState(false)
   const [subtitleEnabled, setSubtitleEnabled] = useState(true)
+  const [articleMindmapEnabled, setArticleMindmapEnabled] = useState(true)
   const [loading, setLoading] = useState(true)
   const storage = new Storage()
 
   useEffect(() => {
     loadAIStatus()
     loadSubtitleStatus()
+    loadArticleMindmapStatus()
   }, [])
 
   const loadAIStatus = async () => {
@@ -35,6 +37,15 @@ function IndexPopup() {
     }
   }
 
+  const loadArticleMindmapStatus = async () => {
+    try {
+      const enabled = await storage.get<boolean>("articleMindmapEnabled")
+      setArticleMindmapEnabled(enabled !== false) // 默认为true
+    } catch (error) {
+      console.error("加载文章思维导图配置失败:", error)
+    }
+  }
+
   const toggleSubtitle = async () => {
     const newStatus = !subtitleEnabled
     setSubtitleEnabled(newStatus)
@@ -52,6 +63,26 @@ function IndexPopup() {
     } catch (error) {
       console.error("保存字幕配置失败:", error)
       setSubtitleEnabled(!newStatus) // 回滚状态
+    }
+  }
+
+  const toggleArticleMindmap = async () => {
+    const newStatus = !articleMindmapEnabled
+    setArticleMindmapEnabled(newStatus)
+    try {
+      await storage.set("articleMindmapEnabled", newStatus)
+      // 通知content script更新文章思维导图显示状态
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            type: "TOGGLE_ARTICLE_MINDMAP",
+            enabled: newStatus
+          })
+        }
+      })
+    } catch (error) {
+      console.error("保存文章思维导图配置失败:", error)
+      setArticleMindmapEnabled(!newStatus) // 回滚状态
     }
   }
 
@@ -88,7 +119,7 @@ function IndexPopup() {
           </label>
         </div>
         
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-gray-800">AI总结</span>
           {loading ? (
             <span className="text-xs text-gray-600">加载中...</span>
@@ -97,6 +128,21 @@ function IndexPopup() {
               aiEnabled ? 'bg-green-500' : 'bg-orange-500'
             }`}>{aiEnabled ? '已启用' : '未配置'}</span>
           )}
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-800">文章思维导图</span>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={articleMindmapEnabled}
+              onChange={toggleArticleMindmap}
+              className="mr-1.5 scale-110"
+            />
+            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
+              articleMindmapEnabled ? 'bg-green-500' : 'bg-gray-400'
+            }`}>{articleMindmapEnabled ? '已启用' : '已禁用'}</span>
+          </label>
         </div>
       </div>
       
@@ -107,6 +153,7 @@ function IndexPopup() {
           <li>字幕面板会自动显示在右侧</li>
           <li>点击字幕可跳转到对应时间</li>
           <li>配置AI后可使用智能总结功能</li>
+          <li>访问文章页面可生成思维导图</li>
         </ul>
       </div>
       

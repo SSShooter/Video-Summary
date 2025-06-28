@@ -48,6 +48,7 @@ function ArticleMindmapPanel() {
   const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [showMindmap, setShowMindmap] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [isEnabled, setIsEnabled] = useState(true)
   const storage = new Storage()
   const mindElixirRef = useRef<MindElixirReactRef>(null)
 
@@ -215,6 +216,33 @@ function ArticleMindmapPanel() {
     return null
   }
 
+  // 加载开关状态
+  const loadEnabledStatus = async () => {
+    try {
+      const enabled = await storage.get<boolean>("articleMindmapEnabled")
+      setIsEnabled(enabled !== false) // 默认为true
+    } catch (error) {
+      console.error("加载文章思维导图开关状态失败:", error)
+    }
+  }
+
+  // 监听来自popup的消息
+  useEffect(() => {
+    const messageListener = (message: any) => {
+      if (message.type === "TOGGLE_ARTICLE_MINDMAP") {
+        setIsEnabled(message.enabled)
+        if (!message.enabled) {
+          setIsVisible(false)
+        } else if (articleInfo) {
+          setIsVisible(true)
+        }
+      }
+    }
+
+    chrome.runtime.onMessage.addListener(messageListener)
+    return () => chrome.runtime.onMessage.removeListener(messageListener)
+  }, [articleInfo])
+
   // 初始化检测
   useEffect(() => {
     const initDetection = async () => {
@@ -222,10 +250,18 @@ function ArticleMindmapPanel() {
       setError(null)
 
       try {
+        // 先加载开关状态
+        await loadEnabledStatus()
+        
         const detected = detectArticle()
         if (detected) {
           setArticleInfo(detected)
-          setIsVisible(true)
+          
+          // 只有在开关启用时才显示浮框
+          const enabled = await storage.get<boolean>("articleMindmapEnabled")
+          if (enabled !== false) {
+            setIsVisible(true)
+          }
 
           // 检查缓存
           const cachedMindmap = await checkCache(detected.url)
@@ -247,7 +283,7 @@ function ArticleMindmapPanel() {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!isVisible || !articleInfo) {
+  if (!isVisible || !articleInfo || !isEnabled) {
     return null
   }
 
