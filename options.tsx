@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { Storage } from "@plasmohq/storage"
+import "~style.css"
 
 interface AIProvider {
   id: string
@@ -238,47 +239,20 @@ function OptionsPage() {
   const currentProvider = AI_PROVIDERS.find(p => p.id === aiConfig.provider)
 
   return (
-    <div style={{
-      maxWidth: "800px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "system-ui, -apple-system, sans-serif"
-    }}>
-      <h1 style={{
-        fontSize: "24px",
-        marginBottom: "20px",
-        color: "#333"
-      }}>视频字幕AI总结 - 配置</h1>
+    <div className="max-w-3xl mx-auto p-5 font-sans">
+      <h1 className="text-2xl mb-5 text-gray-800">视频字幕AI总结 - 配置</h1>
 
-      <div style={{
-        backgroundColor: "#f8f9fa",
-        padding: "20px",
-        borderRadius: "8px",
-        marginBottom: "20px"
-      }}>
-        <h2 style={{
-          fontSize: "18px",
-          marginBottom: "16px",
-          color: "#333"
-        }}>AI服务配置</h2>
+      <div className="bg-gray-50 p-4 rounded-lg mb-5">
+        <h2 className="text-lg mb-4 text-gray-800">AI服务配置</h2>
 
-        <div style={{ marginBottom: "16px" }}>
-          <label style={{
-            display: "block",
-            marginBottom: "8px",
-            fontWeight: "500",
-            color: "#555"
-          }}>启用AI总结功能</label>
-          <label style={{
-            display: "flex",
-            alignItems: "center",
-            cursor: "pointer"
-          }}>
+        <div className="mb-4">
+          <label className="block mb-2 font-medium text-gray-600">启用AI总结功能</label>
+          <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
               checked={aiConfig.enabled}
               onChange={(e) => setAiConfig({ ...aiConfig, enabled: e.target.checked })}
-              style={{ marginRight: "8px" }}
+              className="mr-2"
             />
             启用字幕AI总结
           </label>
@@ -286,23 +260,12 @@ function OptionsPage() {
 
         {aiConfig.enabled && (
           <>
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "500",
-                color: "#555"
-              }}>AI服务商</label>
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-600">AI服务商</label>
               <select
                 value={aiConfig.provider}
                 onChange={(e) => handleProviderChange(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "14px"
-                }}
+                className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
               >
                 {AI_PROVIDERS.map(provider => (
                   <option key={provider.id} value={provider.id}>
@@ -312,72 +275,45 @@ function OptionsPage() {
               </select>
             </div>
 
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "500",
-                color: "#555"
-              }}>{currentProvider?.apiKeyLabel || "API Key"}</label>
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-600">{currentProvider?.apiKeyLabel || "API Key"}</label>
               <input
                 type="password"
                 value={aiConfig.apiKeys?.[aiConfig.provider as keyof typeof aiConfig.apiKeys] || ""}
                 onChange={(e) => handleApiKeyChange(e.target.value)}
                 placeholder={`请输入${currentProvider?.name}的API Key`}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "14px"
-                }}
+                className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
               />
               {currentProvider?.supportsModelFetch && (
-                <small style={{ color: "#666", fontSize: "12px", display: "block", marginTop: "4px" }}>
+                <small className="text-gray-600 text-xs block mt-1">
                   填写API Key后将自动获取可用模型列表
                 </small>
               )}
             </div>
 
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "500",
-                color: "#555"
-              }}>模型选择</label>
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-600">模型选择</label>
               
-              <div style={{ marginBottom: "12px" }}>
-                <label style={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  marginBottom: "8px"
-                }}>
+              <div className="mb-3">
+                <label className="flex items-center cursor-pointer mb-2">
                   <input
                     type="radio"
                     name="modelType"
                     checked={!useCustomModel}
                     onChange={() => setUseCustomModel(false)}
-                    style={{ marginRight: "8px" }}
+                    className="mr-2"
                   />
                   使用预设模型
                 </label>
                 
                 {!useCustomModel && (
-                   <div style={{ marginLeft: "24px" }}>
-                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                   <div className="ml-6">
+                     <div className="flex gap-2 items-center">
                        <select
                          value={aiConfig.model}
                          onChange={(e) => handleModelChange(e.target.value)}
                          disabled={fetchingModels}
-                         style={{
-                           flex: 1,
-                           padding: "8px 12px",
-                           border: "1px solid #ddd",
-                           borderRadius: "4px",
-                           fontSize: "14px"
-                         }}
+                         className="flex-1 py-2 px-3 border border-gray-300 rounded text-sm"
                        >
                          {(availableModels[aiConfig.provider] || currentProvider?.models || []).map(model => (
                            <option key={model} value={model}>
@@ -401,15 +337,9 @@ function OptionsPage() {
                              }
                            }}
                            disabled={fetchingModels}
-                           style={{
-                             padding: "8px 12px",
-                             border: "1px solid #ddd",
-                             borderRadius: "4px",
-                             backgroundColor: "#f8f9fa",
-                             cursor: fetchingModels ? "not-allowed" : "pointer",
-                             fontSize: "12px",
-                             opacity: fetchingModels ? 0.6 : 1
-                           }}
+                           className={`py-2 px-3 border border-gray-300 rounded bg-gray-50 text-xs ${
+                             fetchingModels ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-100'
+                           }`}
                          >
                            {fetchingModels ? "获取中..." : "刷新"}
                          </button>
@@ -419,25 +349,20 @@ function OptionsPage() {
                  )}
                 
                 {fetchingModels && (
-                  <small style={{ color: "#666", fontSize: "12px", display: "block", marginTop: "4px", marginLeft: "24px" }}>
+                  <small className="text-gray-600 text-xs block mt-1 ml-6">
                     正在获取模型列表...
                   </small>
                 )}
               </div>
               
               <div>
-                <label style={{
-                  display: "flex",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  marginBottom: "8px"
-                }}>
+                <label className="flex items-center cursor-pointer mb-2">
                   <input
                     type="radio"
                     name="modelType"
                     checked={useCustomModel}
                     onChange={() => setUseCustomModel(true)}
-                    style={{ marginRight: "8px" }}
+                    className="mr-2"
                   />
                   自定义模型名称
                 </label>
@@ -448,19 +373,12 @@ function OptionsPage() {
                     value={aiConfig.customModel || aiConfig.model}
                     onChange={(e) => handleModelChange(e.target.value)}
                     placeholder="请输入模型名称，如: gpt-4-1106-preview"
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      border: "1px solid #ddd",
-                      borderRadius: "4px",
-                      fontSize: "14px",
-                      marginLeft: "24px"
-                    }}
+                    className="w-full py-2 px-3 border border-gray-300 rounded text-sm ml-6"
                   />
                 )}
               </div>
               
-              <small style={{ color: "#666", fontSize: "12px", display: "block", marginTop: "8px" }}>
+              <small className="text-gray-600 text-xs block mt-2">
                 {currentProvider?.supportsModelFetch 
                   ? "支持自动获取模型列表，也可手动输入模型名称" 
                   : "该服务商暂不支持自动获取模型列表，可手动输入模型名称"}
@@ -468,27 +386,16 @@ function OptionsPage() {
             </div>
 
             {currentProvider?.baseUrl && (
-              <div style={{ marginBottom: "16px" }}>
-                <label style={{
-                  display: "block",
-                  marginBottom: "8px",
-                  fontWeight: "500",
-                  color: "#555"
-                }}>API地址 (可选)</label>
+              <div className="mb-4">
+                <label className="block mb-2 font-medium text-gray-600">API地址 (可选)</label>
                 <input
                   type="text"
                   value={aiConfig.baseUrl || ""}
                   onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value || undefined })}
                   placeholder={currentProvider.baseUrl}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    fontSize: "14px"
-                  }}
+                  className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
                 />
-                <small style={{ color: "#666", fontSize: "12px" }}>
+                <small className="text-gray-600 text-xs block mt-1">
                   如需使用自定义API地址，请在此修改
                 </small>
               </div>
@@ -499,30 +406,17 @@ function OptionsPage() {
         <button
           onClick={saveConfig}
           disabled={saving}
-          style={{
-            backgroundColor: saved ? "#28a745" : "#007bff",
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "4px",
-            fontSize: "14px",
-            cursor: saving ? "not-allowed" : "pointer",
-            opacity: saving ? 0.6 : 1
-          }}
+          className={`${saved ? 'bg-green-600' : 'bg-blue-600'} text-white border-none py-2 px-5 rounded text-sm ${
+            saving ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+          }`}
         >
           {saving ? "保存中..." : saved ? "已保存" : "保存配置"}
         </button>
       </div>
 
-      <div style={{
-        backgroundColor: "#e9ecef",
-        padding: "16px",
-        borderRadius: "8px",
-        fontSize: "14px",
-        color: "#666"
-      }}>
-        <h3 style={{ marginTop: 0, fontSize: "16px", color: "#333" }}>使用说明</h3>
-        <ul style={{ marginBottom: 0, paddingLeft: "20px" }}>
+      <div className="bg-gray-200 p-4 rounded-lg text-sm text-gray-600">
+        <h3 className="mt-0 text-base text-gray-800">使用说明</h3>
+        <ul className="mb-0 pl-5">
           <li>启用AI总结功能后，在观看视频时会自动显示"AI总结"按钮</li>
           <li>点击按钮后，AI会分析视频字幕并生成内容摘要</li>
           <li>请确保API Key有效且有足够的配额</li>

@@ -1,5 +1,6 @@
 import styleText from "data-text:mind-elixir/style"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
+import tailwindStyles from "data-text:~style.css"
 import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
@@ -23,7 +24,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = styleText + styleText2 + styleOverride
+  style.textContent = tailwindStyles + styleText + styleOverride
   return style
 }
 
@@ -251,31 +252,31 @@ function ArticleMindmapPanel() {
   }
 
   return (
-    <div className="video-summary-container">
-      <div className="video-summary-header">
-        <h3>📄 文章思维导图</h3>
+    <div className="fixed top-5 right-5 w-96 max-h-[80vh] bg-white border border-gray-300 rounded-lg shadow-lg z-[10000] font-sans overflow-hidden">
+      <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <h3 className="m-0 text-base font-semibold text-gray-800">📄 文章思维导图</h3>
         <button
-          className="close-btn"
+          className="bg-transparent border-none text-lg cursor-pointer text-gray-600 p-0 w-6 h-6 flex items-center justify-center hover:text-gray-800 hover:bg-gray-200 rounded"
           onClick={() => setIsVisible(false)}
         >
           ✕
         </button>
       </div>
 
-      <div className="video-summary-content">
-        <div className="article-info">
-          <h4>{articleInfo.title}</h4>
-          <p className="article-meta">
+      <div className="p-4 max-h-[calc(80vh-60px)] overflow-y-auto">
+        <div className="mb-4">
+          <h4 className="m-0 mb-2 text-sm font-semibold text-gray-800 leading-tight">{articleInfo.title}</h4>
+          <p className="m-0 text-xs text-gray-600 leading-tight">
             字数: {articleInfo.content.length} |
             URL: {articleInfo.url.length > 50 ? articleInfo.url.slice(0, 50) + '...' : articleInfo.url}
           </p>
         </div>
 
-        <div className="action-buttons">
+        <div className="flex gap-2 mb-4">
           <button
             onClick={generateMindmap}
             disabled={mindmapLoading}
-            className="generate-btn"
+            className="flex-1 px-3 py-2 border border-blue-600 bg-blue-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-blue-700 hover:border-blue-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
           >
             {mindmapLoading ? '生成中...' : '生成思维导图'}
           </button>
@@ -283,7 +284,7 @@ function ArticleMindmapPanel() {
           {mindmapData && (
             <button
               onClick={() => setShowMindmap(!showMindmap)}
-              className="toggle-btn"
+              className="flex-1 px-3 py-2 border border-green-600 bg-green-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-green-700 hover:border-green-700"
             >
               {showMindmap ? '隐藏思维导图' : '显示思维导图'}
             </button>
@@ -291,158 +292,29 @@ function ArticleMindmapPanel() {
         </div>
 
         {mindmapError && (
-          <div className="error-message">
+          <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs mb-4">
             ❌ {mindmapError}
           </div>
         )}
 
         {showMindmap && mindmapData && (
-          <MindElixirReact
-            ref={mindElixirRef}
-            data={mindmapData}
-            options={{
-              editable: false,
-              draggable: false,
-              toolBar: false,
-              mouseSelectionButton: 2
-            }}
-          />
+          <div className="w-full h-full">
+            <MindElixirReact
+              ref={mindElixirRef}
+              data={mindmapData}
+              options={{
+                editable: false,
+                draggable: false,
+                toolBar: false,
+                mouseSelectionButton: 2
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
   )
 }
 
-const styleText2 = `
-.video-summary-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 400px;
-  max-height: 80vh;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 10000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow: hidden;
-}
 
-.video-summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #eee;
-}
-
-.video-summary-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #666;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.close-btn:hover {
-  color: #333;
-  background: #e9ecef;
-  border-radius: 4px;
-}
-
-.video-summary-content {
-  padding: 16px;
-  max-height: calc(80vh - 60px);
-  overflow-y: auto;
-}
-
-.article-info {
-  margin-bottom: 16px;
-}
-
-.article-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  line-height: 1.4;
-}
-
-.article-meta {
-  margin: 0;
-  font-size: 12px;
-  color: #666;
-  line-height: 1.4;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.generate-btn, .toggle-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #007bff;
-  background: #007bff;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.generate-btn:hover, .toggle-btn:hover {
-  background: #0056b3;
-  border-color: #0056b3;
-}
-
-.generate-btn:disabled {
-  background: #6c757d;
-  border-color: #6c757d;
-  cursor: not-allowed;
-}
-
-.toggle-btn {
-  background: #28a745;
-  border-color: #28a745;
-}
-
-.toggle-btn:hover {
-  background: #1e7e34;
-  border-color: #1e7e34;
-}
-
-.error-message {
-  padding: 8px 12px;
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-bottom: 16px;
-}
-
-#mind-elixir-container {
-  width: 100%;
-  height: 100%;
-}
-`
 export default ArticleMindmapPanel

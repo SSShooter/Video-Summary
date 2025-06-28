@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Storage } from "@plasmohq/storage"
 import type { AIConfig } from "~utils/ai-service"
 import iconBase64 from "data-base64:~assets/icon.png"
+import "~style.css"
 
 function IndexPopup() {
   const [aiEnabled, setAiEnabled] = useState(false)
@@ -59,107 +60,49 @@ function IndexPopup() {
   }
 
   return (
-    <div
-      style={{
-        width: 320,
-        padding: 0,
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: 8
-      }}>
+    <div className="w-80 p-3">
+      <div className="flex items-center mb-2">
         <img 
           src={iconBase64} 
           alt="Video Mindmap" 
-          style={{ width: 32, height: 32, marginRight: 12 }}
+          className="w-8 h-8 mr-3"
         />
-        <h2 style={{
-          margin: 0,
-          fontSize: 18,
-          color: '#333'
-        }}>视频字幕助手</h2>
+        <h2 className="m-0 text-lg text-gray-800">视频字幕助手</h2>
       </div>
       
-      <div style={{
-        backgroundColor: '#f8f9fa',
-        padding: 12,
-        borderRadius: 6,
-        marginBottom: 8
-      }}>
-        <div style={{
-          fontSize: 14,
-          color: '#666',
-          marginBottom: 8
-        }}>功能状态</div>
+      <div className="bg-gray-50 p-3 rounded-md mb-2">
+        <div className="text-sm text-gray-600 mb-2">功能状态</div>
         
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 8
-        }}>
-          <span style={{ fontSize: 13, color: '#333' }}>字幕显示</span>
-          <label style={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer'
-          }}>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs text-gray-800">字幕显示</span>
+          <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
               checked={subtitleEnabled}
               onChange={toggleSubtitle}
-              style={{
-                marginRight: 6,
-                transform: 'scale(1.2)'
-              }}
+              className="mr-1.5 scale-110"
             />
-            <span style={{
-              padding: '2px 8px',
-              backgroundColor: subtitleEnabled ? '#4caf50' : '#ccc',
-              color: 'white',
-              fontSize: 11,
-              borderRadius: 12
-            }}>{subtitleEnabled ? '已启用' : '已禁用'}</span>
+            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
+              subtitleEnabled ? 'bg-green-500' : 'bg-gray-400'
+            }`}>{subtitleEnabled ? '已启用' : '已禁用'}</span>
           </label>
         </div>
         
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span style={{ fontSize: 13, color: '#333' }}>AI总结</span>
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-800">AI总结</span>
           {loading ? (
-            <span style={{ fontSize: 11, color: '#666' }}>加载中...</span>
+            <span className="text-xs text-gray-600">加载中...</span>
           ) : (
-            <span style={{
-              padding: '2px 8px',
-              backgroundColor: aiEnabled ? '#4caf50' : '#ff9800',
-              color: 'white',
-              fontSize: 11,
-              borderRadius: 12
-            }}>{aiEnabled ? '已启用' : '未配置'}</span>
+            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${
+              aiEnabled ? 'bg-green-500' : 'bg-orange-500'
+            }`}>{aiEnabled ? '已启用' : '未配置'}</span>
           )}
         </div>
       </div>
       
-      <div style={{
-        marginBottom: 8
-      }}>
-        <div style={{
-          fontSize: 14,
-          color: '#666',
-          marginBottom: 8
-        }}>使用说明</div>
-        <ul style={{
-          margin: 0,
-          paddingLeft: 16,
-          fontSize: 12,
-          color: '#666',
-          lineHeight: 1.5
-        }}>
+      <div className="mb-2">
+        <div className="text-sm text-gray-600 mb-2">使用说明</div>
+        <ul className="m-0 pl-4 text-xs text-gray-600 leading-relaxed">
           <li>访问YouTube或Bilibili视频页面</li>
           <li>字幕面板会自动显示在右侧</li>
           <li>点击字幕可跳转到对应时间</li>
@@ -169,26 +112,12 @@ function IndexPopup() {
       
       <button
         onClick={openOptionsPage}
-        style={{
-          width: '100%',
-          padding: '10px 16px',
-          backgroundColor: '#1976d2',
-          color: 'white',
-          border: 'none',
-          borderRadius: 6,
-          fontSize: 14,
-          cursor: 'pointer',
-          marginBottom: 12
-        }}
+        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white border-none rounded text-sm cursor-pointer mb-3"
       >
         {aiEnabled ? 'AI配置管理' : '配置AI总结'}
       </button>
       
-      <div style={{
-        textAlign: 'center',
-        fontSize: 11,
-        color: '#999'
-      }}>
+      <div className="text-center text-xs text-gray-400">
         支持平台: YouTube • Bilibili
       </div>
     </div>

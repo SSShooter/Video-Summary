@@ -1,12 +1,19 @@
-import type { PlasmoCSConfig } from "plasmo"
+import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import { Storage } from "@plasmohq/storage"
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
+import tailwindStyles from "data-text:~style.css"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.youtube.com/watch*"],
   all_frames: false
+}
+
+export const getStyle: PlasmoGetStyle = () => {
+  const style = document.createElement("style")
+  style.textContent = tailwindStyles
+  return style
 }
 
 interface SubtitleItem {
@@ -290,42 +297,11 @@ function YouTubeSubtitlePanel() {
   }
 
   return (
-    <div style={{
-      width: '350px',
-      height: '600px',
-      backgroundColor: '#fff',
-      border: '1px solid #e0e0e0',
-      borderRadius: '8px',
-      padding: '16px',
-      fontSize: '14px',
-      fontFamily: 'Roboto, Arial, sans-serif',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-      position: 'fixed',
-      top: '80px',
-      right: '20px',
-      zIndex: 9999,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <div style={{
-        borderBottom: '1px solid #e0e0e0',
-        paddingBottom: '12px',
-        marginBottom: '12px'
-      }}>
-        <h3 style={{
-          margin: '0 0 8px 0',
-          fontSize: '16px',
-          fontWeight: '500',
-          color: '#030303'
-        }}>YouTube字幕</h3>
+    <div className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-lg p-4 text-sm font-sans shadow-lg fixed top-20 right-5 z-[9999] overflow-hidden flex flex-col">
+      <div className="border-b border-gray-300 pb-3 mb-3">
+        <h3 className="m-0 mb-2 text-base font-medium text-gray-900">YouTube字幕</h3>
         {videoInfo && (
-          <div style={{
-            fontSize: '12px',
-            color: '#606060',
-            lineHeight: '1.4',
-            marginBottom: '8px'
-          }}>
+          <div className="text-xs text-gray-600 leading-relaxed mb-2">
             {videoInfo.title}
           </div>
         )}
@@ -334,15 +310,7 @@ function YouTubeSubtitlePanel() {
           <select 
             value={selectedLanguage}
             onChange={(e) => changeSubtitleLanguage(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '4px 8px',
-              fontSize: '12px',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              backgroundColor: '#fff',
-              marginBottom: '8px'
-            }}
+            className="w-full py-1 px-2 text-xs border border-gray-400 rounded bg-white mb-2"
           >
             {availableLanguages.map((lang) => (
               <option key={lang.languageCode} value={lang.languageCode}>
@@ -354,36 +322,22 @@ function YouTubeSubtitlePanel() {
         
         {/* AI总结按钮 */}
         {subtitles.length > 0 && (
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+          <div className="flex gap-2 mb-2">
             <button
               onClick={summarizeWithAI}
               disabled={aiLoading}
-              style={{
-                flex: 1,
-                padding: '6px 12px',
-                fontSize: '12px',
-                backgroundColor: aiLoading ? '#ccc' : '#1976d2',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: aiLoading ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.2s'
-              }}
+              className={`flex-1 py-1.5 px-3 text-xs text-white border-none rounded transition-colors duration-200 ${
+                aiLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-700 cursor-pointer hover:bg-blue-800'
+              }`}
             >
               {aiLoading ? '总结中...' : 'AI总结'}
             </button>
             {aiSummary && (
               <button
                 onClick={() => setShowSummary(!showSummary)}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  backgroundColor: showSummary ? '#f44336' : '#4caf50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className={`py-1.5 px-3 text-xs text-white border-none rounded cursor-pointer ${
+                  showSummary ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
+                }`}
               >
                 {showSummary ? '隐藏' : '显示'}
               </button>
@@ -393,75 +347,29 @@ function YouTubeSubtitlePanel() {
         
         {/* AI错误信息 */}
         {aiError && (
-          <div style={{
-            padding: '8px',
-            backgroundColor: '#ffebee',
-            border: '1px solid #f44336',
-            borderRadius: '4px',
-            fontSize: '12px',
-            color: '#d32f2f',
-            marginBottom: '8px'
-          }}>
+          <div className="p-2 bg-red-50 border border-red-400 rounded text-xs text-red-700 mb-2">
             {aiError}
           </div>
         )}
       </div>
       
-      <div style={{
-        flex: 1,
-        overflow: 'auto'
-      }}>
+      <div className="flex-1 overflow-auto">
         {/* AI总结内容 */}
         {showSummary && aiSummary && (
-          <div style={{
-            marginBottom: '16px',
-            padding: '12px',
-            backgroundColor: '#f8f9fa',
-            border: '1px solid #e0e0e0',
-            borderRadius: '6px'
-          }}>
-            <h4 style={{
-              margin: '0 0 8px 0',
-              fontSize: '14px',
-              color: '#1976d2',
-              fontWeight: '600'
-            }}>AI内容总结</h4>
+          <div className="mb-4 p-3 bg-gray-50 border border-gray-300 rounded-md">
+            <h4 className="m-0 mb-2 text-sm text-blue-700 font-semibold">AI内容总结</h4>
             
-            <div style={{
-              marginBottom: '12px'
-            }}>
-              <div style={{
-                fontSize: '12px',
-                color: '#666',
-                marginBottom: '4px',
-                fontWeight: '500'
-              }}>概要:</div>
-              <div style={{
-                fontSize: '13px',
-                lineHeight: '1.4',
-                color: '#333'
-              }}>{aiSummary.summary}</div>
+            <div className="mb-3">
+              <div className="text-xs text-gray-600 mb-1 font-medium">概要:</div>
+              <div className="text-xs leading-relaxed text-gray-800">{aiSummary.summary}</div>
             </div>
             
             {aiSummary.keyPoints.length > 0 && (
-              <div style={{
-                marginBottom: '12px'
-              }}>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  marginBottom: '4px',
-                  fontWeight: '500'
-                }}>关键要点:</div>
-                <ul style={{
-                  margin: 0,
-                  paddingLeft: '16px',
-                  fontSize: '12px',
-                  lineHeight: '1.4',
-                  color: '#333'
-                }}>
+              <div className="mb-3">
+                <div className="text-xs text-gray-600 mb-1 font-medium">关键要点:</div>
+                <ul className="m-0 pl-4 text-xs leading-relaxed text-gray-800">
                   {aiSummary.keyPoints.map((point, index) => (
-                    <li key={index} style={{ marginBottom: '2px' }}>{point}</li>
+                    <li key={index} className="mb-0.5">{point}</li>
                   ))}
                 </ul>
               </div>
@@ -469,28 +377,12 @@ function YouTubeSubtitlePanel() {
             
             {aiSummary.topics.length > 0 && (
               <div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#666',
-                  marginBottom: '4px',
-                  fontWeight: '500'
-                }}>主要话题:</div>
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '4px'
-                }}>
+                <div className="text-xs text-gray-600 mb-1 font-medium">主要话题:</div>
+                <div className="flex flex-wrap gap-1">
                   {aiSummary.topics.map((topic, index) => (
                     <span
                       key={index}
-                      style={{
-                        padding: '2px 6px',
-                        backgroundColor: '#e3f2fd',
-                        color: '#1976d2',
-                        fontSize: '11px',
-                        borderRadius: '12px',
-                        border: '1px solid #bbdefb'
-                      }}
+                      className="py-0.5 px-1.5 bg-blue-50 text-blue-700 text-[11px] rounded-full border border-blue-200"
                     >
                       {topic}
                     </span>
@@ -501,19 +393,11 @@ function YouTubeSubtitlePanel() {
           </div>
         )}
         {loading && (
-          <div style={{
-            textAlign: 'center',
-            padding: '20px',
-            color: '#606060'
-          }}>加载中...</div>
+          <div className="text-center py-5 text-gray-600">加载中...</div>
         )}
         
         {error && (
-          <div style={{
-            textAlign: 'center',
-            padding: '20px',
-            color: '#d93025'
-          }}>{error}</div>
+          <div className="text-center py-5 text-red-600">{error}</div>
         )}
         
         {subtitles.length > 0 && (
@@ -521,32 +405,13 @@ function YouTubeSubtitlePanel() {
             {subtitles.map((subtitle, index) => (
               <div
                 key={index}
-                style={{
-                  padding: '8px 0',
-                  borderBottom: '1px solid #f0f0f0',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f8f9fa'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }}
+                className="py-2 border-b border-gray-200 cursor-pointer transition-colors duration-200 hover:bg-gray-50"
                 onClick={() => jumpToTime(subtitle.start)}
               >
-                <div style={{
-                  fontSize: '12px',
-                  color: '#1976d2',
-                  marginBottom: '4px',
-                  fontWeight: '500'
-                }}>
+                <div className="text-xs text-blue-700 mb-1 font-medium">
                   {formatTime(subtitle.start)} - {formatTime(subtitle.start + subtitle.dur)}
                 </div>
-                <div style={{
-                  color: '#030303',
-                  lineHeight: '1.4'
-                }}>
+                <div className="text-gray-900 leading-relaxed">
                   {subtitle.text}
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import styleText from "data-text:mind-elixir/style"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
+import tailwindStyles from "data-text:~style.css"
 import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
@@ -23,7 +24,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = styleText + styleOverride
+  style.textContent = tailwindStyles + styleText + styleOverride
   return style
 }
 
@@ -471,93 +472,35 @@ function SubtitlePanel() {
   }
 
   return (
-    <div
-      style={{
-        width: "350px",
-        height: "600px",
-        backgroundColor: "#fff",
-        border: "1px solid #e1e5e9",
-        borderRadius: "8px",
-        padding: "16px",
-        fontSize: "14px",
-        fontFamily:
-          "PingFang SC, HarmonyOS_Regular, Helvetica Neue, Microsoft YaHei, sans-serif",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        position: "fixed",
-        top: "80px",
-        right: "20px",
-        zIndex: 9999,
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column"
-      }}>
-      <div
-        style={{
-          marginBottom: "12px"
-        }}>
-        <h3
-          style={{
-            margin: "0 0 8px 0",
-            fontSize: "16px",
-            fontWeight: "600",
-            color: "#18191c"
-          }}>
+    <div className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-lg p-4 text-sm font-sans shadow-lg fixed top-20 right-5 z-[9999] overflow-hidden flex flex-col">
+      <div className="mb-3">
+        <h3 className="m-0 mb-2 text-base font-semibold text-gray-900">
           视频助手
         </h3>
         {videoInfo && (
-          <div
-            style={{
-              fontSize: "12px",
-              color: "#61666d",
-              lineHeight: "1.4",
-              marginBottom: "12px"
-            }}>
+          <div className="text-xs text-gray-600 leading-relaxed mb-3">
             {videoInfo.title}
           </div>
         )}
 
         {/* Tab导航 */}
-        <div
-          style={{
-            display: "flex",
-            borderBottom: "1px solid #e1e5e9"
-          }}>
+        <div className="flex border-b border-gray-300">
           <button
             onClick={() => setActiveTab("subtitles")}
-            style={{
-              flex: 1,
-              padding: "8px 12px",
-              margin: "0",
-              fontSize: "13px",
-              backgroundColor: "transparent",
-              color: activeTab === "subtitles" ? "#00a1d6" : "#61666d",
-              border: "none",
-              borderBottom:
-                activeTab === "subtitles"
-                  ? "2px solid #00a1d6"
-                  : "2px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s"
-            }}>
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
+              activeTab === "subtitles"
+                ? "text-blue-500 border-blue-500"
+                : "text-gray-600 border-transparent hover:text-blue-400"
+            }`}>
             字幕
           </button>
           <button
             onClick={() => setActiveTab("summary")}
-            style={{
-              flex: 1,
-              padding: "8px 12px",
-              margin: "0",
-              fontSize: "13px",
-              backgroundColor: "transparent",
-              color: activeTab === "summary" ? "#00a1d6" : "#61666d",
-              border: "none",
-              borderBottom:
-                activeTab === "summary"
-                  ? "2px solid #00a1d6"
-                  : "2px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s"
-            }}>
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
+              activeTab === "summary"
+                ? "text-blue-500 border-blue-500"
+                : "text-gray-600 border-transparent hover:text-blue-400"
+            }`}>
             AI总结
           </button>
           <button
@@ -567,52 +510,28 @@ function SubtitlePanel() {
                 mindmapRef.current?.instance.toCenter()
               }, 200)
             }}
-            style={{
-              flex: 1,
-              padding: "8px 12px",
-              margin: "0",
-              fontSize: "13px",
-              backgroundColor: "transparent",
-              color: activeTab === "mindmap" ? "#00a1d6" : "#61666d",
-              border: "none",
-              borderBottom:
-                activeTab === "mindmap"
-                  ? "2px solid #00a1d6"
-                  : "2px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s"
-            }}>
+            className={`flex-1 py-2 px-3 m-0 text-xs bg-transparent border-none border-b-2 cursor-pointer transition-all duration-200 ${
+              activeTab === "mindmap"
+                ? "text-blue-500 border-blue-500"
+                : "text-gray-600 border-transparent hover:text-blue-400"
+            }`}>
             思维导图
           </button>
         </div>
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          overflow: "auto"
-        }}>
+      <div className="flex-1 overflow-auto">
         {/* 字幕Tab内容 */}
         {activeTab === "subtitles" && (
           <>
             {loading && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  color: "#61666d"
-                }}>
+              <div className="text-center p-5 text-gray-600">
                 加载中...
               </div>
             )}
 
             {error && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  color: "#ff6b6b"
-                }}>
+              <div className="text-center p-5 text-red-500">
                 {error}
               </div>
             )}
@@ -622,33 +541,12 @@ function SubtitlePanel() {
                 {subtitles.map((subtitle, index) => (
                   <div
                     key={index}
-                    style={{
-                      padding: "8px 0",
-                      borderBottom: "1px solid #f1f2f3",
-                      cursor: "pointer",
-                      transition: "background-color 0.2s"
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f7f8fa"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "transparent"
-                    }}
+                    className="py-2 border-b border-gray-100 cursor-pointer transition-colors duration-200 hover:bg-gray-50"
                     onClick={() => jumpToTime(subtitle.from)}>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#00a1d6",
-                        marginBottom: "4px",
-                        fontWeight: "500"
-                      }}>
+                    <div className="text-xs text-blue-500 mb-1 font-medium">
                       {formatTime(subtitle.from)} - {formatTime(subtitle.to)}
                     </div>
-                    <div
-                      style={{
-                        color: "#18191c",
-                        lineHeight: "1.4"
-                      }}>
+                    <div className="text-gray-900 leading-relaxed">
                       {subtitle.content}
                     </div>
                   </div>
@@ -663,24 +561,14 @@ function SubtitlePanel() {
           <>
             {/* AI总结功能按钮 */}
             {subtitles.length > 0 && (
-              <div
-                style={{ padding: "12px" }}>
-                <div style={{ display: "flex", gap: "8px" }}>
+              <div className="p-3">
+                <div className="flex gap-2">
                   <button
                     onClick={() => summarizeWithAI(false)}
                     disabled={aiLoading}
-                    style={{
-                      flex: 1,
-                      padding: "8px 12px",
-                      margin: "0",
-                      fontSize: "13px",
-                      backgroundColor: aiLoading ? "#ccc" : "#00a1d6",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: aiLoading ? "not-allowed" : "pointer",
-                      transition: "background-color 0.2s"
-                    }}>
+                    className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
+                      aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                    } text-white`}>
                     {aiLoading
                       ? "总结中..."
                       : aiSummary
@@ -691,32 +579,15 @@ function SubtitlePanel() {
                     <button
                       onClick={() => summarizeWithAI(true)}
                       disabled={aiLoading}
-                      style={{
-                        padding: "8px 12px",
-                        margin: "0",
-                        fontSize: "13px",
-                        backgroundColor: aiLoading ? "#ccc" : "#52c41a",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: aiLoading ? "not-allowed" : "pointer",
-                        transition: "background-color 0.2s"
-                      }}>
+                      className={`py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
+                        aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                      } text-white`}>
                       重新生成
                     </button>
                   )}
                 </div>
                 {aiError && (
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      padding: "8px",
-                      backgroundColor: "#fff2f0",
-                      border: "1px solid #ffccc7",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      color: "#ff4d4f"
-                    }}>
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-500">
                     {aiError}
                   </div>
                 )}
@@ -724,116 +595,50 @@ function SubtitlePanel() {
             )}
 
             {!aiSummary && !aiLoading && subtitles.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "#61666d"
-                }}>
-                <div style={{ marginBottom: "12px" }}>暂无字幕数据</div>
-                <div style={{ fontSize: "12px" }}>
+              <div className="text-center py-10 px-5 text-gray-600">
+                <div className="mb-3">暂无字幕数据</div>
+                <div className="text-xs">
                   请先获取字幕后再生成AI总结
                 </div>
               </div>
             )}
 
             {aiLoading && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "#61666d"
-                }}>
+              <div className="text-center py-10 px-5 text-gray-600">
                 正在生成AI总结...
               </div>
             )}
 
             {aiSummary && (
-              <div
-                style={{
-                  padding: "12px",
-                  backgroundColor: "#f6ffed",
-                  border: "1px solid #b7eb8f",
-                  borderRadius: "6px"
-                }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "12px"
-                  }}>
-                  <h4
-                    style={{
-                      margin: "0",
-                      fontSize: "14px",
-                      color: "#00a1d6",
-                      fontWeight: "600"
-                    }}>
+              <div className="p-3 bg-green-50 border border-green-300 rounded-md">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="m-0 text-sm text-blue-500 font-semibold">
                     AI内容总结
                   </h4>
                   {cacheLoaded && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "#52c41a",
-                        backgroundColor: "#f6ffed",
-                        padding: "2px 6px",
-                        borderRadius: "10px",
-                        border: "1px solid #b7eb8f"
-                      }}>
+                    <span className="text-xs text-green-500 bg-green-50 py-0.5 px-1.5 rounded-full border border-green-300">
                       已缓存
                     </span>
                   )}
                 </div>
 
-                <div
-                  style={{
-                    marginBottom: "12px"
-                  }}>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#666",
-                      marginBottom: "4px",
-                      fontWeight: "500"
-                    }}>
+                <div className="mb-3">
+                  <div className="text-xs text-gray-600 mb-1 font-medium">
                     概要:
                   </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      lineHeight: "1.4",
-                      color: "#333"
-                    }}>
+                  <div className="text-xs leading-relaxed text-gray-800">
                     {aiSummary.summary}
                   </div>
                 </div>
 
                 {aiSummary.keyPoints.length > 0 && (
-                  <div
-                    style={{
-                      marginBottom: "12px"
-                    }}>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#666",
-                        marginBottom: "4px",
-                        fontWeight: "500"
-                      }}>
+                  <div className="mb-3">
+                    <div className="text-xs text-gray-600 mb-1 font-medium">
                       关键要点:
                     </div>
-                    <ul
-                      style={{
-                        margin: 0,
-                        paddingLeft: "16px",
-                        fontSize: "12px",
-                        lineHeight: "1.4",
-                        color: "#333"
-                      }}>
+                    <ul className="m-0 pl-4 text-xs leading-relaxed text-gray-800">
                       {aiSummary.keyPoints.map((point, index) => (
-                        <li key={index} style={{ marginBottom: "2px" }}>
+                        <li key={index} className="mb-0.5">
                           {point}
                         </li>
                       ))}
@@ -843,32 +648,14 @@ function SubtitlePanel() {
 
                 {aiSummary.topics.length > 0 && (
                   <div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#666",
-                        marginBottom: "4px",
-                        fontWeight: "500"
-                      }}>
+                    <div className="text-xs text-gray-600 mb-1 font-medium">
                       主要话题:
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "4px"
-                      }}>
+                    <div className="flex flex-wrap gap-1">
                       {aiSummary.topics.map((topic, index) => (
                         <span
                           key={index}
-                          style={{
-                            padding: "2px 6px",
-                            backgroundColor: "#e6f7ff",
-                            color: "#00a1d6",
-                            fontSize: "11px",
-                            borderRadius: "12px",
-                            border: "1px solid #91d5ff"
-                          }}>
+                          className="py-0.5 px-1.5 bg-blue-50 text-blue-500 text-xs rounded-full border border-blue-200">
                           {topic}
                         </span>
                       ))}
@@ -885,94 +672,46 @@ function SubtitlePanel() {
           <>
             {/* 思维导图功能按钮 */}
             {subtitles.length > 0 && (
-              <div style={{ padding: "12px" }}>
-                <div
-                  style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+              <div className="p-3">
+                <div className="flex gap-2 mb-2">
                   {!mindmapData ? (
                     <button
                       onClick={() => generateMindmap(false)}
                       disabled={mindmapLoading}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        margin: "0",
-                        fontSize: "13px",
-                        backgroundColor: mindmapLoading ? "#ccc" : "#722ed1",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: mindmapLoading ? "not-allowed" : "pointer",
-                        transition: "background-color 0.2s"
-                      }}>
+                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
+                        mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
+                      } text-white`}>
                       {mindmapLoading ? "生成中..." : "生成思维导图"}
                     </button>
                   ) : (
                     <button
                       onClick={() => generateMindmap(true)}
                       disabled={mindmapLoading}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        margin: "0",
-                        fontSize: "13px",
-                        backgroundColor: mindmapLoading ? "#ccc" : "#52c41a",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: mindmapLoading ? "not-allowed" : "pointer",
-                        transition: "background-color 0.2s"
-                      }}>
+                      className={`flex-1 py-2 px-3 m-0 text-xs border-none rounded cursor-pointer transition-colors duration-200 ${
+                        mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                      } text-white`}>
                       重新生成
                     </button>
                   )}
                 </div>
                 {mindmapData && (
-                  <div style={{ display: "flex", gap: "8px" }}>
+                  <div className="flex gap-2">
                     <button
                       onClick={copyMindmapJSON}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        margin: "0",
-                        fontSize: "12px",
-                        backgroundColor: "#13c2c2",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer"
-                      }}>
+                      className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600">
                       复制JSON
                     </button>
                     <button
-                      onClick={()=>{
+                      onClick={() => {
                         mindmapRef.current?.instance.el.requestFullscreen()
                       }}
-                      style={{
-                        flex: 1,
-                        padding: "8px 12px",
-                        margin: "0",
-                        fontSize: "12px",
-                        backgroundColor: "#13c2c2",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer"
-                      }}>
+                      className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600">
                       全屏
                     </button>
                   </div>
                 )}
                 {mindmapError && (
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      padding: "8px",
-                      backgroundColor: "#fff2f0",
-                      border: "1px solid #ffccc7",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      color: "#ff4d4f"
-                    }}>
+                  <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-500">
                     {mindmapError}
                   </div>
                 )}
@@ -980,38 +719,30 @@ function SubtitlePanel() {
             )}
 
             {!mindmapData && !mindmapLoading && subtitles.length === 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "#61666d"
-                }}>
-                <div style={{ marginBottom: "12px" }}>暂无字幕数据</div>
-                <div style={{ fontSize: "12px" }}>
+              <div className="text-center py-10 px-5 text-gray-600">
+                <div className="mb-3">暂无字幕数据</div>
+                <div className="text-xs">
                   请先获取字幕后再生成思维导图
                 </div>
               </div>
             )}
 
             {mindmapLoading && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "#61666d"
-                }}>
+              <div className="text-center py-10 px-5 text-gray-600">
                 正在生成思维导图...
               </div>
             )}
 
             {mindmapData && (
-              <MindElixirReact data={mindmapData} ref={mindmapRef}
-                options={{
-                  editable: false,
-                  draggable: false,
-                  toolBar: false,
-                  mouseSelectionButton: 2
-                }} />
+              <div className="h-[calc(100%-120px)] border border-gray-300 rounded-md overflow-hidden mt-3">
+                <MindElixirReact data={mindmapData} ref={mindmapRef}
+                  options={{
+                    editable: false,
+                    draggable: false,
+                    toolBar: false,
+                    mouseSelectionButton: 2
+                  }} />
+              </div>
             )}
           </>
         )}
