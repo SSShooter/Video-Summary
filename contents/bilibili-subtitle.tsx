@@ -14,7 +14,7 @@ import MindElixirReact, {
 
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 import { fullscreen } from "~utils/fullscreen"
-import { openAppWithFallback } from "~utils/mind-elixir"
+import { launchMindElixir } from "~utils/mind-elixir"
 
 export const config: PlasmoCSConfig = {
   matches: [
@@ -407,66 +407,14 @@ function SubtitlePanel() {
     }
   }
 
-  // 等待服务可用的Promise函数
-  const waitForService = (url: string, timeout: number = 10000): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const startTime = Date.now()
-
-      const checkService = async () => {
-        try {
-          const response = await fetch(url)
-          if (response.ok) {
-            resolve()
-            return
-          }
-        } catch (error) {
-          // 服务还未启动，继续等待
-        }
-
-        // 检查是否超时
-        if (Date.now() - startTime > timeout) {
-          reject(new Error('服务启动超时'))
-          return
-        }
-
-        // 100ms后再次检查
-        setTimeout(checkService, 100)
-      }
-
-      checkService()
-    })
-  }
-
   const openInMindElixir = async () => {
     if (mindmapData) {
       setMindElixirLoading(true)
       setMindElixirError(null)
       
       try {
-        // 打开 Mind Elixir 应用
-        await openAppWithFallback('mind-elixird://open')
-        // await openAppWithFallback('mind-elixir://open')
-
-        // 等待服务可用
-        await waitForService('http://127.0.0.1:6595/ping')
-
-        // 发送思维导图数据
-        const response = await fetch('http://127.0.0.1:6595/create-mindmap', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            mindmap: JSON.stringify(mindmapData),
-            source: window.location.href.split('?')[0]
-          })
-        })
-
-        if (!response.ok) {
-          throw new Error('发送思维导图数据失败')
-        }
-
-        console.log('思维导图已成功发送到 Mind Elixir')
+        // 使用通用的 Mind Elixir 启动函数
+        await launchMindElixir(mindmapData)
       } catch (error) {
         console.error('打开 Mind Elixir 失败:', error)
         setMindElixirError(error instanceof Error ? error.message : '打开 Mind Elixir 失败')

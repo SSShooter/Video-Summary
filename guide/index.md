@@ -43,6 +43,12 @@
 
 ![硅基流动 复制 key](./silicon-key.jpg)
 
+### 3. OpenRouter
+
+### 4. GPT_API_free
+
+https://github.com/chatanywhere/GPT_API_free
+
 ## 💰 付费方案
 
 ### 3. OpenAI GPT系列

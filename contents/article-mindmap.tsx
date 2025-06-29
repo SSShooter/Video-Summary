@@ -13,6 +13,7 @@ import MindElixirReact, {
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
 import { fullscreen } from "~utils/fullscreen"
+import { launchMindElixir } from "~utils/mind-elixir"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -44,6 +45,8 @@ function ArticleMindmapPanel() {
   const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [showMindmap, setShowMindmap] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [mindElixirLoading, setMindElixirLoading] = useState(false)
+  const [mindElixirError, setMindElixirError] = useState<string | null>(null)
   const storage = new Storage()
   const mindElixirRef = useRef<MindElixirReactRef>(null)
 
@@ -58,11 +61,8 @@ function ArticleMindmapPanel() {
 
     try {
       // 使用智能HTML到Markdown转换
-      let markdownContent = detectAndConvertArticle({
-        maxLength: 8000,
-        includeImages: false,
-        includeLinks: true
-      })
+      let markdownContent = detectAndConvertArticle()
+      console.log('智能HTML到Markdown转换结果:', markdownContent)
 
       // 如果智能检测失败，使用原始文本内容
       if (!markdownContent) {
@@ -109,6 +109,24 @@ function ArticleMindmapPanel() {
       setMindmapError(error instanceof Error ? error.message : '生成思维导图失败')
     } finally {
       setMindmapLoading(false)
+    }
+  }
+
+  // 在 Mind Elixir 中打开思维导图
+  const openInMindElixir = async () => {
+    if (mindmapData) {
+      setMindElixirLoading(true)
+      setMindElixirError(null)
+
+      try {
+        // 使用通用的 Mind Elixir 启动函数
+        await launchMindElixir(mindmapData)
+      } catch (error) {
+        console.error('打开 Mind Elixir 失败:', error)
+        setMindElixirError(error instanceof Error ? error.message : '打开 Mind Elixir 失败')
+      } finally {
+        setMindElixirLoading(false)
+      }
     }
   }
 
@@ -211,10 +229,11 @@ function ArticleMindmapPanel() {
 
           {mindmapData && (
             <button
-              onClick={() => setShowMindmap(!showMindmap)}
-              className="flex-1 px-3 py-2 border border-green-600 bg-green-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-green-700 hover:border-green-700"
+              onClick={openInMindElixir}
+              disabled={mindElixirLoading}
+              className="flex-1 px-3 py-2 border border-purple-600 bg-purple-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-purple-700 hover:border-purple-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
             >
-              {showMindmap ? '隐藏思维导图' : '显示思维导图'}
+              {mindElixirLoading ? '正在打开...' : '在 Mind Elixir 打开'}
             </button>
           )}
 
@@ -233,6 +252,12 @@ function ArticleMindmapPanel() {
         {mindmapError && (
           <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs mb-4">
             ❌ {mindmapError}
+          </div>
+        )}
+
+        {mindElixirError && (
+          <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs mb-4">
+            ❌ {mindElixirError}
           </div>
         )}
 
@@ -255,5 +280,5 @@ function ArticleMindmapPanel() {
   )
 }
 
- 
+
 export default ArticleMindmapPanel
