@@ -12,7 +12,6 @@ export function openAppWithFallback(url: string) {
         setTimeout(() => {
             const delta = Date.now() - now;
             if (delta < 1500) {
-                // 协议打开成功
                 window.open('https://desktop.mind-elixir.com/', '_blank')
                 reject("未安装 Mind Elixir Desktop")
             }
@@ -20,7 +19,7 @@ export function openAppWithFallback(url: string) {
                 // 用户已离开页面，认为已安装
                 resolve(true);
             }
-        }, 1000);
+        }, 2000);
     })
 }
 
@@ -82,10 +81,10 @@ export const launchMindElixir = async (
   } = {}
 ): Promise<void> => {
   const {
-    appUrl = 'mind-elixird://open',
+    appUrl = 'mind-elixir://open',
     serviceUrl = 'http://127.0.0.1:6595/create-mindmap',
     pingUrl = 'http://127.0.0.1:6595/ping',
-    timeout = 10000
+    timeout = 8000
   } = options
 
   // 打开 Mind Elixir 应用
