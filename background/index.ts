@@ -425,46 +425,6 @@ export interface Arrow {
         generationConfig: {
           temperature: 0.3,
           responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              topic: {
-                type: "string",
-                description: "思维导图的主题"
-              },
-              nodeData: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  topic: { type: "string" },
-                  children: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        topic: { type: "string" },
-                        children: {
-                          type: "array",
-                          items: {
-                            type: "object",
-                            properties: {
-                              id: { type: "string" },
-                              topic: { type: "string" }
-                            },
-                            required: ["id", "topic"]
-                          }
-                        }
-                      },
-                      required: ["id", "topic"]
-                    }
-                  }
-                },
-                required: ["id", "topic"]
-              }
-            },
-            required: ["topic", "nodeData"]
-          }
         }
       })
     })
