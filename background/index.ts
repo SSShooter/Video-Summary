@@ -241,8 +241,7 @@ export interface Arrow {
             content: this.USER_PROMPT_TEMPLATE(subtitles)
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1500
+        temperature: 0.3
       })
     })
 
@@ -276,8 +275,7 @@ export interface Arrow {
           }]
         }],
         generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 1500
+          temperature: 0.3
         }
       })
     })
@@ -307,7 +305,6 @@ export interface Arrow {
       },
       body: JSON.stringify({
         model: model,
-        max_tokens: 1500,
         system: this.SYSTEM_PROMPT,
         messages: [
           {
@@ -357,8 +354,7 @@ export interface Arrow {
           ]
         },
         parameters: {
-          temperature: 0.3,
-          max_tokens: 1500
+          temperature: 0.3
         }
       })
     })
@@ -398,8 +394,7 @@ export interface Arrow {
             content: `请根据以下视频字幕内容生成思维导图：\n\n${subtitles}`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2000
+        temperature: 0.3
       })
     })
 
@@ -429,7 +424,6 @@ export interface Arrow {
         }],
         generationConfig: {
           temperature: 0.3,
-          maxOutputTokens: 2000,
           responseMimeType: "application/json",
           responseSchema: {
             type: "object",
@@ -496,7 +490,6 @@ export interface Arrow {
       },
       body: JSON.stringify({
         model: model,
-        max_tokens: 2000,
         system: this.MINDMAP_PROMPT,
         messages: [
           {
@@ -542,8 +535,7 @@ export interface Arrow {
           ]
         },
         parameters: {
-          temperature: 0.3,
-          max_tokens: 2000
+          temperature: 0.3
         }
       })
     })
@@ -579,8 +571,7 @@ export interface Arrow {
             content: `请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2000
+        temperature: 0.3
       })
     })
 
@@ -636,7 +627,6 @@ export interface Arrow {
       },
       body: JSON.stringify({
         model: model,
-        max_tokens: 2000,
         system: this.MINDMAP_PROMPT,
         messages: [
           {
@@ -680,8 +670,7 @@ export interface Arrow {
           ]
         },
         parameters: {
-          temperature: 0.3,
-          max_tokens: 2000
+          temperature: 0.3
         }
       })
     })
