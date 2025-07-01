@@ -7,10 +7,15 @@ import "~style.css"
 function IndexPopup() {
   const [aiEnabled, setAiEnabled] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const [isVideoPage, setIsVideoPage] = useState(false)
+  const [isArticlePage, setIsArticlePage] = useState(false)
+  const [panelTriggering, setPanelTriggering] = useState(false)
   const storage = new Storage()
 
   useEffect(() => {
     loadAIStatus()
+    getCurrentPageInfo()
   }, [])
 
   const loadAIStatus = async () => {
@@ -24,85 +29,222 @@ function IndexPopup() {
     }
   }
 
-
-
-  const triggerPanel = async () => {
+  const getCurrentPageInfo = async () => {
     try {
-      // 通知content script显示字幕面板
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            type: "SHOW_SUBTITLE_PANEL"
-          })
-          chrome.tabs.sendMessage(tabs[0].id, {
-            type: "SHOW_ARTICLE_MINDMAP_PANEL"
-          })
+        if (tabs[0]?.url) {
+          const url = tabs[0].url
+
+          // 检测是否为视频页面
+          const isVideo = url.includes('youtube.com/watch') ||
+            url.includes('bilibili.com/video') ||
+            url.includes('bilibili.com/list/watchlater')
+          setIsVideoPage(isVideo)
+
+          // 检测是否为文章页面（排除视频网站）
+          const isArticle = !isVideo &&
+            !url.includes('youtube.com') &&
+            !url.includes('bilibili.com') &&
+            !url.startsWith('chrome://') &&
+            !url.startsWith('chrome-extension://')
+          setIsArticlePage(isArticle)
         }
       })
     } catch (error) {
-      console.error("显示字幕面板失败:", error)
+      console.error("获取页面信息失败:", error)
     }
   }
 
+  const triggerPanel = async () => {
+    try {
+      setPanelTriggering(true)
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          if (isVideoPage) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: "SHOW_SUBTITLE_PANEL"
+            })
+          }
+          if (isArticlePage) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: "SHOW_ARTICLE_MINDMAP_PANEL"
+            })
+          }
+        }
+      })
+
+      // 模拟操作完成
+      setTimeout(() => {
+        setPanelTriggering(false)
+      }, 1000)
+    } catch (error) {
+      console.error("显示面板失败:", error)
+      setPanelTriggering(false)
+    }
+  }
 
   const openOptionsPage = () => {
     chrome.runtime.openOptionsPage()
   }
 
+  const getPageTypeInfo = () => {
+    if (isVideoPage) {
+      return {
+        type: "视频页面",
+        icon: "🎥",
+        description: "支持字幕提取和AI总结",
+        actionText: "启动字幕面板",
+        available: true
+      }
+    } else if (isArticlePage) {
+      return {
+        type: "文章页面",
+        icon: "📄",
+        description: "支持生成思维导图",
+        actionText: "生成思维导图",
+        available: true
+      }
+    } else {
+      return {
+        type: "不支持的页面",
+        icon: "❌",
+        description: "请访问视频或文章页面",
+        actionText: "无法使用",
+        available: false
+      }
+    }
+  }
+
+  const pageInfo = getPageTypeInfo()
+
   return (
-    <div className="w-80 p-3">
-      <div className="flex items-center mb-2">
-        <img
-          src={iconBase64}
-          alt="Video Mindmap"
-          className="w-8 h-8 mr-3"
-        />
-        <h2 className="m-0 text-lg text-gray-800">视频字幕助手</h2>
+    <div className="w-96 bg-white">
+      {/* 头部区域 */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 text-white">
+        <div className="flex items-center mb-3">
+          <img
+            src={iconBase64}
+            alt="Video Mindmap"
+            className="w-10 h-10 mr-3 rounded-lg shadow-lg"
+          />
+          <div>
+            <h1 className="m-0 text-lg font-semibold">M10C 助手</h1>
+            <p className="m-0 text-sm text-blue-100">智能内容分析工具</p>
+          </div>
+        </div>
+
+        {/* 页面类型指示器 */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="text-xl mr-2">{pageInfo.icon}</span>
+              <div>
+                <div className="text-sm font-medium">{pageInfo.type}</div>
+                <div className="text-xs text-blue-100">{pageInfo.description}</div>
+              </div>
+            </div>
+            <div className={`w-3 h-3 rounded-full ${pageInfo.available ? 'bg-green-400' : 'bg-red-400'}`}></div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-gray-50 p-3 rounded-md mb-2">
-        <div className="text-sm text-gray-600 mb-2">功能状态</div>
+      {/* 主要内容区域 */}
+      <div className="p-4">
+        {/* AI状态卡片 */}
+        <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <span className="text-blue-600 text-sm">🤖</span>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-800">AI 服务状态</div>
+                <div className="text-xs text-gray-500">智能分析功能</div>
+              </div>
+            </div>
+            {loading ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span className="text-xs text-gray-600">检测中</span>
+              </div>
+            ) : (
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${aiEnabled
+                  ? 'bg-green-100 text-green-700 border border-green-200'
+                  : 'bg-orange-100 text-orange-700 border border-orange-200'
+                }`}>
+                {aiEnabled ? '✓ 已配置' : '⚠ 未配置'}
+              </div>
+            )}
+          </div>
 
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-gray-800">AI 配置</span>
-          {loading ? (
-            <span className="text-xs text-gray-600">加载中...</span>
-          ) : (
-            <span className={`py-0.5 px-2 text-white text-xs rounded-full ${aiEnabled ? 'bg-green-500' : 'bg-orange-500'
-              }`}>{aiEnabled ? '已启用' : '未配置'}</span>
+          {!aiEnabled && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+              <div className="text-xs text-orange-700">
+                💡 配置AI服务后可使用智能总结和思维导图功能
+              </div>
+            </div>
           )}
         </div>
 
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-xs text-gray-800">AI 面板</span>
+        {/* 快速操作区域 */}
+        <div className="space-y-3 mb-4">
           <button
             onClick={triggerPanel}
-            className="py-1 px-3 text-white text-xs rounded bg-blue-500 hover:bg-blue-600 transition-colors duration-200"
+            disabled={!pageInfo.available || panelTriggering}
+            className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${pageInfo.available && !panelTriggering
+                ? 'border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 text-blue-700'
+                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+              }`}
           >
-            显示
+            <div className="flex items-center justify-center">
+              {panelTriggering ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <span className="font-medium">启动中...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-lg mr-2">{pageInfo.available ? '🚀' : '🚫'}</span>
+                  <span className="font-medium">{pageInfo.actionText}</span>
+                </>
+              )}
+            </div>
+          </button>
+
+          <button
+            onClick={openOptionsPage}
+            className="w-full p-3 bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
+          >
+            <div className="flex items-center justify-center text-gray-700">
+              <span className="text-lg mr-2">⚙️</span>
+              <span className="font-medium">{aiEnabled ? 'AI配置管理' : '配置AI服务'}</span>
+            </div>
           </button>
         </div>
 
+        {/* 功能说明 */}
+        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+          <div className="text-sm font-medium text-blue-800 mb-2">✨ 功能特性</div>
+          <div className="space-y-1 text-xs text-blue-700">
+            <div className="flex items-center">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+              <span>YouTube/Bilibili 字幕自动提取</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+              <span>AI 智能内容总结分析</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+              <span>文章内容思维导图生成</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
+              <span>一键时间跳转和内容定位</span>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div className="mb-2">
-        <div className="text-sm text-gray-600 mb-2">使用说明</div>
-        <ul className="m-0 pl-4 text-xs text-gray-600 leading-relaxed">
-          <li>访问YouTube或Bilibili视频页面</li>
-          <li>字幕面板会自动显示在右侧</li>
-          <li>点击字幕可跳转到对应时间</li>
-          <li>配置AI后可使用智能总结功能</li>
-          <li>访问文章页面可生成思维导图</li>
-        </ul>
-      </div>
-
-      <button
-        onClick={openOptionsPage}
-        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white border-none rounded text-sm cursor-pointer mb-3"
-      >
-        {aiEnabled ? 'AI配置管理' : '配置AI总结'}
-      </button>
-
     </div>
   )
 }
