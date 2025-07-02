@@ -273,6 +273,40 @@ class BackgroundAIService {
 
 const backgroundAIService = new BackgroundAIService()
 
+// YouTube字幕URL监听器
+let capturedSubtitleUrl: string | null = null
+
+// 监听YouTube的timedtext API请求
+chrome.webRequest.onBeforeRequest.addListener(
+  (details) => {
+    const url = new URL(details.url)
+
+    // 检查是否是YouTube的timedtext API请求
+    if (url.hostname === "www.youtube.com" && url.pathname === "/api/timedtext") {
+      // 检查是否包含pot参数（表示这是一个有效的字幕请求）
+      if (url.searchParams.has('pot')) {
+        console.log('捕获到YouTube字幕URL:', details.url)
+        capturedSubtitleUrl = details.url
+
+        // 通知content script字幕URL已捕获
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+          if (tabs[0]?.id) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              type: "SUBTITLE_URL_CAPTURED",
+              url: details.url
+            }).catch(() => {
+              // 忽略发送失败的错误（可能content script还未加载）
+            })
+          }
+        })
+      }
+    }
+  },
+  {
+    urls: ["https://www.youtube.com/api/timedtext*"]
+  }
+)
+
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "summarizeSubtitles") {
@@ -311,5 +345,14 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         sendResponse({ success: false, error: error.message })
       })
     return true // Keep the message channel open for async response
+  }
+
+  if (request.action === "getCapturedSubtitleUrl") {
+    sendResponse({ success: true, data: capturedSubtitleUrl })
+  }
+
+  if (request.action === "clearCapturedSubtitleUrl") {
+    capturedSubtitleUrl = null
+    sendResponse({ success: true })
   }
 })

@@ -1,7 +1,6 @@
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
-import { Storage } from "@plasmohq/storage"
 import { aiService, type SubtitleSummary } from "../utils/ai-service"
 import tailwindStyles from "data-text:~style.css"
 
@@ -32,14 +31,12 @@ function YouTubeSubtitlePanel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null)
-  const [availableLanguages, setAvailableLanguages] = useState<any[]>([])
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('')
+
   const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   const [showSummary, setShowSummary] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const storage = new Storage()
 
   // 从URL中提取视频ID
   const extractVideoId = (): string | null => {
@@ -54,38 +51,88 @@ function YouTubeSubtitlePanel() {
     return titleElement?.textContent || '未知标题'
   }
 
-  // 从YouTube播放器获取字幕信息
-  const getSubtitleTracksFromPlayer = (): any[] => {
-    try {
-      // 尝试从ytInitialPlayerResponse获取
-      const scripts = document.querySelectorAll('script')
-      for (const script of scripts) {
-        const content = script.textContent || ''
-        if (content.includes('ytInitialPlayerResponse')) {
-          const match = content.match(/var ytInitialPlayerResponse = ({.+?});/)
-          if (match) {
-            const playerResponse = JSON.parse(match[1])
-            const captions = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks
-            if (captions) {
-              console.log('找到字幕轨道:', captions)
-              return captions
-            }
-          }
+  // 等待捕获字幕URL
+  const waitForSubtitleUrl = async (maxWaitTime: number = 10000): Promise<string | null> => {
+    const startTime = Date.now()
+
+    while (Date.now() - startTime < maxWaitTime) {
+      try {
+        const response = await chrome.runtime.sendMessage({
+          action: "getCapturedSubtitleUrl"
+        })
+
+        if (response.success && response.data) {
+          console.log('获取到捕获的字幕URL:', response.data)
+          return response.data
         }
+      } catch (error) {
+        console.error('获取字幕URL失败:', error)
       }
 
-      // 尝试从window.ytInitialPlayerResponse获取
-      const windowPlayerResponse = (window as any).ytInitialPlayerResponse
-      if (windowPlayerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks) {
-        console.log('从window对象找到字幕轨道')
-        return windowPlayerResponse.captions.playerCaptionsTracklistRenderer.captionTracks
-      }
-
-      return []
-    } catch (error) {
-      console.error('获取字幕轨道失败:', error)
-      return []
+      // 等待500ms后重试
+      await new Promise(resolve => setTimeout(resolve, 500))
     }
+
+    return null
+  }
+
+  // 清除已捕获的字幕URL
+  const clearCapturedSubtitleUrl = async () => {
+    try {
+      await chrome.runtime.sendMessage({
+        action: "clearCapturedSubtitleUrl"
+      })
+    } catch (error) {
+      console.error('清除字幕URL失败:', error)
+    }
+  }
+
+  // 合并字幕片段
+  const mergeSubtitleSegments = (rawSubtitles: SubtitleItem[]): SubtitleItem[] => {
+    if (rawSubtitles.length === 0) return []
+
+    const merged: SubtitleItem[] = []
+    let currentGroup: SubtitleItem[] = []
+    let currentGroupText = ''
+
+    for (let i = 0; i < rawSubtitles.length; i++) {
+      const current = rawSubtitles[i]
+      const next = rawSubtitles[i + 1]
+
+      currentGroup.push(current)
+      currentGroupText += (currentGroupText ? ' ' : '') + current.text
+
+      // 判断是否应该结束当前组
+      const shouldEndGroup =
+        // 当前文本长度已经足够（50-120字符之间比较合适）
+        currentGroupText.length >= 50 ||
+        // 没有下一个片段了
+        !next ||
+        // 下一个片段与当前片段时间间隔太大（超过2秒）
+        (next.start - (current.start + current.dur)) > 2 ||
+        // 当前组文本已经很长了（避免单行过长）
+        currentGroupText.length >= 120 ||
+        // 检测到句子结束标点
+        /[。！？.!?]$/.test(current.text.trim())
+
+      if (shouldEndGroup) {
+        // 创建合并后的字幕项
+        const firstItem = currentGroup[0]
+        const lastItem = currentGroup[currentGroup.length - 1]
+
+        merged.push({
+          start: firstItem.start,
+          dur: (lastItem.start + lastItem.dur) - firstItem.start,
+          text: currentGroupText.trim()
+        })
+
+        // 重置当前组
+        currentGroup = []
+        currentGroupText = ''
+      }
+    }
+
+    return merged
   }
 
   // 获取字幕数据
@@ -93,37 +140,36 @@ function YouTubeSubtitlePanel() {
     try {
       setLoading(true)
       setError(null)
-      
+
       console.log('开始获取YouTube字幕，视频ID:', videoId)
-      
-      // 获取可用的字幕轨道
-      const captionTracks = getSubtitleTracksFromPlayer()
-      
-      if (!captionTracks || captionTracks.length === 0) {
-        setError('该视频暂无字幕')
+
+      // 清除之前捕获的字幕URL
+      await clearCapturedSubtitleUrl()
+
+      // 触发视频播放以产生字幕请求
+      const video = document.querySelector('video') as HTMLVideoElement
+      if (video) {
+        // 暂停并重新播放一小段来触发字幕请求
+        const currentTime = video.currentTime
+        video.currentTime = currentTime + 0.1
+        video.play()
+        setTimeout(() => {
+          video.currentTime = currentTime
+          video.pause()
+        }, 100)
+      }
+
+      // 等待捕获字幕URL
+      const subtitleUrl = await waitForSubtitleUrl(15000)
+
+      if (!subtitleUrl) {
+        setError('无法获取字幕URL，请确保视频有字幕')
         return
       }
-      
-      setAvailableLanguages(captionTracks)
-      
-      // 选择字幕语言（优先中文，然后英文，最后第一个可用的）
-      let selectedTrack = captionTracks.find(track => 
-        track.languageCode === 'zh' || track.languageCode === 'zh-CN' || track.languageCode === 'zh-Hans'
-      )
-      
-      if (!selectedTrack) {
-        selectedTrack = captionTracks.find(track => track.languageCode === 'en')
-      }
-      
-      if (!selectedTrack) {
-        selectedTrack = captionTracks[0]
-      }
-      
-      setSelectedLanguage(selectedTrack.languageCode)
-      
+
       // 获取字幕内容
-      await loadSubtitleContent(selectedTrack.baseUrl)
-      
+      await loadSubtitleContent(subtitleUrl)
+
     } catch (error) {
       console.error('获取YouTube字幕失败:', error)
       setError('获取字幕失败: ' + (error as Error).message)
@@ -136,25 +182,31 @@ function YouTubeSubtitlePanel() {
   const loadSubtitleContent = async (subtitleUrl: string) => {
     try {
       console.log('加载字幕内容:', subtitleUrl)
-      
-      // 添加格式参数以获取JSON格式的字幕
+
+      // 确保URL包含JSON格式参数
       const url = new URL(subtitleUrl)
-      url.searchParams.set('fmt', 'json3')
-      
+      if (!url.searchParams.has('fmt')) {
+        url.searchParams.set('fmt', 'json3')
+      }
+
       const response = await fetch(url.toString())
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
       const data = await response.json()
-      
       console.log('字幕数据:', data)
-      
+
       if (data.events && Array.isArray(data.events)) {
         // 处理YouTube的字幕格式
-        const processedSubtitles: SubtitleItem[] = []
-        
+        const rawSubtitles: SubtitleItem[] = []
+
+        // 首先提取所有原始字幕片段
         for (const event of data.events) {
           if (event.segs && Array.isArray(event.segs)) {
             for (const seg of event.segs) {
               if (seg.utf8) {
-                processedSubtitles.push({
+                rawSubtitles.push({
                   start: event.tStartMs / 1000,
                   dur: event.dDurationMs / 1000,
                   text: seg.utf8.replace(/\n/g, ' ').trim()
@@ -163,9 +215,12 @@ function YouTubeSubtitlePanel() {
             }
           }
         }
-        
-        setSubtitles(processedSubtitles)
-        console.log('字幕加载成功，共', processedSubtitles.length, '条')
+
+        // 合并短片段字幕
+        const mergedSubtitles = mergeSubtitleSegments(rawSubtitles)
+
+        setSubtitles(mergedSubtitles)
+        console.log('字幕加载成功，原始片段:', rawSubtitles.length, '条，合并后:', mergedSubtitles.length, '条')
       } else {
         console.error('YouTube字幕数据格式错误:', data)
         setError('字幕数据格式错误：期望包含events数组')
@@ -176,15 +231,21 @@ function YouTubeSubtitlePanel() {
     }
   }
 
-  // 切换字幕语言
-  const changeSubtitleLanguage = async (languageCode: string) => {
-    const track = availableLanguages.find(t => t.languageCode === languageCode)
-    if (track) {
-      setSelectedLanguage(languageCode)
-      setSubtitles([])
-      await loadSubtitleContent(track.baseUrl)
+  // 监听来自background的字幕URL捕获消息
+  useEffect(() => {
+    const messageListener = (message: any) => {
+      if (message.type === "SUBTITLE_URL_CAPTURED") {
+        console.log('收到字幕URL捕获消息:', message.url)
+        // 可以在这里直接加载字幕，但我们选择在fetchSubtitles中主动获取
+      }
     }
-  }
+
+    chrome.runtime.onMessage.addListener(messageListener)
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener)
+    }
+  }, [])
 
   // 格式化时间
   const formatTime = (seconds: number): string => {
@@ -295,20 +356,7 @@ function YouTubeSubtitlePanel() {
             {videoInfo.title}
           </div>
         )}
-        
-        {availableLanguages.length > 0 && (
-          <select 
-            value={selectedLanguage}
-            onChange={(e) => changeSubtitleLanguage(e.target.value)}
-            className="w-full py-1 px-2 text-xs border border-gray-400 rounded bg-white mb-2"
-          >
-            {availableLanguages.map((lang) => (
-              <option key={lang.languageCode} value={lang.languageCode}>
-                {lang.name?.simpleText || lang.languageCode}
-              </option>
-            ))}
-          </select>
-        )}
+
         
         {/* AI总结按钮 */}
         {subtitles.length > 0 && (

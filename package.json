@@ -41,7 +41,8 @@
     ],
     "permissions": [
       "activeTab",
-      "storage"
+      "storage",
+      "webRequest"
     ],
     "options_page": "options.html",
     "content_security_policy": {
