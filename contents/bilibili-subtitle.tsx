@@ -109,18 +109,6 @@ function SubtitlePanel() {
     return document.cookie
   }
 
-  // 获取CSRF token
-  const getBiliJct = (): string => {
-    const cookies = document.cookie.split(";")
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split("=")
-      if (name === "bili_jct") {
-        return value
-      }
-    }
-    return ""
-  }
-
   // 获取字幕数据
   const fetchSubtitles = async (bvid: string, cid: number) => {
     try {

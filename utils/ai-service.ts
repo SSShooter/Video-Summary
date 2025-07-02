@@ -72,8 +72,6 @@ class AIService {
     })
   }
 
-  // 所有API调用现在都通过background脚本处理，避免CORS问题
-
   // 格式化字幕文本用于AI分析
   formatSubtitlesForAI(subtitles: any[]): string {
     if (!Array.isArray(subtitles)) {
