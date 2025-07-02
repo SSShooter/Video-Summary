@@ -10,7 +10,6 @@ interface AIConfig {
     gemini?: string
     claude?: string
     "openai-compatible"?: string
-    qwen?: string
   }
   model: string
   baseUrl?: string
@@ -166,8 +165,6 @@ export interface Arrow {
         return this.callGemini(config, subtitles, model, apiKey)
       case "claude":
         return this.callClaude(config, subtitles, model, apiKey)
-      case "qwen":
-        return this.callQwen(config, subtitles, model, apiKey)
       default:
         throw new Error(`不支持的AI服务商: ${config.provider}`)
     }
@@ -190,8 +187,6 @@ export interface Arrow {
         return this.callGeminiForMindmap(config, subtitles, model, apiKey)
       case "claude":
         return this.callClaudeForMindmap(config, subtitles, model, apiKey)
-      case "qwen":
-        return this.callQwenForMindmap(config, subtitles, model, apiKey)
       default:
         throw new Error(`不支持的AI服务商: ${config.provider}`)
     }
@@ -214,8 +209,6 @@ export interface Arrow {
         return this.callGeminiForArticleMindmap(config, content, title, model, apiKey)
       case "claude":
         return this.callClaudeForArticleMindmap(config, content, title, model, apiKey)
-      case "qwen":
-        return this.callQwenForArticleMindmap(config, content, title, model, apiKey)
       default:
         throw new Error(`不支持的AI服务商: ${config.provider}`)
     }
@@ -331,47 +324,7 @@ export interface Arrow {
 
 
 
-  private async callQwen(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<SubtitleSummary> {
-    const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"
-    const response = await fetch(`${baseUrl}/services/aigc/text-generation/generation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        input: {
-          messages: [
-            {
-              role: "system",
-              content: this.SYSTEM_PROMPT
-            },
-            {
-              role: "user",
-              content: this.USER_PROMPT_TEMPLATE(subtitles)
-            }
-          ]
-        },
-        parameters: {
-          temperature: 0.3
-        }
-      })
-    })
 
-    if (!response.ok) {
-      throw new Error(`通义千问 API请求失败: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const content = data.output?.text
-
-    try {
-      return this.parseJSONResponse(content)
-    } catch {
-      return this.parseTextResponse(content)
-    }
-  }
 
   // 思维导图生成方法
   private async callOpenAIForMindmap(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<any> {
@@ -472,43 +425,7 @@ export interface Arrow {
 
 
 
-  private async callQwenForMindmap(config: AIConfig, subtitles: string, model: string, apiKey: string): Promise<any> {
-    const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"
-    const response = await fetch(`${baseUrl}/services/aigc/text-generation/generation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        input: {
-          messages: [
-            {
-              role: "system",
-              content: this.MINDMAP_PROMPT
-            },
-            {
-              role: "user",
-              content: `请根据以下视频字幕内容生成思维导图：\n\n${subtitles}`
-            }
-          ]
-        },
-        parameters: {
-          temperature: 0.3
-        }
-      })
-    })
 
-    if (!response.ok) {
-      throw new Error(`通义千问 API请求失败: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const content = data.output?.text
-
-    return this.parseMindmapResponse(content)
-  }
 
   // 文章思维导图API调用方法
   private async callOpenAIForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
@@ -607,43 +524,7 @@ export interface Arrow {
     return this.parseMindmapResponse(responseContent)
   }
 
-  private async callQwenForArticleMindmap(config: AIConfig, content: string, title: string, model: string, apiKey: string): Promise<any> {
-    const baseUrl = config.baseUrl || "https://dashscope.aliyuncs.com/api/v1"
-    const response = await fetch(`${baseUrl}/services/aigc/text-generation/generation`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        input: {
-          messages: [
-            {
-              role: "system",
-              content: this.MINDMAP_PROMPT
-            },
-            {
-              role: "user",
-              content: `请根据以下文章内容生成思维导图：\n\n标题：${title}\n\n内容：\n${content}`
-            }
-          ]
-        },
-        parameters: {
-          temperature: 0.3
-        }
-      })
-    })
 
-    if (!response.ok) {
-      throw new Error(`通义千问 API请求失败: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    const responseContent = data.output?.text
-
-    return this.parseMindmapResponse(responseContent)
-  }
 
   /**
    * 解析思维导图响应

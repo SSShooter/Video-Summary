@@ -7,7 +7,6 @@ export interface AIConfig {
     gemini?: string
     claude?: string
     zhipu?: string
-    qwen?: string
   }
   model: string
   baseUrl?: string

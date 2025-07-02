@@ -52,15 +52,6 @@ const AI_PROVIDERS: AIProvider[] = [
     defaultModel: "gpt-3.5-turbo",
     modelsEndpoint: "/models",
     supportsModelFetch: true
-  },
-  {
-    id: "qwen",
-    name: "通义千问",
-    apiKeyLabel: "API Key",
-    baseUrl: "https://dashscope.aliyuncs.com/api/v1",
-    models: ["qwen-turbo", "qwen-plus", "qwen-max"],
-    defaultModel: "qwen-turbo",
-    supportsModelFetch: false
   }
 ]
 
@@ -71,7 +62,6 @@ interface AIConfig {
     gemini?: string
     claude?: string
     "openai-compatible"?: string
-    qwen?: string
   }
   model: string
   baseUrl?: string
@@ -434,7 +424,6 @@ function OptionsPage() {
               <li>Google Gemini: 访问 ai.google.dev</li>
               <li>Anthropic Claude: 访问 console.anthropic.com</li>
               <li>OpenAI兼容API: 根据具体服务商要求获取</li>
-              <li>通义千问: 访问 dashscope.console.aliyun.com</li>
             </ul>
           </li>
         </ul>

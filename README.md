@@ -81,7 +81,6 @@
      - **Google Gemini**: 访问 [ai.google.dev](https://ai.google.dev)
      - **Anthropic Claude**: 访问 [console.anthropic.com](https://console.anthropic.com)
      - **智谱AI**: 访问 [open.bigmodel.cn](https://open.bigmodel.cn)
-     - **通义千问**: 访问 [dashscope.console.aliyun.com](https://dashscope.console.aliyun.com)
      - **硅基流动**: 访问 [cloud.siliconflow.cn](https://cloud.siliconflow.cn)
 
 4. **选择模型**
