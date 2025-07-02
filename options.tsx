@@ -65,6 +65,12 @@ interface AIConfig {
   }
   model: string
   baseUrl?: string
+  baseUrls?: {
+    openai?: string
+    gemini?: string
+    claude?: string
+    "openai-compatible"?: string
+  }
   enabled: boolean
   customModel?: string
 }
@@ -74,7 +80,8 @@ function OptionsPage() {
     provider: "openai",
     apiKeys: {},
     model: "gpt-3.5-turbo",
-    enabled: false
+    enabled: false,
+    baseUrls: {}
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -117,13 +124,18 @@ function OptionsPage() {
   const saveConfig = async () => {
     try {
       setSaving(true)
-      
+
       // 构建要保存的配置
       const configToSave = {
         ...aiConfig,
-        customModel: useCustomModel ? aiConfig.model : undefined
+        customModel: useCustomModel ? aiConfig.model : undefined,
+        // 保存当前服务商的baseUrl到baseUrls对象中
+        baseUrls: {
+          ...aiConfig.baseUrls,
+          [aiConfig.provider]: aiConfig.baseUrl
+        }
       }
-      
+
       await storage.set("aiConfig", configToSave)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -180,17 +192,26 @@ function OptionsPage() {
     }
   }
 
-  const handleProviderChange = (providerId: string) => {
+  const handleProviderChange = async (providerId: string) => {
     const provider = AI_PROVIDERS.find(p => p.id === providerId)
     if (provider) {
+      // 从存储中加载完整配置，以获取该服务商之前保存的baseUrl
+      const savedConfig = await storage.get<AIConfig>("aiConfig")
+
+      // 优先使用该服务商之前保存的baseUrl，否则使用默认的baseUrl
+      let newBaseUrl = provider.baseUrl
+      if (savedConfig?.baseUrls?.[providerId as keyof typeof savedConfig.baseUrls]) {
+        newBaseUrl = savedConfig.baseUrls[providerId as keyof typeof savedConfig.baseUrls]
+      }
+
       setAiConfig({
         ...aiConfig,
         provider: providerId,
         model: provider.defaultModel,
-        baseUrl: provider.baseUrl
+        baseUrl: newBaseUrl
       })
       setUseCustomModel(false)
-      
+
       // 如果有API Key，尝试获取模型列表
       const apiKey = aiConfig.apiKeys?.[providerId as keyof typeof aiConfig.apiKeys]
       if (apiKey && provider.supportsModelFetch) {

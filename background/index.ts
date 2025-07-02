@@ -13,6 +13,12 @@ interface AIConfig {
   }
   model: string
   baseUrl?: string
+  baseUrls?: {
+    openai?: string
+    gemini?: string
+    claude?: string
+    "openai-compatible"?: string
+  }
   customModel?: string
 }
 

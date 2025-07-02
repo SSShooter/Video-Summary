@@ -7,9 +7,17 @@ export interface AIConfig {
     gemini?: string
     claude?: string
     zhipu?: string
+    "openai-compatible"?: string
   }
   model: string
   baseUrl?: string
+  baseUrls?: {
+    openai?: string
+    gemini?: string
+    claude?: string
+    zhipu?: string
+    "openai-compatible"?: string
+  }
   enabled: boolean
   customModel?: string
 }
