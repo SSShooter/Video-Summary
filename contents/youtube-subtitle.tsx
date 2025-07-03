@@ -50,69 +50,33 @@ function YouTubeSubtitlePanel() {
     return titleElement?.textContent || '未知标题'
   }
 
-  // 自动打开CC字幕
-  const autoEnableSubtitles = () => {
-    try {
-      // 等待页面元素加载完成
-      setTimeout(() => {
-        // 查找CC字幕按钮
+  // 等待CC按钮加载并启动字幕
+  const waitForCCButtonAndEnable = async (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const checkCCButton = () => {
         const ccButton = document.querySelector('.ytp-subtitles-button, .ytp-caption-button, button[aria-label*="字幕"], button[aria-label*="Subtitles"], button[aria-label*="Captions"]') as HTMLButtonElement
 
         if (ccButton) {
           // 检查字幕是否已经开启
           const isSubtitleEnabled = ccButton.getAttribute('aria-pressed') === 'true' ||
-                                   ccButton.classList.contains('ytp-button-active') ||
-                                   ccButton.classList.contains('ytp-subtitles-button-active')
+            ccButton.classList.contains('ytp-button-active') ||
+            ccButton.classList.contains('ytp-subtitles-button-active')
 
           if (!isSubtitleEnabled) {
-            console.log('自动开启YouTube CC字幕')
+            console.log('启动YouTube CC字幕')
             ccButton.click()
           } else {
             console.log('YouTube CC字幕已经开启')
           }
+          resolve(true)
         } else {
-          console.log('未找到YouTube CC字幕按钮，可能视频没有字幕')
+          // 继续等待CC按钮加载
+          setTimeout(checkCCButton, 500)
         }
-      }, 3000) // 延迟3秒确保页面完全加载
-    } catch (error) {
-      console.error('自动开启字幕失败:', error)
-    }
-  }
-
-  // 等待捕获字幕URL
-  const waitForSubtitleUrl = async (maxWaitTime: number = 10000): Promise<string | null> => {
-    const startTime = Date.now()
-
-    while (Date.now() - startTime < maxWaitTime) {
-      try {
-        const response = await chrome.runtime.sendMessage({
-          action: "getCapturedSubtitleUrl"
-        })
-
-        if (response.success && response.data) {
-          console.log('获取到捕获的字幕URL:', response.data)
-          return response.data
-        }
-      } catch (error) {
-        console.error('获取字幕URL失败:', error)
       }
 
-      // 等待500ms后重试
-      await new Promise(resolve => setTimeout(resolve, 500))
-    }
-
-    return null
-  }
-
-  // 清除已捕获的字幕URL
-  const clearCapturedSubtitleUrl = async () => {
-    try {
-      await chrome.runtime.sendMessage({
-        action: "clearCapturedSubtitleUrl"
-      })
-    } catch (error) {
-      console.error('清除字幕URL失败:', error)
-    }
+      checkCCButton()
+    })
   }
 
   // 合并字幕片段
@@ -163,45 +127,45 @@ function YouTubeSubtitlePanel() {
     return merged
   }
 
-  // 获取字幕数据
-  const fetchSubtitles = async (videoId: string) => {
+  // 开始字幕逻辑：等待字幕URL并处理
+  const startSubtitleLogic = async (videoId: string) => {
     try {
       setLoading(true)
       setError(null)
+      console.log('开始字幕逻辑，视频ID:', videoId)
 
-      console.log('开始获取YouTube字幕，视频ID:', videoId)
-
-      // 清除之前捕获的字幕URL
-      await clearCapturedSubtitleUrl()
-
-      // 触发视频播放以产生字幕请求
-      const video = document.querySelector('video') as HTMLVideoElement
-      if (video) {
-        // 暂停并重新播放一小段来触发字幕请求
-        const currentTime = video.currentTime
-        video.currentTime = currentTime + 0.1
-        video.play()
-        setTimeout(() => {
-          video.currentTime = currentTime
-          video.pause()
-        }, 100)
+      // 开始监听字幕URL
+      let isListening = true
+      const urlListener = (message: any) => {
+        if (message.type === "SUBTITLE_URL_CAPTURED" && isListening) {
+          console.log('收到字幕URL:', message.url)
+          isListening = false // 停止监听
+          chrome.runtime.onMessage.removeListener(urlListener)
+          loadSubtitleContent(message.url)
+        }
       }
+      chrome.runtime.onMessage.addListener(urlListener)
 
-      // 等待捕获字幕URL
-      const subtitleUrl = await waitForSubtitleUrl(15000)
+      await new Promise((resolve) => {
+        setTimeout(resolve, 3000)
+      })
 
-      if (!subtitleUrl) {
-        setError('无法获取字幕URL，请确保视频有字幕')
-        return
-      }
+      // 等待CC按钮加载并启动字幕
+      await waitForCCButtonAndEnable()
 
-      // 获取字幕内容
-      await loadSubtitleContent(subtitleUrl)
+      // 设置超时，如果15秒内没有收到URL则停止
+      setTimeout(() => {
+        if (isListening) {
+          isListening = false
+          chrome.runtime.onMessage.removeListener(urlListener)
+          setError('获取字幕超时，请确保视频有字幕')
+          setLoading(false)
+        }
+      }, 15000)
 
     } catch (error) {
-      console.error('获取YouTube字幕失败:', error)
+      console.error('字幕逻辑失败:', error)
       setError('获取字幕失败: ' + (error as Error).message)
-    } finally {
       setLoading(false)
     }
   }
@@ -248,32 +212,21 @@ function YouTubeSubtitlePanel() {
         const mergedSubtitles = mergeSubtitleSegments(rawSubtitles)
 
         setSubtitles(mergedSubtitles)
+        setLoading(false)
         console.log('字幕加载成功，原始片段:', rawSubtitles.length, '条，合并后:', mergedSubtitles.length, '条')
       } else {
         console.error('YouTube字幕数据格式错误:', data)
         setError('字幕数据格式错误：期望包含events数组')
+        setLoading(false)
       }
     } catch (error) {
       console.error('加载字幕内容失败:', error)
       setError('加载字幕内容失败: ' + (error as Error).message)
+      setLoading(false)
     }
   }
 
-  // 监听来自background的字幕URL捕获消息
-  useEffect(() => {
-    const messageListener = (message: any) => {
-      if (message.type === "SUBTITLE_URL_CAPTURED") {
-        console.log('收到字幕URL捕获消息:', message.url)
-        // 可以在这里直接加载字幕，但我们选择在fetchSubtitles中主动获取
-      }
-    }
 
-    chrome.runtime.onMessage.addListener(messageListener)
-
-    return () => {
-      chrome.runtime.onMessage.removeListener(messageListener)
-    }
-  }, [])
 
   // 跳转到指定时间
   const jumpToTime = (time: number) => {
@@ -289,13 +242,8 @@ function YouTubeSubtitlePanel() {
       const title = getVideoTitle()
       setVideoInfo({ videoId, title })
 
-      // 自动开启CC字幕
-      autoEnableSubtitles()
-
-      // 延迟获取字幕，等待页面完全加载
-      setTimeout(() => {
-        fetchSubtitles(videoId)
-      }, 2000)
+      // 开始字幕逻辑
+      startSubtitleLogic(videoId)
     }
 
     // 监听来自popup的消息
@@ -324,18 +272,14 @@ function YouTubeSubtitlePanel() {
         setSubtitles([])
         setError(null)
 
-        // 自动开启CC字幕
-        autoEnableSubtitles()
-
-        setTimeout(() => {
-          fetchSubtitles(newVideoId)
-        }, 2000)
+        // 开始新的字幕逻辑
+        startSubtitleLogic(newVideoId)
       }
     }
 
     // 监听pushstate和popstate事件
     const originalPushState = history.pushState
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(history, args)
       setTimeout(handleUrlChange, 1000)
     }
@@ -371,7 +315,7 @@ function injectYouTubeSubtitlePanel() {
   if (document.getElementById('youtube-subtitle-panel')) {
     return
   }
-  
+
   // 等待页面加载完成
   const checkAndInject = () => {
     const videoContainer = document.querySelector('#movie_player, .html5-video-player')
@@ -379,7 +323,7 @@ function injectYouTubeSubtitlePanel() {
       const container = document.createElement('div')
       container.id = 'youtube-subtitle-panel'
       document.body.appendChild(container)
-      
+
       const root = createRoot(container)
       root.render(<YouTubeSubtitlePanel />)
     } else {
@@ -387,7 +331,7 @@ function injectYouTubeSubtitlePanel() {
       setTimeout(checkAndInject, 1000)
     }
   }
-  
+
   checkAndInject()
 }
 
