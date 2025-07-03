@@ -1,3 +1,7 @@
-.map-container me-main>me-wrapper {
-    margin: 5px 45px !important;
+.map-container me-main > me-wrapper {
+  margin: 5px 45px !important;
+}
+
+#plasmo-shadow-container {
+  font-size: 16px !important;
 }

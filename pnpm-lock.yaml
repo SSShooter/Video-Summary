@@ -12,8 +12,8 @@ importers:
         specifier: ^1.15.0
         version: 1.15.0(react@18.2.0)
       mind-elixir:
-        specifier: 5.0.0-beta.41
-        version: 5.0.0-beta.41
+        specifier: 5.0.0-beta.43
+        version: 5.0.0-beta.43
       plasmo:
         specifier: 0.90.5
         version: 0.90.5(@swc/core@1.12.1(@swc/helpers@0.5.17))(@swc/helpers@0.5.17)(@types/node@20.11.5)(postcss@8.5.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2516,8 +2516,8 @@ packages:
     resolution: {integrity: sha512-e5ISH9xMYU0DzrT+jl8q2ze9D6eWBto+I8CNpe+VI+K2J/F/k3PdkdTdz4wvGVH4NTpo+NRYTVIuMQEMMcsLqg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  mind-elixir@5.0.0-beta.41:
-    resolution: {integrity: sha512-+dLMd4GrbEWXQ2Iv+Rp00LDJoPmbwoOgTqa9oSSpMM35utaJXiKvUFViJ+uKRdhmOXk8ixndakQW8Pd2AGjvLw==}
+  mind-elixir@5.0.0-beta.43:
+    resolution: {integrity: sha512-Yt0e9bLYdeVZfGOKGtY44hagKfSLR1aNB/8oOLe5zOYkwMpzgbS5IPIVSz4lVmCvO+smcS5O4oGpA2dcet2JBA==}
 
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
@@ -5873,7 +5873,7 @@ snapshots:
 
   mimic-response@4.0.0: {}
 
-  mind-elixir@5.0.0-beta.41: {}
+  mind-elixir@5.0.0-beta.43: {}
 
   minimatch@9.0.5:
     dependencies:
