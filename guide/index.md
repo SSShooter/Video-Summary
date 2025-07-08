@@ -33,7 +33,7 @@
 - ✅ 支持多种开源模型
 - ⚠️ 速度相对较慢
 
-![硅基流动 获取 key](./silicon.jpg)
+![硅基流动 获取 key](./siliconflow.jpg)
 
 **获取方式：**
 1. 访问 [硅基流动](https://cloud.siliconflow.cn/)
@@ -41,7 +41,7 @@
 3. 获取API Key
 4. 在插件配置中选择"自定义"，填入硅基流动的API地址和Key
 
-![硅基流动 复制 key](./silicon-key.jpg)
+![硅基流动 复制 key](./siliconflow-key.jpg)
 
 ### 3. OpenRouter
 
