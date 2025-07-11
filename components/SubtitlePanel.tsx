@@ -4,6 +4,7 @@ import MindElixirReact, { type MindElixirReactRef } from "~components/MindElixir
 import { aiService, type SubtitleSummary } from "~utils/ai-service"
 import { fullscreen } from "~utils/fullscreen"
 import { launchMindElixir } from "~utils/mind-elixir"
+import { t, formatTime as formatTimeI18n } from "~utils/i18n"
 import { Storage } from "@plasmohq/storage"
 
 export interface SubtitleItem {
@@ -128,7 +129,7 @@ export function SubtitlePanel({
   // AI总结字幕
   const summarizeWithAI = async (forceRegenerate = false) => {
     if (subtitles.length === 0) {
-      setAiError("没有字幕内容可以总结")
+      setAiError(t("noSubtitles"))
       return
     }
 
@@ -270,7 +271,7 @@ export function SubtitlePanel({
     <div className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-[8px] p-[16px] font-sans shadow-lg fixed top-[80px] right-[20px] z-[9999] overflow-hidden flex flex-col">
       <div className="mb-[12px]">
         <h3 className="m-0 mb-[8px] text-[16px] font-semibold text-gray-900">
-          {platform === 'bilibili' ? '视频助手' : 'YouTube字幕'}
+          {platform === 'bilibili' ? t('videoAssistant') : t('youtubeSubtitle')}
         </h3>
         {videoInfo && (
           <div className="text-[12px] text-gray-600 leading-relaxed mb-[12px]">
@@ -286,7 +287,7 @@ export function SubtitlePanel({
               ? "text-blue-500 border-blue-500"
               : "text-gray-600 border-transparent hover:text-blue-400"
               }`}>
-            字幕
+            {t('subtitles')}
           </button>
           <button
             onClick={() => setActiveTab("summary")}
@@ -294,7 +295,7 @@ export function SubtitlePanel({
               ? "text-blue-500 border-blue-500"
               : "text-gray-600 border-transparent hover:text-blue-400"
               }`}>
-            AI总结
+            {t('aiSummary')}
           </button>
           {enableMindmap && (
             <button
@@ -308,7 +309,7 @@ export function SubtitlePanel({
                 ? "text-blue-500 border-blue-500"
                 : "text-gray-600 border-transparent hover:text-blue-400"
                 }`}>
-              思维导图
+              {t('mindmap')}
             </button>
           )}
         </div>
@@ -320,7 +321,7 @@ export function SubtitlePanel({
           <>
             {loading && (
               <div className="text-center p-[20px] text-gray-600">
-                加载中...
+                {t('loading')}
               </div>
             )}
 
@@ -367,10 +368,10 @@ export function SubtitlePanel({
                     className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
                       } text-white`}>
                     {aiLoading
-                      ? "总结中..."
+                      ? t('summarizing')
                       : aiSummary
-                        ? "查看总结"
-                        : "生成AI总结"}
+                        ? t('viewSummary')
+                        : t('generateAiSummary')}
                   </button>
                   {aiSummary && (
                     <button
@@ -378,7 +379,7 @@ export function SubtitlePanel({
                       disabled={aiLoading}
                       className={`py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
                         } text-white`}>
-                      重新生成
+                      {t('regenerate')}
                     </button>
                   )}
                 </div>
@@ -392,16 +393,16 @@ export function SubtitlePanel({
 
             {!aiSummary && !aiLoading && subtitles.length === 0 && (
               <div className="text-center py-[40px] px-[20px] text-gray-600">
-                <div className="mb-[12px]">暂无字幕数据</div>
+                <div className="mb-[12px]">{t('noSubtitles')}</div>
                 <div className="text-[12px]">
-                  请先获取字幕后再生成AI总结
+                  {t('getSubtitlesFirst')}
                 </div>
               </div>
             )}
 
             {aiLoading && (
               <div className="text-center py-[40px] px-[20px] text-gray-600">
-                正在生成AI总结...
+                {t('generatingAiSummary')}
               </div>
             )}
 
@@ -409,18 +410,18 @@ export function SubtitlePanel({
               <div className="p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
                 <div className="flex justify-between items-center mb-[12px]">
                   <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
-                    AI内容总结
+                    {t('aiContentSummaryTitle')}
                   </h4>
                   {cacheLoaded && (
                     <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
-                      已缓存
+                      {t('cached')}
                     </span>
                   )}
                 </div>
 
                 <div className="mb-[12px]">
                   <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    概要:
+                    {t('summary')}
                   </div>
                   <div className="text-[12px] leading-relaxed text-gray-800">
                     {aiSummary.summary}
@@ -430,7 +431,7 @@ export function SubtitlePanel({
                 {aiSummary.keyPoints.length > 0 && (
                   <div className="mb-[12px]">
                     <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                      关键要点:
+                      {t('keyPoints')}
                     </div>
                     <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
                       {aiSummary.keyPoints.map((point, index) => (
@@ -445,7 +446,7 @@ export function SubtitlePanel({
                 {aiSummary.topics.length > 0 && (
                   <div>
                     <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                      主要话题:
+                      {t('mainTopics')}
                     </div>
                     <div className="flex flex-wrap gap-[4px]">
                       {aiSummary.topics.map((topic, index) => (
@@ -476,7 +477,7 @@ export function SubtitlePanel({
                       disabled={mindmapLoading}
                       className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
                         } text-white`}>
-                      {mindmapLoading ? "生成中..." : "生成思维导图"}
+                      {mindmapLoading ? t('generating') : t('generateMindmapBtn')}
                     </button>
                   ) : (
                     <button
@@ -484,7 +485,7 @@ export function SubtitlePanel({
                       disabled={mindmapLoading}
                       className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
                         } text-white`}>
-                      重新生成
+                      {t('regenerate')}
                     </button>
                   )}
                 </div>
@@ -498,14 +499,14 @@ export function SubtitlePanel({
                           ? 'bg-gray-400 text-white cursor-not-allowed'
                           : 'bg-cyan-500 text-white cursor-pointer hover:bg-cyan-600'
                       }`}>
-                      {mindElixirLoading ? '正在打开...' : '在 Mind Elixir 打开'}
+                      {mindElixirLoading ? t('opening') : t('openInMindElixir')}
                     </button>
                     <button
                       onClick={() => {
                         fullscreen(mindmapRef.current?.instance!)
                       }}
                       className="flex-1 py-[8px] px-[12px] m-0 text-[12px] bg-cyan-500 text-white border-none rounded-[4px] cursor-pointer hover:bg-cyan-600">
-                      全屏
+                      {t('fullscreen')}
                     </button>
                   </div>
                 )}
@@ -524,16 +525,16 @@ export function SubtitlePanel({
 
             {!mindmapData && !mindmapLoading && subtitles.length === 0 && (
               <div className="text-center py-[40px] px-[20px] text-gray-600">
-                <div className="mb-[12px]">暂无字幕数据</div>
+                <div className="mb-[12px]">{t('noSubtitles')}</div>
                 <div className="text-[12px]">
-                  请先获取字幕后再生成思维导图
+                  {t('getSubtitlesForMindmap')}
                 </div>
               </div>
             )}
 
             {mindmapLoading && (
               <div className="text-center py-[40px] px-[20px] text-gray-600">
-                正在生成思维导图...
+                {t('generatingMindmap')}
               </div>
             )}
 

@@ -1,8 +1,8 @@
 {
   "name": "video-mindmap",
-  "displayName": "M10C | Web page & Video to Mindmap",
+  "displayName": "__MSG_extensionName__",
   "version": "0.0.3",
-  "description": "Summary video, or convert video to mindmap",
+  "description": "__MSG_extensionDescription__",
   "author": "Dexter",
   "scripts": {
     "dev": "plasmo dev",
@@ -31,6 +31,7 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "default_locale": "zh_CN",
     "host_permissions": [
       "https://*/*",
       "http://*/*",

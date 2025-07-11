@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react"
 import { createRoot } from "react-dom/client"
 
 import { Storage } from "@plasmohq/storage"
+import { t } from "~utils/i18n"
 
 import { SubtitlePanel as CommonSubtitlePanel } from "~components/SubtitlePanel"
 
@@ -73,7 +74,7 @@ function BilibiliSubtitlePanel() {
       }
       return null
     } catch (error) {
-      console.error("获取视频信息失败:", error)
+      console.error(t("getVideoInfoFailed"), error)
       return null
     }
   }
@@ -134,7 +135,7 @@ function BilibiliSubtitlePanel() {
       console.log("字幕文件URL:", subtitleUrl)
 
       if (!subtitleUrl) {
-        setError("字幕文件地址无效")
+        setError(t("invalidSubtitleUrl"))
         return
       }
 
@@ -157,14 +158,14 @@ function BilibiliSubtitlePanel() {
 
       if (subtitleData.body && Array.isArray(subtitleData.body)) {
         setSubtitles(subtitleData.body)
-        console.log("字幕加载成功，共", subtitleData.body.length, "条")
+        console.log(t("subtitleLoadedCount", subtitleData.body.length.toString()))
       } else {
         console.error("字幕数据不是数组格式:", subtitleData.body)
-        setError("字幕数据格式错误：期望数组格式")
+        setError(t("subtitleFormatError"))
       }
     } catch (error) {
-      console.error("获取字幕失败:", error)
-      setError("该视频可能确实没有字幕，或需要登录后才能访问 " + (error as Error).message)
+      console.error(t("fetchSubtitlesFailed"), error)
+      setError(t("noSubtitleOrLoginRequired") + " " + (error as Error).message)
     } finally {
       setLoading(false)
     }

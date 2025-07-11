@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Storage } from "@plasmohq/storage"
 import type { AIConfig } from "~utils/ai-service"
+import { t } from "~utils/i18n"
 import iconBase64 from "data-base64:~assets/icon.png"
 import "~style.css"
 
@@ -90,26 +91,26 @@ function IndexPopup() {
   const getPageTypeInfo = () => {
     if (isVideoPage) {
       return {
-        type: "视频页面",
+        type: t("videoPage"),
         icon: "🎥",
-        description: "支持字幕提取和AI总结",
-        actionText: "启动字幕面板",
+        description: t("videoPageDescription"),
+        actionText: t("startSubtitlePanel"),
         available: true
       }
     } else if (isArticlePage) {
       return {
-        type: "文章页面",
+        type: t("articlePage"),
         icon: "📄",
-        description: "支持生成思维导图",
-        actionText: "生成思维导图",
+        description: t("articlePageDescription"),
+        actionText: t("generateMindmap"),
         available: true
       }
     } else {
       return {
-        type: "不支持的页面",
+        type: t("unsupportedPage"),
         icon: "❌",
-        description: "请访问视频或文章页面",
-        actionText: "无法使用",
+        description: t("unsupportedPageDescription"),
+        actionText: t("cannotUse"),
         available: false
       }
     }
@@ -128,8 +129,8 @@ function IndexPopup() {
             className="w-10 h-10 mr-3 rounded-lg shadow-lg"
           />
           <div>
-            <h1 className="m-0 text-lg font-semibold">M10C 助手</h1>
-            <p className="m-0 text-sm text-blue-100">智能内容分析工具</p>
+            <h1 className="m-0 text-lg font-semibold">{t("popupTitle")}</h1>
+            <p className="m-0 text-sm text-blue-100">{t("popupSubtitle")}</p>
           </div>
         </div>
 
@@ -158,21 +159,21 @@ function IndexPopup() {
                 <span className="text-blue-600 text-sm">🤖</span>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-800">AI 服务状态</div>
-                <div className="text-xs text-gray-500">智能分析功能</div>
+                <div className="text-sm font-medium text-gray-800">{t("aiServiceStatus")}</div>
+                <div className="text-xs text-gray-500">{t("intelligentAnalysis")}</div>
               </div>
             </div>
             {loading ? (
               <div className="flex items-center">
                 <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span className="text-xs text-gray-600">检测中</span>
+                <span className="text-xs text-gray-600">{t("detecting")}</span>
               </div>
             ) : (
               <div className={`px-3 py-1 rounded-full text-xs font-medium ${aiEnabled
                   ? 'bg-green-100 text-green-700 border border-green-200'
                   : 'bg-orange-100 text-orange-700 border border-orange-200'
                 }`}>
-                {aiEnabled ? '✓ 已配置' : '⚠ 未配置'}
+                {aiEnabled ? t("configured") : t("notConfigured")}
               </div>
             )}
           </div>
@@ -180,7 +181,7 @@ function IndexPopup() {
           {!aiEnabled && (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
               <div className="text-xs text-orange-700">
-                💡 配置AI服务后可使用智能总结和思维导图功能
+                {t("configureAiTip")}
               </div>
             </div>
           )}
@@ -200,7 +201,7 @@ function IndexPopup() {
               {panelTriggering ? (
                 <>
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                  <span className="font-medium">启动中...</span>
+                  <span className="font-medium">{t("starting")}</span>
                 </>
               ) : (
                 <>
@@ -217,30 +218,30 @@ function IndexPopup() {
           >
             <div className="flex items-center justify-center text-gray-700">
               <span className="text-lg mr-2">⚙️</span>
-              <span className="font-medium">{aiEnabled ? 'AI配置管理' : '配置AI服务'}</span>
+              <span className="font-medium">{aiEnabled ? t("aiConfigManagement") : t("configureAiService")}</span>
             </div>
           </button>
         </div>
 
         {/* 功能说明 */}
         <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-          <div className="text-sm font-medium text-blue-800 mb-2">✨ 功能特性</div>
+          <div className="text-sm font-medium text-blue-800 mb-2">{t("features")}</div>
           <div className="space-y-1 text-xs text-blue-700">
             <div className="flex items-center">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-              <span>YouTube/Bilibili 字幕自动提取</span>
+              <span>{t("autoSubtitleExtraction")}</span>
             </div>
             <div className="flex items-center">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-              <span>AI 智能内容总结分析</span>
+              <span>{t("aiContentSummary")}</span>
             </div>
             <div className="flex items-center">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-              <span>文章内容思维导图生成</span>
+              <span>{t("articleMindmap")}</span>
             </div>
             <div className="flex items-center">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>
-              <span>一键时间跳转和内容定位</span>
+              <span>{t("oneClickJump")}</span>
             </div>
           </div>
         </div>

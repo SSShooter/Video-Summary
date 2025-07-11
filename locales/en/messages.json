@@ -1,0 +1,438 @@
+{
+  "extensionName": {
+    "message": "M10C | Web page & Video to Mindmap",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Summary video, or convert video to mindmap",
+    "description": "Extension description"
+  },
+  "popupTitle": {
+    "message": "M10C Assistant",
+    "description": "Popup title"
+  },
+  "popupSubtitle": {
+    "message": "Intelligent Content Analysis Tool",
+    "description": "Popup subtitle"
+  },
+  "videoPage": {
+    "message": "Video Page",
+    "description": "Video page type"
+  },
+  "articlePage": {
+    "message": "Article Page",
+    "description": "Article page type"
+  },
+  "unsupportedPage": {
+    "message": "Unsupported Page",
+    "description": "Unsupported page type"
+  },
+  "videoPageDescription": {
+    "message": "Supports subtitle extraction and AI summary",
+    "description": "Video page feature description"
+  },
+  "articlePageDescription": {
+    "message": "Supports mindmap generation",
+    "description": "Article page feature description"
+  },
+  "unsupportedPageDescription": {
+    "message": "Please visit video or article pages",
+    "description": "Unsupported page tip"
+  },
+  "startSubtitlePanel": {
+    "message": "Start Subtitle Panel",
+    "description": "Start subtitle panel button text"
+  },
+  "generateMindmap": {
+    "message": "Generate Mindmap",
+    "description": "Generate mindmap button text"
+  },
+  "cannotUse": {
+    "message": "Cannot Use",
+    "description": "Cannot use button text"
+  },
+  "starting": {
+    "message": "Starting...",
+    "description": "Starting status text"
+  },
+  "aiServiceStatus": {
+    "message": "AI Service Status",
+    "description": "AI service status title"
+  },
+  "intelligentAnalysis": {
+    "message": "Intelligent Analysis Feature",
+    "description": "Intelligent analysis feature description"
+  },
+  "detecting": {
+    "message": "Detecting",
+    "description": "Detecting status"
+  },
+  "configured": {
+    "message": "✓ Configured",
+    "description": "Configured status"
+  },
+  "notConfigured": {
+    "message": "⚠ Not Configured",
+    "description": "Not configured status"
+  },
+  "configureAiTip": {
+    "message": "💡 Configure AI service to use intelligent summary and mindmap features",
+    "description": "Configure AI service tip"
+  },
+  "aiConfigManagement": {
+    "message": "AI Config Management",
+    "description": "AI config management button"
+  },
+  "configureAiService": {
+    "message": "Configure AI Service",
+    "description": "Configure AI service button"
+  },
+  "features": {
+    "message": "✨ Features",
+    "description": "Features title"
+  },
+  "autoSubtitleExtraction": {
+    "message": "YouTube/Bilibili automatic subtitle extraction",
+    "description": "Auto subtitle extraction feature"
+  },
+  "aiContentSummary": {
+    "message": "AI intelligent content summary analysis",
+    "description": "AI content summary feature"
+  },
+  "articleMindmap": {
+    "message": "Article content mindmap generation",
+    "description": "Article mindmap feature"
+  },
+  "oneClickJump": {
+    "message": "One-click time jump and content positioning",
+    "description": "One-click jump feature"
+  },
+  "optionsTitle": {
+    "message": "Video Subtitle AI Summary - Configuration",
+    "description": "Options page title"
+  },
+  "aiServiceConfig": {
+    "message": "AI Service Configuration",
+    "description": "AI service config title"
+  },
+  "enableAiSummary": {
+    "message": "Enable AI Summary Feature",
+    "description": "Enable AI summary label"
+  },
+  "enableSubtitleAiSummary": {
+    "message": "Enable subtitle AI summary",
+    "description": "Enable subtitle AI summary checkbox"
+  },
+  "aiProvider": {
+    "message": "AI Provider",
+    "description": "AI provider label"
+  },
+  "modelSelection": {
+    "message": "Model Selection",
+    "description": "Model selection label"
+  },
+  "usePresetModel": {
+    "message": "Use preset model",
+    "description": "Use preset model option"
+  },
+  "useCustomModel": {
+    "message": "Custom model name",
+    "description": "Custom model option"
+  },
+  "apiAddress": {
+    "message": "API Address (Optional)",
+    "description": "API address label"
+  },
+  "customApiAddressTip": {
+    "message": "Modify here if you need to use a custom API address",
+    "description": "Custom API address tip"
+  },
+  "saving": {
+    "message": "Saving...",
+    "description": "Saving status"
+  },
+  "saved": {
+    "message": "Saved",
+    "description": "Saved status"
+  },
+  "saveConfig": {
+    "message": "Save Configuration",
+    "description": "Save config button"
+  },
+  "usageInstructions": {
+    "message": "Usage Instructions",
+    "description": "Usage instructions title"
+  },
+  "refreshing": {
+    "message": "Fetching...",
+    "description": "Refreshing models status"
+  },
+  "refresh": {
+    "message": "Refresh",
+    "description": "Refresh button"
+  },
+  "fetchingModels": {
+    "message": "Fetching model list...",
+    "description": "Fetching models status"
+  },
+  "autoFetchModelsTip": {
+    "message": "Model list will be automatically fetched after entering API Key",
+    "description": "Auto fetch models tip"
+  },
+  "enterCustomModelName": {
+    "message": "Please enter model name, e.g.: gpt-4-1106-preview",
+    "description": "Enter custom model name tip"
+  },
+  "subtitlePanel": {
+    "message": "Subtitle Panel",
+    "description": "Subtitle panel title"
+  },
+  "loading": {
+    "message": "Loading...",
+    "description": "Loading status"
+  },
+  "error": {
+    "message": "Error",
+    "description": "Error status"
+  },
+  "noSubtitles": {
+    "message": "No subtitle data available",
+    "description": "No subtitles tip"
+  },
+  "aiSummary": {
+    "message": "AI Summary",
+    "description": "AI summary button"
+  },
+  "generateMindmapBtn": {
+    "message": "Generate Mindmap",
+    "description": "Generate mindmap button"
+  },
+  "close": {
+    "message": "Close",
+    "description": "Close button"
+  },
+  "fullscreen": {
+    "message": "Fullscreen",
+    "description": "Fullscreen button"
+  },
+  "exitFullscreen": {
+    "message": "Exit Fullscreen",
+    "description": "Exit fullscreen button"
+  },
+  "generating": {
+    "message": "Generating...",
+    "description": "Generating status"
+  },
+  "summarizing": {
+    "message": "Summarizing...",
+    "description": "Summarizing status"
+  },
+  "jumpToTime": {
+    "message": "Jump to",
+    "description": "Jump to time"
+  },
+  "seconds": {
+    "message": "seconds",
+    "description": "Seconds unit"
+  },
+  "minutes": {
+    "message": "minutes",
+    "description": "Minutes unit"
+  },
+  "hours": {
+    "message": "hours",
+    "description": "Hours unit"
+  },
+  "videoAssistant": {
+    "message": "Video Assistant",
+    "description": "Video assistant title"
+  },
+  "youtubeSubtitle": {
+    "message": "YouTube Subtitle",
+    "description": "YouTube subtitle title"
+  },
+  "subtitles": {
+    "message": "Subtitles",
+    "description": "Subtitles tab"
+  },
+  "mindmap": {
+    "message": "Mindmap",
+    "description": "Mindmap tab"
+  },
+  "generateAiSummary": {
+    "message": "Generate AI Summary",
+    "description": "Generate AI summary button"
+  },
+  "viewSummary": {
+    "message": "View Summary",
+    "description": "View summary button"
+  },
+  "regenerate": {
+    "message": "Regenerate",
+    "description": "Regenerate button"
+  },
+  "getSubtitlesFirst": {
+    "message": "Please get subtitles first before generating AI summary",
+    "description": "Get subtitles tip"
+  },
+  "generatingAiSummary": {
+    "message": "Generating AI summary...",
+    "description": "Generating AI summary status"
+  },
+  "aiContentSummaryTitle": {
+    "message": "AI Content Summary",
+    "description": "AI content summary title"
+  },
+  "cached": {
+    "message": "Cached",
+    "description": "Cached status"
+  },
+  "summary": {
+    "message": "Summary:",
+    "description": "Summary label"
+  },
+  "keyPoints": {
+    "message": "Key Points:",
+    "description": "Key points label"
+  },
+  "mainTopics": {
+    "message": "Main Topics:",
+    "description": "Main topics label"
+  },
+  "generatingMindmap": {
+    "message": "Generating mindmap...",
+    "description": "Generating mindmap status"
+  },
+  "openInMindElixir": {
+    "message": "Open in Mind Elixir",
+    "description": "Open in Mind Elixir button"
+  },
+  "opening": {
+    "message": "Opening...",
+    "description": "Opening status"
+  },
+  "getSubtitlesForMindmap": {
+    "message": "Please get subtitles first before generating mindmap",
+    "description": "Get subtitles for mindmap tip"
+  },
+  "fetchSubtitlesFailed": {
+    "message": "Failed to fetch subtitles:",
+    "description": "Fetch subtitles failed message"
+  },
+  "invalidSubtitleUrl": {
+    "message": "Invalid subtitle file URL",
+    "description": "Invalid subtitle URL message"
+  },
+  "subtitleFormatError": {
+    "message": "Subtitle data format error: expected array format",
+    "description": "Subtitle format error message"
+  },
+  "noSubtitleOrLoginRequired": {
+    "message": "This video may not have subtitles, or login is required to access",
+    "description": "No subtitle or login required message"
+  },
+  "getVideoInfoFailed": {
+    "message": "Failed to get video info:",
+    "description": "Get video info failed message"
+  },
+  "subtitleLoadedCount": {
+    "message": "Subtitles loaded successfully, {count} items total",
+    "description": "Subtitle loaded count message"
+  },
+  "unknownTitle": {
+    "message": "Unknown Title",
+    "description": "Unknown title"
+  },
+  "subtitleLogicFailed": {
+    "message": "Subtitle logic failed:",
+    "description": "Subtitle logic failed message"
+  },
+  "youtubeSubtitleFormatError": {
+    "message": "YouTube subtitle data format error:",
+    "description": "YouTube subtitle format error"
+  },
+  "expectedEventsArray": {
+    "message": "Subtitle data format error: expected events array",
+    "description": "Expected events array error"
+  },
+  "loadSubtitleContentFailed": {
+    "message": "Failed to load subtitle content:",
+    "description": "Load subtitle content failed"
+  },
+  "youtubeSubtitleLoadedCount": {
+    "message": "Subtitles loaded successfully, raw segments: {raw} items, merged: {merged} items",
+    "description": "YouTube subtitle loaded count"
+  },
+  "articleAssistant": {
+    "message": "📄 Article Assistant",
+    "description": "Article assistant title"
+  },
+  "noArticleContent": {
+    "message": "No article content to summarize",
+    "description": "No article content error message"
+  },
+  "summaryFailed": {
+    "message": "Summary failed, please check AI configuration",
+    "description": "Summary failed error message"
+  },
+  "generateMindmapFailed": {
+    "message": "Failed to generate mindmap",
+    "description": "Generate mindmap failed error message"
+  },
+  "openMindElixirFailed": {
+    "message": "Failed to open Mind Elixir",
+    "description": "Open Mind Elixir failed error message"
+  },
+  "checkCacheFailed": {
+    "message": "Failed to check cache",
+    "description": "Check cache failed log message"
+  },
+  "articleDetectionFailed": {
+    "message": "Article detection failed",
+    "description": "Article detection failed error message"
+  },
+  "wordCount": {
+    "message": "Word count",
+    "description": "Word count label"
+  },
+  "noAiSummary": {
+    "message": "No AI summary available",
+    "description": "No AI summary tip"
+  },
+  "clickToGenerateArticleSummary": {
+    "message": "Click the button above to generate article AI summary",
+    "description": "Click to generate article summary tip"
+  },
+  "noMindmap": {
+    "message": "No mindmap available",
+    "description": "No mindmap tip"
+  },
+  "clickToGenerateArticleMindmap": {
+    "message": "Click the button above to generate article mindmap",
+    "description": "Click to generate article mindmap tip"
+  },
+  "loadConfigFailed": {
+    "message": "Failed to load configuration",
+    "description": "Load config failed error message"
+  },
+  "saveConfigFailed": {
+    "message": "Failed to save configuration",
+    "description": "Save config failed error message"
+  },
+  "fetchModelsFailed": {
+    "message": "Failed to fetch model list",
+    "description": "Fetch models failed error message"
+  },
+  "enterApiKeyPlaceholder": {
+    "message": "Please enter {provider} API Key",
+    "description": "Enter API Key placeholder text"
+  },
+  "supportsAutoFetchModels": {
+    "message": "Supports automatic model list fetching, you can also manually enter model name",
+    "description": "Supports auto fetch models tip"
+  },
+  "notSupportsAutoFetchModels": {
+    "message": "This provider does not support automatic model list fetching, you can manually enter model name",
+    "description": "Not supports auto fetch models tip"
+  }
+}

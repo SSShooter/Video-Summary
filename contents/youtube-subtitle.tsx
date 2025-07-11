@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 import styleText from "data-text:mind-elixir/style"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
 import tailwindStyles from "data-text:~style.css"
+import { t } from "~utils/i18n"
 import { SubtitlePanel } from "~components/SubtitlePanel"
 
 export const config: PlasmoCSConfig = {
@@ -47,7 +48,7 @@ function YouTubeSubtitlePanel() {
   // 获取视频标题
   const getVideoTitle = (): string => {
     const titleElement = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, h1.title')
-    return titleElement?.textContent || '未知标题'
+    return titleElement?.textContent || t('unknownTitle')
   }
 
   // 等待CC按钮加载并启动字幕
@@ -164,8 +165,8 @@ function YouTubeSubtitlePanel() {
       }, 15000)
 
     } catch (error) {
-      console.error('字幕逻辑失败:', error)
-      setError('获取字幕失败: ' + (error as Error).message)
+      console.error(t('subtitleLogicFailed'), error)
+      setError(t('fetchSubtitlesFailed') + ' ' + (error as Error).message)
       setLoading(false)
     }
   }
@@ -213,15 +214,15 @@ function YouTubeSubtitlePanel() {
 
         setSubtitles(mergedSubtitles)
         setLoading(false)
-        console.log('字幕加载成功，原始片段:', rawSubtitles.length, '条，合并后:', mergedSubtitles.length, '条')
+        console.log(t('youtubeSubtitleLoadedCount', [rawSubtitles.length.toString(), mergedSubtitles.length.toString()]))
       } else {
-        console.error('YouTube字幕数据格式错误:', data)
-        setError('字幕数据格式错误：期望包含events数组')
+        console.error(t('youtubeSubtitleFormatError'), data)
+        setError(t('expectedEventsArray'))
         setLoading(false)
       }
     } catch (error) {
-      console.error('加载字幕内容失败:', error)
-      setError('加载字幕内容失败: ' + (error as Error).message)
+      console.error(t('loadSubtitleContentFailed'), error)
+      setError(t('loadSubtitleContentFailed') + ' ' + (error as Error).message)
       setLoading(false)
     }
   }

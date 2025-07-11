@@ -13,6 +13,7 @@ import MindElixirReact, {
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
 import { fullscreen } from "~utils/fullscreen"
+import { t } from "~utils/i18n"
 import { launchMindElixir } from "~utils/mind-elixir"
 import type { SubtitleSummary } from "~utils/types"
 
@@ -60,7 +61,7 @@ function ArticleMindmapPanel() {
   // AI总结文章
   const summarizeWithAI = async (forceRegenerate = false) => {
     if (!articleInfo) {
-      setAiError("没有文章内容可以总结")
+      setAiError(t("noArticleContent"))
       return
     }
 
@@ -76,7 +77,7 @@ function ArticleMindmapPanel() {
 
       // 使用智能HTML到Markdown转换
       let markdownContent = detectAndConvertArticle()
-      
+
       // 如果智能检测失败，使用原始文本内容
       if (!markdownContent) {
         markdownContent = articleInfo.content
@@ -119,7 +120,7 @@ function ArticleMindmapPanel() {
     } catch (error) {
       console.error("AI总结失败:", error)
       setAiError(
-        error instanceof Error ? error.message : "总结失败，请检查AI配置"
+        error instanceof Error ? error.message : t("summaryFailed")
       )
     } finally {
       setAiLoading(false)
@@ -181,7 +182,7 @@ function ArticleMindmapPanel() {
 
     } catch (error) {
       console.error('生成思维导图失败:', error)
-      setMindmapError(error instanceof Error ? error.message : '生成思维导图失败')
+      setMindmapError(error instanceof Error ? error.message : t("generateMindmapFailed"))
     } finally {
       setMindmapLoading(false)
     }
@@ -198,7 +199,7 @@ function ArticleMindmapPanel() {
         await launchMindElixir(mindmapData)
       } catch (error) {
         console.error('打开 Mind Elixir 失败:', error)
-        setMindElixirError(error instanceof Error ? error.message : '打开 Mind Elixir 失败')
+        setMindElixirError(error instanceof Error ? error.message : t("openMindElixirFailed"))
       } finally {
         setMindElixirLoading(false)
       }
@@ -218,7 +219,7 @@ function ArticleMindmapPanel() {
         }
       }
     } catch (error) {
-      console.error('检查缓存失败:', error)
+      console.error(t("checkCacheFailed"), error)
     }
     return null
   }
@@ -262,8 +263,8 @@ function ArticleMindmapPanel() {
           }
         }
       } catch (error) {
-        console.error('文章检测失败:', error)
-        setError('文章检测失败')
+        console.error(t("articleDetectionFailed"), error)
+        setError(t("articleDetectionFailed"))
       } finally {
         setLoading(false)
       }
@@ -281,9 +282,9 @@ function ArticleMindmapPanel() {
   return (
     <div className="fixed top-5 right-5 w-96 max-h-[80vh] bg-white border border-gray-300 rounded-lg shadow-lg z-[10000] font-sans overflow-hidden">
       <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="m-0 text-base font-semibold text-gray-800">📄 文章助手</h3>
+        <h3 className="m-0 text-[16px] font-semibold text-gray-800">{t("articleAssistant")}</h3>
         <button
-          className="bg-transparent border-none text-lg cursor-pointer text-gray-600 p-0 w-6 h-6 flex items-center justify-center hover:text-gray-800 hover:bg-gray-200 rounded"
+          className="bg-transparent border-none text-[18px] cursor-pointer text-gray-600 p-0 w-6 h-6 flex items-center justify-center hover:text-gray-800 hover:bg-gray-200 rounded"
           onClick={() => setIsVisible(false)}
         >
           ✕
@@ -294,13 +295,13 @@ function ArticleMindmapPanel() {
       <div className="flex border-b border-gray-200 bg-gray-50">
         <button
           onClick={() => setActiveTab("summary")}
-          className={`flex-1 py-2 px-3 text-xs font-medium transition-all duration-200 ${
+          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${
             activeTab === "summary"
               ? "text-blue-600 border-b-2 border-blue-600 bg-white"
               : "text-gray-600 hover:text-blue-500"
           }`}
         >
-          AI总结
+          {t("aiSummary")}
         </button>
         <button
           onClick={() => {
@@ -309,22 +310,22 @@ function ArticleMindmapPanel() {
               mindElixirRef.current?.instance.toCenter()
             }, 200)
           }}
-          className={`flex-1 py-2 px-3 text-xs font-medium transition-all duration-200 ${
+          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${
             activeTab === "mindmap"
               ? "text-blue-600 border-b-2 border-blue-600 bg-white"
               : "text-gray-600 hover:text-blue-500"
           }`}
         >
-          思维导图
+          {t("mindmap")}
         </button>
       </div>
 
       <div className="p-4 max-h-[calc(80vh-100px)] overflow-y-auto">
         {/* 文章信息 */}
         <div className="mb-4">
-          <h4 className="m-0 mb-2 text-sm font-semibold text-gray-800 leading-tight">{articleInfo.title}</h4>
-          <p className="m-0 text-xs text-gray-600 leading-tight">
-            字数: {articleInfo.content.length} |
+          <h4 className="m-0 mb-2 text-[14px] font-semibold text-gray-800 leading-tight">{articleInfo.title}</h4>
+          <p className="m-0 text-[12px] text-gray-600 leading-tight">
+            {t("wordCount")}: {articleInfo.content.length} |
             URL: {articleInfo.url.length > 50 ? articleInfo.url.slice(0, 50) + '...' : articleInfo.url}
           </p>
         </div>
@@ -338,30 +339,30 @@ function ArticleMindmapPanel() {
                 <button
                   onClick={() => summarizeWithAI(false)}
                   disabled={aiLoading}
-                  className={`flex-1 px-3 py-2 text-xs border-none rounded cursor-pointer font-medium transition-all duration-200 ${
+                  className={`flex-1 px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${
                     aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
                   } text-white`}
                 >
                   {aiLoading
-                    ? "总结中..."
+                    ? t("summarizing")
                     : aiSummary
-                    ? "查看总结"
-                    : "生成AI总结"}
+                    ? t("viewSummary")
+                    : t("generateAiSummary")}
                 </button>
                 {aiSummary && (
                   <button
                     onClick={() => summarizeWithAI(true)}
                     disabled={aiLoading}
-                    className={`px-3 py-2 text-xs border-none rounded cursor-pointer font-medium transition-all duration-200 ${
+                    className={`px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${
                       aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
                     } text-white`}
                   >
-                    重新生成
+                    {t("regenerate")}
                   </button>
                 )}
               </div>
               {aiError && (
-                <div className="mt-2 px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs">
+                <div className="mt-2 px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-[12px]">
                   ❌ {aiError}
                 </div>
               )}
@@ -369,47 +370,47 @@ function ArticleMindmapPanel() {
 
             {!aiSummary && !aiLoading && (
               <div className="text-center py-8 px-4 text-gray-600">
-                <div className="mb-3 text-sm">暂无AI总结</div>
-                <div className="text-xs">
-                  点击上方按钮生成文章AI总结
+                <div className="mb-3 text-[14px]">{t("noAiSummary")}</div>
+                <div className="text-[12px]">
+                  {t("clickToGenerateArticleSummary")}
                 </div>
               </div>
             )}
 
             {aiLoading && (
               <div className="text-center py-8 px-4 text-gray-600">
-                正在生成AI总结...
+                {t("generatingAiSummary")}
               </div>
             )}
 
             {aiSummary && (
               <div className="p-3 bg-green-50 border border-green-300 rounded">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="m-0 text-sm text-blue-600 font-semibold">
-                    AI内容总结
+                  <h4 className="m-0 text-[14px] text-blue-600 font-semibold">
+                    {t("aiContentSummaryTitle")}
                   </h4>
                   {cacheLoaded && (
-                    <span className="text-xs text-green-600 bg-green-100 py-1 px-2 rounded-full border border-green-300">
-                      已缓存
+                    <span className="text-[12px] text-green-600 bg-green-100 py-1 px-2 rounded-full border border-green-300">
+                      {t("cached")}
                     </span>
                   )}
                 </div>
 
                 <div className="mb-3">
-                  <div className="text-xs text-gray-600 mb-1 font-medium">
-                    概要:
+                  <div className="text-[12px] text-gray-600 mb-1 font-medium">
+                    {t("summary")}
                   </div>
-                  <div className="text-xs leading-relaxed text-gray-800">
+                  <div className="text-[12px] leading-relaxed text-gray-800">
                     {aiSummary.summary}
                   </div>
                 </div>
 
                 {aiSummary.keyPoints.length > 0 && (
                   <div className="mb-3">
-                    <div className="text-xs text-gray-600 mb-1 font-medium">
-                      关键要点:
+                    <div className="text-[12px] text-gray-600 mb-1 font-medium">
+                      {t("keyPoints")}
                     </div>
-                    <ul className="m-0 pl-4 text-xs leading-relaxed text-gray-800">
+                    <ul className="m-0 pl-4 text-[12px] leading-relaxed text-gray-800">
                       {aiSummary.keyPoints.map((point, index) => (
                         <li key={index} className="mb-1">
                           {point}
@@ -421,14 +422,14 @@ function ArticleMindmapPanel() {
 
                 {aiSummary.topics.length > 0 && (
                   <div>
-                    <div className="text-xs text-gray-600 mb-1 font-medium">
-                      主要话题:
+                    <div className="text-[12px] text-gray-600 mb-1 font-medium">
+                      {t("mainTopics")}
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {aiSummary.topics.map((topic, index) => (
                         <span
                           key={index}
-                          className="py-1 px-2 bg-blue-50 text-blue-600 text-xs rounded-full border border-blue-200"
+                          className="py-1 px-2 bg-blue-50 text-blue-600 text-[12px] rounded-full border border-blue-200"
                         >
                           {topic}
                         </span>
@@ -448,18 +449,18 @@ function ArticleMindmapPanel() {
               <button
                 onClick={generateMindmap}
                 disabled={mindmapLoading}
-                className="flex-1 px-3 py-2 border border-blue-600 bg-blue-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-blue-700 hover:border-blue-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
+                className="flex-1 px-3 py-2 border border-blue-600 bg-blue-600 text-white rounded cursor-pointer text-[12px] font-medium transition-all duration-200 hover:bg-blue-700 hover:border-blue-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
               >
-                {mindmapLoading ? '生成中...' : '生成思维导图'}
+                {mindmapLoading ? t("generating") : t("generateMindmapBtn")}
               </button>
 
               {mindmapData && (
                 <button
                   onClick={openInMindElixir}
                   disabled={mindElixirLoading}
-                  className="flex-1 px-3 py-2 border border-purple-600 bg-purple-600 text-white rounded cursor-pointer text-xs font-medium transition-all duration-200 hover:bg-purple-700 hover:border-purple-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
+                  className="flex-1 px-3 py-2 border border-purple-600 bg-purple-600 text-white rounded cursor-pointer text-[12px] font-medium transition-all duration-200 hover:bg-purple-700 hover:border-purple-700 disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed"
                 >
-                  {mindElixirLoading ? '正在打开...' : '在 Mind Elixir 打开'}
+                  {mindElixirLoading ? t("opening") : t("openInMindElixir")}
                 </button>
               )}
 
@@ -468,37 +469,37 @@ function ArticleMindmapPanel() {
                   onClick={() => {
                     fullscreen(mindElixirRef.current?.instance!)
                   }}
-                  className="flex-1 py-2 px-3 m-0 text-xs bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600"
+                  className="flex-1 py-2 px-3 m-0 text-[12px] bg-cyan-500 text-white border-none rounded cursor-pointer hover:bg-cyan-600"
                 >
-                  全屏
+                  {t("fullscreen")}
                 </button>
               )}
             </div>
 
             {mindmapError && (
-              <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs mb-4">
+              <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-[12px] mb-4">
                 ❌ {mindmapError}
               </div>
             )}
 
             {mindElixirError && (
-              <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-xs mb-4">
+              <div className="px-3 py-2 bg-red-100 text-red-800 border border-red-200 rounded text-[12px] mb-4">
                 ❌ {mindElixirError}
               </div>
             )}
 
             {!mindmapData && !mindmapLoading && (
               <div className="text-center py-8 px-4 text-gray-600">
-                <div className="mb-3 text-sm">暂无思维导图</div>
-                <div className="text-xs">
-                  点击上方按钮生成文章思维导图
+                <div className="mb-3 text-[14px]">{t("noMindmap")}</div>
+                <div className="text-[12px]">
+                  {t("clickToGenerateArticleMindmap")}
                 </div>
               </div>
             )}
 
             {mindmapLoading && (
               <div className="text-center py-8 px-4 text-gray-600">
-                正在生成思维导图...
+                {t("generatingMindmap")}
               </div>
             )}
 

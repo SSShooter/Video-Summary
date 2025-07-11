@@ -1,0 +1,438 @@
+{
+  "extensionName": {
+    "message": "M10C | 网页&视频转思维导图",
+    "description": "插件名称"
+  },
+  "extensionDescription": {
+    "message": "总结视频内容，或将视频转换为思维导图",
+    "description": "插件描述"
+  },
+  "popupTitle": {
+    "message": "M10C 助手",
+    "description": "弹窗标题"
+  },
+  "popupSubtitle": {
+    "message": "智能内容分析工具",
+    "description": "弹窗副标题"
+  },
+  "videoPage": {
+    "message": "视频页面",
+    "description": "视频页面类型"
+  },
+  "articlePage": {
+    "message": "文章页面",
+    "description": "文章页面类型"
+  },
+  "unsupportedPage": {
+    "message": "不支持的页面",
+    "description": "不支持的页面类型"
+  },
+  "videoPageDescription": {
+    "message": "支持字幕提取和AI总结",
+    "description": "视频页面功能描述"
+  },
+  "articlePageDescription": {
+    "message": "支持生成思维导图",
+    "description": "文章页面功能描述"
+  },
+  "unsupportedPageDescription": {
+    "message": "请访问视频或文章页面",
+    "description": "不支持页面的提示"
+  },
+  "startSubtitlePanel": {
+    "message": "启动字幕面板",
+    "description": "启动字幕面板按钮文字"
+  },
+  "generateMindmap": {
+    "message": "生成思维导图",
+    "description": "生成思维导图按钮文字"
+  },
+  "cannotUse": {
+    "message": "无法使用",
+    "description": "无法使用的按钮文字"
+  },
+  "starting": {
+    "message": "启动中...",
+    "description": "启动中状态文字"
+  },
+  "aiServiceStatus": {
+    "message": "AI 服务状态",
+    "description": "AI服务状态标题"
+  },
+  "intelligentAnalysis": {
+    "message": "智能分析功能",
+    "description": "智能分析功能描述"
+  },
+  "detecting": {
+    "message": "检测中",
+    "description": "检测中状态"
+  },
+  "configured": {
+    "message": "✓ 已配置",
+    "description": "已配置状态"
+  },
+  "notConfigured": {
+    "message": "⚠ 未配置",
+    "description": "未配置状态"
+  },
+  "configureAiTip": {
+    "message": "💡 配置AI服务后可使用智能总结和思维导图功能",
+    "description": "配置AI服务提示"
+  },
+  "aiConfigManagement": {
+    "message": "AI配置管理",
+    "description": "AI配置管理按钮"
+  },
+  "configureAiService": {
+    "message": "配置AI服务",
+    "description": "配置AI服务按钮"
+  },
+  "features": {
+    "message": "✨ 功能特性",
+    "description": "功能特性标题"
+  },
+  "autoSubtitleExtraction": {
+    "message": "YouTube/Bilibili 字幕自动提取",
+    "description": "自动字幕提取功能"
+  },
+  "aiContentSummary": {
+    "message": "AI 智能内容总结分析",
+    "description": "AI内容总结功能"
+  },
+  "articleMindmap": {
+    "message": "文章内容思维导图生成",
+    "description": "文章思维导图功能"
+  },
+  "oneClickJump": {
+    "message": "一键时间跳转和内容定位",
+    "description": "一键跳转功能"
+  },
+  "optionsTitle": {
+    "message": "视频字幕AI总结 - 配置",
+    "description": "选项页面标题"
+  },
+  "aiServiceConfig": {
+    "message": "AI服务配置",
+    "description": "AI服务配置标题"
+  },
+  "enableAiSummary": {
+    "message": "启用AI总结功能",
+    "description": "启用AI总结功能标签"
+  },
+  "enableSubtitleAiSummary": {
+    "message": "启用字幕AI总结",
+    "description": "启用字幕AI总结复选框"
+  },
+  "aiProvider": {
+    "message": "AI服务商",
+    "description": "AI服务商标签"
+  },
+  "modelSelection": {
+    "message": "模型选择",
+    "description": "模型选择标签"
+  },
+  "usePresetModel": {
+    "message": "使用预设模型",
+    "description": "使用预设模型选项"
+  },
+  "useCustomModel": {
+    "message": "自定义模型名称",
+    "description": "自定义模型选项"
+  },
+  "apiAddress": {
+    "message": "API地址 (可选)",
+    "description": "API地址标签"
+  },
+  "customApiAddressTip": {
+    "message": "如需使用自定义API地址，请在此修改",
+    "description": "自定义API地址提示"
+  },
+  "saving": {
+    "message": "保存中...",
+    "description": "保存中状态"
+  },
+  "saved": {
+    "message": "已保存",
+    "description": "已保存状态"
+  },
+  "saveConfig": {
+    "message": "保存配置",
+    "description": "保存配置按钮"
+  },
+  "usageInstructions": {
+    "message": "使用说明",
+    "description": "使用说明标题"
+  },
+  "refreshing": {
+    "message": "获取中...",
+    "description": "刷新模型列表状态"
+  },
+  "refresh": {
+    "message": "刷新",
+    "description": "刷新按钮"
+  },
+  "fetchingModels": {
+    "message": "正在获取模型列表...",
+    "description": "获取模型列表状态"
+  },
+  "autoFetchModelsTip": {
+    "message": "填写API Key后将自动获取可用模型列表",
+    "description": "自动获取模型提示"
+  },
+  "enterCustomModelName": {
+    "message": "请输入模型名称，如: gpt-4-1106-preview",
+    "description": "输入自定义模型名称提示"
+  },
+  "subtitlePanel": {
+    "message": "字幕面板",
+    "description": "字幕面板标题"
+  },
+  "loading": {
+    "message": "加载中...",
+    "description": "加载状态"
+  },
+  "error": {
+    "message": "错误",
+    "description": "错误状态"
+  },
+  "noSubtitles": {
+    "message": "暂无字幕数据",
+    "description": "无字幕数据提示"
+  },
+  "aiSummary": {
+    "message": "AI总结",
+    "description": "AI总结按钮"
+  },
+  "generateMindmapBtn": {
+    "message": "生成思维导图",
+    "description": "生成思维导图按钮"
+  },
+  "close": {
+    "message": "关闭",
+    "description": "关闭按钮"
+  },
+  "fullscreen": {
+    "message": "全屏",
+    "description": "全屏按钮"
+  },
+  "exitFullscreen": {
+    "message": "退出全屏",
+    "description": "退出全屏按钮"
+  },
+  "generating": {
+    "message": "生成中...",
+    "description": "生成中状态"
+  },
+  "summarizing": {
+    "message": "总结中...",
+    "description": "总结中状态"
+  },
+  "jumpToTime": {
+    "message": "跳转到",
+    "description": "跳转到时间"
+  },
+  "seconds": {
+    "message": "秒",
+    "description": "秒单位"
+  },
+  "minutes": {
+    "message": "分钟",
+    "description": "分钟单位"
+  },
+  "hours": {
+    "message": "小时",
+    "description": "小时单位"
+  },
+  "videoAssistant": {
+    "message": "视频助手",
+    "description": "视频助手标题"
+  },
+  "youtubeSubtitle": {
+    "message": "YouTube字幕",
+    "description": "YouTube字幕标题"
+  },
+  "subtitles": {
+    "message": "字幕",
+    "description": "字幕标签"
+  },
+  "mindmap": {
+    "message": "思维导图",
+    "description": "思维导图标签"
+  },
+  "generateAiSummary": {
+    "message": "生成AI总结",
+    "description": "生成AI总结按钮"
+  },
+  "viewSummary": {
+    "message": "查看总结",
+    "description": "查看总结按钮"
+  },
+  "regenerate": {
+    "message": "重新生成",
+    "description": "重新生成按钮"
+  },
+  "getSubtitlesFirst": {
+    "message": "请先获取字幕后再生成AI总结",
+    "description": "获取字幕提示"
+  },
+  "generatingAiSummary": {
+    "message": "正在生成AI总结...",
+    "description": "生成AI总结状态"
+  },
+  "aiContentSummaryTitle": {
+    "message": "AI内容总结",
+    "description": "AI内容总结标题"
+  },
+  "cached": {
+    "message": "已缓存",
+    "description": "已缓存状态"
+  },
+  "summary": {
+    "message": "概要:",
+    "description": "概要标签"
+  },
+  "keyPoints": {
+    "message": "关键要点:",
+    "description": "关键要点标签"
+  },
+  "mainTopics": {
+    "message": "主要话题:",
+    "description": "主要话题标签"
+  },
+  "generatingMindmap": {
+    "message": "正在生成思维导图...",
+    "description": "生成思维导图状态"
+  },
+  "openInMindElixir": {
+    "message": "在 Mind Elixir 打开",
+    "description": "在Mind Elixir打开按钮"
+  },
+  "opening": {
+    "message": "正在打开...",
+    "description": "正在打开状态"
+  },
+  "getSubtitlesForMindmap": {
+    "message": "请先获取字幕后再生成思维导图",
+    "description": "获取字幕生成思维导图提示"
+  },
+  "fetchSubtitlesFailed": {
+    "message": "获取字幕失败:",
+    "description": "获取字幕失败消息"
+  },
+  "invalidSubtitleUrl": {
+    "message": "字幕文件地址无效",
+    "description": "字幕文件地址无效消息"
+  },
+  "subtitleFormatError": {
+    "message": "字幕数据格式错误：期望数组格式",
+    "description": "字幕数据格式错误消息"
+  },
+  "noSubtitleOrLoginRequired": {
+    "message": "该视频可能确实没有字幕，或需要登录后才能访问",
+    "description": "无字幕或需要登录消息"
+  },
+  "getVideoInfoFailed": {
+    "message": "获取视频信息失败:",
+    "description": "获取视频信息失败消息"
+  },
+  "subtitleLoadedCount": {
+    "message": "字幕加载成功，共 {count} 条",
+    "description": "字幕加载成功计数消息"
+  },
+  "unknownTitle": {
+    "message": "未知标题",
+    "description": "未知标题"
+  },
+  "subtitleLogicFailed": {
+    "message": "字幕逻辑失败:",
+    "description": "字幕逻辑失败消息"
+  },
+  "youtubeSubtitleFormatError": {
+    "message": "YouTube字幕数据格式错误:",
+    "description": "YouTube字幕格式错误"
+  },
+  "expectedEventsArray": {
+    "message": "字幕数据格式错误：期望包含events数组",
+    "description": "期望events数组错误"
+  },
+  "loadSubtitleContentFailed": {
+    "message": "加载字幕内容失败:",
+    "description": "加载字幕内容失败"
+  },
+  "youtubeSubtitleLoadedCount": {
+    "message": "字幕加载成功，原始片段: {raw} 条，合并后: {merged} 条",
+    "description": "YouTube字幕加载成功计数"
+  },
+  "articleAssistant": {
+    "message": "📄 文章助手",
+    "description": "文章助手标题"
+  },
+  "noArticleContent": {
+    "message": "没有文章内容可以总结",
+    "description": "没有文章内容错误消息"
+  },
+  "summaryFailed": {
+    "message": "总结失败，请检查AI配置",
+    "description": "总结失败错误消息"
+  },
+  "generateMindmapFailed": {
+    "message": "生成思维导图失败",
+    "description": "生成思维导图失败错误消息"
+  },
+  "openMindElixirFailed": {
+    "message": "打开 Mind Elixir 失败",
+    "description": "打开Mind Elixir失败错误消息"
+  },
+  "checkCacheFailed": {
+    "message": "检查缓存失败",
+    "description": "检查缓存失败日志消息"
+  },
+  "articleDetectionFailed": {
+    "message": "文章检测失败",
+    "description": "文章检测失败错误消息"
+  },
+  "wordCount": {
+    "message": "字数",
+    "description": "字数标签"
+  },
+  "noAiSummary": {
+    "message": "暂无AI总结",
+    "description": "暂无AI总结提示"
+  },
+  "clickToGenerateArticleSummary": {
+    "message": "点击上方按钮生成文章AI总结",
+    "description": "点击生成文章总结提示"
+  },
+  "noMindmap": {
+    "message": "暂无思维导图",
+    "description": "暂无思维导图提示"
+  },
+  "clickToGenerateArticleMindmap": {
+    "message": "点击上方按钮生成文章思维导图",
+    "description": "点击生成文章思维导图提示"
+  },
+  "loadConfigFailed": {
+    "message": "加载配置失败",
+    "description": "加载配置失败错误消息"
+  },
+  "saveConfigFailed": {
+    "message": "保存配置失败",
+    "description": "保存配置失败错误消息"
+  },
+  "fetchModelsFailed": {
+    "message": "获取模型列表失败",
+    "description": "获取模型列表失败错误消息"
+  },
+  "enterApiKeyPlaceholder": {
+    "message": "请输入{provider}的API Key",
+    "description": "输入API Key占位符文本"
+  },
+  "supportsAutoFetchModels": {
+    "message": "支持自动获取模型列表，也可手动输入模型名称",
+    "description": "支持自动获取模型列表提示"
+  },
+  "notSupportsAutoFetchModels": {
+    "message": "该服务商暂不支持自动获取模型列表，可手动输入模型名称",
+    "description": "不支持自动获取模型列表提示"
+  }
+}
