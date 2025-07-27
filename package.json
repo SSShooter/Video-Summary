@@ -1,7 +1,7 @@
 {
   "name": "video-mindmap",
   "displayName": "__MSG_extensionName__",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "__MSG_extensionDescription__",
   "author": "Dexter",
   "scripts": {
@@ -31,7 +31,7 @@
     "typescript": "5.3.3"
   },
   "manifest": {
-    "default_locale": "zh_CN",
+    "default_locale": "en",
     "host_permissions": [
       "https://*/*",
       "http://*/*",
