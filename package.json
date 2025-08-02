@@ -10,8 +10,9 @@
     "package": "plasmo package"
   },
   "dependencies": {
+    "@mind-elixir/open-desktop": "^0.0.1",
     "@plasmohq/storage": "^1.15.0",
-    "mind-elixir": "5.0.0-beta.43",
+    "mind-elixir": "5.0.4",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",

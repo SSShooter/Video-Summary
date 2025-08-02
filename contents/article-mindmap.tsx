@@ -14,7 +14,7 @@ import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
 import { fullscreen } from "~utils/fullscreen"
 import { t } from "~utils/i18n"
-import { launchMindElixir } from "~utils/mind-elixir"
+import { launchMindElixir } from "@mind-elixir/open-desktop"
 import type { SubtitleSummary } from "~utils/types"
 
 export const config: PlasmoCSConfig = {

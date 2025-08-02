@@ -8,12 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@mind-elixir/open-desktop':
+        specifier: ^0.0.1
+        version: 0.0.1
       '@plasmohq/storage':
         specifier: ^1.15.0
         version: 1.15.0(react@18.2.0)
       mind-elixir:
-        specifier: 5.0.0-beta.43
-        version: 5.0.0-beta.43
+        specifier: 5.0.4
+        version: 5.0.4
       plasmo:
         specifier: 0.90.5
         version: 0.90.5(@swc/core@1.12.1(@swc/helpers@0.5.17))(@swc/helpers@0.5.17)(@types/node@20.11.5)(postcss@8.5.6)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -605,6 +608,9 @@ packages:
     resolution: {integrity: sha512-BJwkHlSUgtB+Ei52Ai32M1AOMerSlzyIGA/KC4dAGL+GGwVMdwG8HGCOA2TxP3KjhbgDPMYkv7bt/NmOmRIFng==}
     cpu: [x64]
     os: [win32]
+
+  '@mind-elixir/open-desktop@0.0.1':
+    resolution: {integrity: sha512-MhpsQmvfGO9fNNTBpitA+ut+7JYFfYbg4qp9j31iTI/IPIAQx/vWNnWbBpDusXR3xij0nDNPPWY9bfYpOhEfaA==}
 
   '@mischnic/json-sourcemap@0.1.0':
     resolution: {integrity: sha512-dQb3QnfNqmQNYA4nFSN/uLaByIic58gOXq4Y4XqLOWmOrw73KmJPt/HLyG0wvn1bnR6mBKs/Uwvkh+Hns1T0XA==}
@@ -2516,8 +2522,8 @@ packages:
     resolution: {integrity: sha512-e5ISH9xMYU0DzrT+jl8q2ze9D6eWBto+I8CNpe+VI+K2J/F/k3PdkdTdz4wvGVH4NTpo+NRYTVIuMQEMMcsLqg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  mind-elixir@5.0.0-beta.43:
-    resolution: {integrity: sha512-Yt0e9bLYdeVZfGOKGtY44hagKfSLR1aNB/8oOLe5zOYkwMpzgbS5IPIVSz4lVmCvO+smcS5O4oGpA2dcet2JBA==}
+  mind-elixir@5.0.4:
+    resolution: {integrity: sha512-/hffgIS8OsdMhSk6ZwcGQbbaQ84vOPIh0F31X8ywP7oq1LOzRn0mT+AXTR5bDlVUdXzKUcoAa3xcS/JP6hLwlQ==}
 
   minimatch@9.0.5:
     resolution: {integrity: sha512-G6T0ZX48xgozx7587koeX9Ys2NYy6Gmv//P89sEte9V9whIapMNF4idKxnW2QtCcLiTWlb/wfCabAtAFWhhBow==}
@@ -3639,6 +3645,8 @@ snapshots:
 
   '@lmdb/lmdb-win32-x64@2.7.11':
     optional: true
+
+  '@mind-elixir/open-desktop@0.0.1': {}
 
   '@mischnic/json-sourcemap@0.1.0':
     dependencies:
@@ -5873,7 +5881,7 @@ snapshots:
 
   mimic-response@4.0.0: {}
 
-  mind-elixir@5.0.0-beta.43: {}
+  mind-elixir@5.0.4: {}
 
   minimatch@9.0.5:
     dependencies:

@@ -3,9 +3,9 @@ import type { MindElixirData } from "mind-elixir"
 import MindElixirReact, { type MindElixirReactRef } from "~components/MindElixirReact"
 import { aiService, type SubtitleSummary } from "~utils/ai-service"
 import { fullscreen } from "~utils/fullscreen"
-import { launchMindElixir } from "~utils/mind-elixir"
 import { t, formatTime as formatTimeI18n } from "~utils/i18n"
 import { Storage } from "@plasmohq/storage"
+import { launchMindElixir } from "@mind-elixir/open-desktop"
 
 export interface SubtitleItem {
   from?: number
