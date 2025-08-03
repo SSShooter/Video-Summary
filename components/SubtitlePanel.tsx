@@ -16,7 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "~components/ui/dropdown-menu"
 import { Button } from "~components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "~components/ui/tabs"
 import { Brain, RotateCcw, ExternalLink, Maximize, Download } from "lucide-react"
+import { Toaster } from "~components/ui/sonner"
+import { toast } from "sonner"
 
 export interface SubtitleItem {
   from?: number
@@ -67,7 +70,7 @@ export function SubtitlePanel({
   const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [mindElixirLoading, setMindElixirLoading] = useState(false)
   const [mindElixirError, setMindElixirError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"subtitles" | "summary" | "mindmap">("subtitles")
+
   const [cacheLoaded, setCacheLoaded] = useState(false)
   const mindmapRef = useRef<MindElixirReactRef>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -140,6 +143,9 @@ export function SubtitlePanel({
 
   // AI总结字幕
   const summarizeWithAI = async (forceRegenerate = false) => {
+    debugger
+    toast("Event has been created.")
+
     if (subtitles.length === 0) {
       setAiError(t("noSubtitles"))
       return
@@ -147,7 +153,6 @@ export function SubtitlePanel({
 
     // 如果不是强制重新生成且已有缓存数据，直接使用缓存
     if (!forceRegenerate && aiSummary) {
-      setActiveTab("summary")
       return
     }
 
@@ -158,7 +163,6 @@ export function SubtitlePanel({
       const summary = await aiService.summarizeSubtitles(subtitles)
 
       setAiSummary(summary)
-      setActiveTab("summary")
 
       // 保存到缓存
       await saveCacheData({
@@ -185,7 +189,6 @@ export function SubtitlePanel({
 
     // 如果不是强制重新生成且已有缓存数据，直接使用缓存
     if (!forceRegenerate && mindmapData) {
-      setActiveTab("mindmap")
       return
     }
 
@@ -219,7 +222,6 @@ export function SubtitlePanel({
 
       if (response.success) {
         setMindmapData(response.data)
-        setActiveTab("mindmap")
 
         // 保存到缓存
         await saveCacheData({
@@ -300,294 +302,269 @@ export function SubtitlePanel({
           )}
         </div>
         {videoInfo && (
-          <div className="text-[12px] text-gray-600 leading-relaxed mb-[12px]">
+          <div className="text-[12px] text-gray-600 leading-relaxed">
             {videoInfo.title}
           </div>
         )}
 
-        {/* Tab导航 */}
-        <div className="flex border-b border-gray-300">
-          <Button
-            onClick={() => setActiveTab("subtitles")}
-            variant="ghost"
-            size="sm" >
-            {t('subtitles')}
-          </Button>
-          <Button
-            onClick={() => setActiveTab("summary")}
-            variant="ghost"
-            size="sm">
-            {t('aiSummary')}
-          </Button>
-
-          <Button
-            onClick={() => {
-              setActiveTab("mindmap")
-              setTimeout(() => {
-                mindmapRef.current?.instance.toCenter()
-              }, 200)
-            }}
-            variant="ghost"
-            size="sm" >
-            {t('mindmap')}
-          </Button>
-
-        </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        {/* 字幕Tab内容 */}
-        {activeTab === "subtitles" && (
-          <>
-            {loading && (
-              <div className="text-center p-[20px] text-gray-600">
-                {t('loading')}
-              </div>
-            )}
+      <Tabs defaultValue="subtitles" className="flex-1 flex flex-col overflow-hidden">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="subtitles">{t('subtitles')}</TabsTrigger>
+          <TabsTrigger value="summary">{t('aiSummary')}</TabsTrigger>
+          <TabsTrigger
+            value="mindmap"
+          >
+            {t('mindmap')}
+          </TabsTrigger>
+        </TabsList>
 
-            {error && (
-              <div className="text-center p-[20px] text-red-500">
-                {error}
-              </div>
-            )}
+        <TabsContent value="subtitles" className="flex-1 overflow-auto mt-[12px]">
+          {loading && (
+            <div className="text-center p-[20px] text-gray-600">
+              {t('loading')}
+            </div>
+          )}
 
-            {subtitles.length > 0 && (
-              <div>
-                {subtitles.map((subtitle, index) => {
-                  const time = getSubtitleTime(subtitle)
-                  const content = getSubtitleContent(subtitle)
-                  return (
-                    <div
-                      key={index}
-                      className="py-[8px] border-b border-gray-100 cursor-pointer transition-colors duration-200 hover:bg-gray-50"
-                      onClick={() => onJumpToTime(time.start)}>
-                      <div className="text-[12px] text-blue-500 mb-[4px] font-medium">
-                        {formatTime(time.start)} - {formatTime(time.end)}
-                      </div>
-                      <div className="text-[14px] text-gray-900 leading-relaxed">
-                        {content}
-                      </div>
+          {error && (
+            <div className="text-center p-[20px] text-red-500">
+              {error}
+            </div>
+          )}
+
+          {subtitles.length > 0 && (
+            <div>
+              {subtitles.map((subtitle, index) => {
+                const time = getSubtitleTime(subtitle)
+                const content = getSubtitleContent(subtitle)
+                return (
+                  <div
+                    key={index}
+                    className="py-[8px] border-b border-gray-100 cursor-pointer transition-colors duration-200 hover:bg-gray-50"
+                    onClick={() => onJumpToTime(time.start)}>
+                    <div className="text-[12px] text-blue-500 mb-[4px] font-medium">
+                      {formatTime(time.start)} - {formatTime(time.end)}
                     </div>
-                  )
-                })}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* AI总结Tab内容 */}
-        {activeTab === "summary" && (
-          <>
-            {/* AI总结功能按钮 */}
-            {subtitles.length > 0 && (
-              <div className="p-[12px]">
-                <div className="flex gap-[8px]">
-                  <Button
-                    onClick={() => summarizeWithAI(false)}
-                    disabled={aiLoading}
-                    size="sm"
-                    className={`flex-1 text-xs ${aiLoading ? "" : "bg-blue-500 hover:bg-blue-600"}`}>
-                    {aiLoading
-                      ? t('summarizing')
-                      : aiSummary
-                        ? t('viewSummary')
-                        : t('generateAiSummary')}
-                  </Button>
-                  {aiSummary && (
-                    <Button
-                      onClick={() => summarizeWithAI(true)}
-                      disabled={aiLoading}
-                      size="sm"
-                      className={`text-xs ${aiLoading ? "" : "bg-green-500 hover:bg-green-600"}`}>
-                      {t('regenerate')}
-                    </Button>
-                  )}
-                </div>
-                {aiError && (
-                  <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                    {aiError}
+                    <div className="text-[14px] text-gray-900 leading-relaxed">
+                      {content}
+                    </div>
                   </div>
+                )
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="summary" className="flex-1 overflow-auto mt-[12px]">
+          {/* AI总结功能按钮 */}
+          {subtitles.length > 0 && (
+            <>
+              <div className="flex gap-[8px]">
+                <Button
+                  onClick={() => summarizeWithAI(false)}
+                  disabled={aiLoading}
+                  size="sm"
+                  className={`flex-1`}>
+                  {aiLoading
+                    ? t('summarizing')
+                    : aiSummary
+                      ? t('viewSummary')
+                      : t('generateAiSummary')}
+                </Button>
+                {aiSummary && (
+                  <Button
+                    onClick={() => summarizeWithAI(true)}
+                    disabled={aiLoading}
+                    size="sm" >
+                    {t('regenerate')}
+                  </Button>
                 )}
               </div>
-            )}
+              {aiError && (
+                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
+                  {aiError}
+                </div>
+              )}
+            </>
+          )}
 
-            {!aiSummary && !aiLoading && subtitles.length === 0 && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                <div className="mb-[12px]">{t('noSubtitles')}</div>
-                <div className="text-[12px]">
-                  {t('getSubtitlesFirst')}
+          {!aiSummary && !aiLoading && subtitles.length === 0 && (
+            <div className="text-center py-[40px] px-[20px] text-gray-600">
+              <div className="mb-[12px]">{t('noSubtitles')}</div>
+              <div className="text-[12px]">
+                {t('getSubtitlesFirst')}
+              </div>
+            </div>
+          )}
+
+          {aiLoading && (
+            <div className="text-center py-[40px] px-[20px] text-gray-600">
+              {t('generatingAiSummary')}
+            </div>
+          )}
+
+          {aiSummary && (
+            <div className="p-[12px] mt-[12px] bg-green-50 border border-green-300 rounded-[6px]">
+              <div className="flex justify-between items-center mb-[12px]">
+                <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
+                  {t('aiContentSummaryTitle')}
+                </h4>
+                {cacheLoaded && (
+                  <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
+                    {t('cached')}
+                  </span>
+                )}
+              </div>
+
+              <div className="mb-[12px]">
+                <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
+                  {t('summary')}
+                </div>
+                <div className="text-[12px] leading-relaxed text-gray-800">
+                  {aiSummary.summary}
                 </div>
               </div>
-            )}
 
-            {aiLoading && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                {t('generatingAiSummary')}
-              </div>
-            )}
-
-            {aiSummary && (
-              <div className="p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
-                <div className="flex justify-between items-center mb-[12px]">
-                  <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
-                    {t('aiContentSummaryTitle')}
-                  </h4>
-                  {cacheLoaded && (
-                    <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
-                      {t('cached')}
-                    </span>
-                  )}
-                </div>
-
+              {aiSummary.keyPoints.length > 0 && (
                 <div className="mb-[12px]">
                   <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    {t('summary')}
+                    {t('keyPoints')}
                   </div>
-                  <div className="text-[12px] leading-relaxed text-gray-800">
-                    {aiSummary.summary}
+                  <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
+                    {aiSummary.keyPoints.map((point, index) => (
+                      <li key={index} className="mb-[2px]">
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {aiSummary.topics.length > 0 && (
+                <div>
+                  <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
+                    {t('mainTopics')}
+                  </div>
+                  <div className="flex flex-wrap gap-[4px]">
+                    {aiSummary.topics.map((topic, index) => (
+                      <span
+                        key={index}
+                        className="py-[2px] px-[6px] bg-blue-50 text-blue-500 text-[12px] rounded-full border border-blue-200">
+                        {topic}
+                      </span>
+                    ))}
                   </div>
                 </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
 
-                {aiSummary.keyPoints.length > 0 && (
-                  <div className="mb-[12px]">
-                    <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                      {t('keyPoints')}
-                    </div>
-                    <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
-                      {aiSummary.keyPoints.map((point, index) => (
-                        <li key={index} className="mb-[2px]">
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+        <TabsContent value="mindmap" className="flex-1 overflow-auto mt-[12px]">
+          {/* 思维导图功能按钮 */}
+          {subtitles.length > 0 && (
+            <div className="p-[0px]">
+              <div className="flex gap-[8px] mb-[8px] justify-center">
+                {!mindmapData ? (
+                  <Button
+                    onClick={() => generateMindmap(false)}
+                    disabled={mindmapLoading}
+                    size="sm"
+                    title={mindmapLoading ? t('generating') : t('generateMindmapBtn')}>
+                    {mindmapLoading ? t('generating') : t('generateMindmapBtn')}
+                    <Brain className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => generateMindmap(true)}
+                    disabled={mindmapLoading}
+                    size="sm"
+                    title={t('regenerate')}>
+                    {t('regenerate')}
+                    <RotateCcw className="w-4 h-4" />
+                  </Button>
                 )}
-
-                {aiSummary.topics.length > 0 && (
-                  <div>
-                    <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                      {t('mainTopics')}
-                    </div>
-                    <div className="flex flex-wrap gap-[4px]">
-                      {aiSummary.topics.map((topic, index) => (
-                        <span
-                          key={index}
-                          className="py-[2px] px-[6px] bg-blue-50 text-blue-500 text-[12px] rounded-full border border-blue-200">
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* 思维导图Tab内容 */}
-        {activeTab === "mindmap" && (
-          <>
-            {/* 思维导图功能按钮 */}
-            {subtitles.length > 0 && (
-              <div className="p-[0px]">
-                <div className="flex gap-[8px] mb-[8px] justify-center">
-                  {!mindmapData ? (
+                {mindmapData && (
+                  <>
                     <Button
-                      onClick={() => generateMindmap(false)}
-                      disabled={mindmapLoading}
+                      onClick={openInMindElixir}
+                      disabled={mindElixirLoading}
                       size="sm"
-                      title={mindmapLoading ? t('generating') : t('generateMindmapBtn')}>
-                      <Brain className="w-4 h-4" />
+                      title={mindElixirLoading ? t('opening') : t('openInMindElixir')}>
+                      <ExternalLink className="w-4 h-4" />
                     </Button>
-                  ) : (
                     <Button
-                      onClick={() => generateMindmap(true)}
-                      disabled={mindmapLoading}
+                      onClick={() => {
+                        fullscreen(mindmapRef.current?.instance!)
+                      }}
                       size="sm"
-                      title={t('regenerate')}>
-                      <RotateCcw className="w-4 h-4" />
+                      title={t('fullscreen')}>
+                      <Maximize className="w-4 h-4" />
                     </Button>
-                  )}
-                  {mindmapData && (
-                    <>
-                      <Button
-                        onClick={openInMindElixir}
-                        disabled={mindElixirLoading}
-                        size="sm"
-                        title={mindElixirLoading ? t('opening') : t('openInMindElixir')}>
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          fullscreen(mindmapRef.current?.instance!)
-                        }}
-                        size="sm"
-                        title={t('fullscreen')}>
-                        <Maximize className="w-4 h-4" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" title={t('download') || '下载'}>
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuPortal container={panelRef.current}>
-                          <DropdownMenuContent align="end">
-                            {downloadMethodList.map((method) => (
-                              <DropdownMenuItem
-                                key={method.type}
-                                onClick={() => {
-                                  if (mindmapRef.current?.instance) {
-                                    method.download(mindmapRef.current.instance)
-                                  }
-                                }}
-                              >
-                                {method.type}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenu>
-                    </>
-                  )}
-                </div>
-                {mindElixirError && (
-                  <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                    {mindElixirError}
-                  </div>
-                )}
-                {mindmapError && (
-                  <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                    {mindmapError}
-                  </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" title={t('download') || '下载'}>
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuPortal container={panelRef.current}>
+                        <DropdownMenuContent align="end">
+                          {downloadMethodList.map((method) => (
+                            <DropdownMenuItem
+                              key={method.type}
+                              onClick={() => {
+                                if (mindmapRef.current?.instance) {
+                                  method.download(mindmapRef.current.instance)
+                                }
+                              }}
+                            >
+                              {method.type}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenu>
+                  </>
                 )}
               </div>
-            )}
-
-            {!mindmapData && !mindmapLoading && subtitles.length === 0 && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                <div className="mb-[12px]">{t('noSubtitles')}</div>
-                <div className="text-[12px]">
-                  {t('getSubtitlesForMindmap')}
+              {mindElixirError && (
+                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
+                  {mindElixirError}
                 </div>
-              </div>
-            )}
+              )}
+              {mindmapError && (
+                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
+                  {mindmapError}
+                </div>
+              )}
+            </div>
+          )}
 
-            {mindmapLoading && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                {t('generatingMindmap')}
+          {!mindmapData && !mindmapLoading && subtitles.length === 0 && (
+            <div className="text-center py-[40px] px-[20px] text-gray-600">
+              <div className="mb-[12px]">{t('noSubtitles')}</div>
+              <div className="text-[12px]">
+                {t('getSubtitlesForMindmap')}
               </div>
-            )}
+            </div>
+          )}
 
-            {mindmapData && (
-              <div className="h-[calc(100%-120px)] border border-gray-300 rounded-[6px] overflow-hidden mt-[12px]">
-                <MindElixirReact data={mindmapData} ref={mindmapRef}
-                  options={options} />
-              </div>
-            )}
-          </>
-        )}
-      </div>
+          {mindmapLoading && (
+            <div className="text-center py-[40px] px-[20px] text-gray-600">
+              {t('generatingMindmap')}
+            </div>
+          )}
+
+          {mindmapData && (
+            <div className="h-[calc(100%-120px)] border border-gray-300 rounded-[6px] overflow-hidden mt-[12px]">
+              <MindElixirReact data={mindmapData} ref={mindmapRef}
+                options={options} />
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+      <Toaster />
     </div>
   )
 }

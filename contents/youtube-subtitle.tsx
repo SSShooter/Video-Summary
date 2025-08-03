@@ -1,8 +1,8 @@
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useState } from "react"
-import { createRoot } from "react-dom/client"
-import styleText from "data-text:mind-elixir/style"
+import styleText from "data-text:mind-elixir/style.css"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
+import sonnerStyle from 'data-text:sonner/dist/styles.css';
 import tailwindStyles from "data-text:~style.css"
 import { t } from "~utils/i18n"
 import { SubtitlePanel } from "~components/SubtitlePanel"
@@ -14,7 +14,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = tailwindStyles + styleText + styleOverride
+  style.textContent = tailwindStyles + styleText + styleOverride + sonnerStyle
   return style
 }
 
@@ -305,7 +305,6 @@ function YouTubeSubtitlePanel() {
       videoInfo={videoInfo}
       onJumpToTime={jumpToTime}
       platform="youtube"
-      enableMindmap={true}
     />
   )
 }
