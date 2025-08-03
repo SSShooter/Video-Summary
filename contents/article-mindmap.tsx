@@ -16,6 +16,7 @@ import { fullscreen } from "~utils/fullscreen"
 import { t } from "~utils/i18n"
 import { launchMindElixir } from "@mind-elixir/open-desktop"
 import type { SubtitleSummary } from "~utils/types"
+import { options } from "~utils/mind-elixir"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -508,12 +509,7 @@ function ArticleMindmapPanel() {
                 <MindElixirReact
                   ref={mindElixirRef}
                   data={mindmapData}
-                  options={{
-                    editable: false,
-                    draggable: false,
-                    toolBar: false,
-                    mouseSelectionButton: 2
-                  }}
+                  options={options}
                 />
               </div>
             )}

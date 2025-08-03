@@ -6,6 +6,8 @@ import { fullscreen } from "~utils/fullscreen"
 import { t, formatTime as formatTimeI18n } from "~utils/i18n"
 import { Storage } from "@plasmohq/storage"
 import { launchMindElixir } from "@mind-elixir/open-desktop"
+import { options } from "~utils/mind-elixir"
+import { downloadMethodList } from "@mind-elixir/export-mindmap"
 
 export interface SubtitleItem {
   from?: number
@@ -234,7 +236,7 @@ export function SubtitlePanel({
     if (mindmapData) {
       setMindElixirLoading(true)
       setMindElixirError(null)
-      
+
       try {
         // 使用通用的 Mind Elixir 启动函数
         await launchMindElixir(mindmapData)
@@ -494,11 +496,10 @@ export function SubtitlePanel({
                     <button
                       onClick={openInMindElixir}
                       disabled={mindElixirLoading}
-                      className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] ${
-                        mindElixirLoading
-                          ? 'bg-gray-400 text-white cursor-not-allowed'
-                          : 'bg-cyan-500 text-white cursor-pointer hover:bg-cyan-600'
-                      }`}>
+                      className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] ${mindElixirLoading
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : 'bg-cyan-500 text-white cursor-pointer hover:bg-cyan-600'
+                        }`}>
                       {mindElixirLoading ? t('opening') : t('openInMindElixir')}
                     </button>
                     <button
@@ -541,12 +542,7 @@ export function SubtitlePanel({
             {mindmapData && (
               <div className="h-[calc(100%-120px)] border border-gray-300 rounded-[6px] overflow-hidden mt-[12px]">
                 <MindElixirReact data={mindmapData} ref={mindmapRef}
-                  options={{
-                    editable: false,
-                    draggable: false,
-                    toolBar: false,
-                    mouseSelectionButton: 2
-                  }} />
+                  options={options} />
               </div>
             )}
           </>
