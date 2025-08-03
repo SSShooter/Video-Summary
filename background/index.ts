@@ -251,7 +251,6 @@ class BackgroundAIService {
       .join(' ')
       // 清理多余的空格和标点
       .replace(/\s+/g, ' ')
-      .replace(/[。，！？；：、\s]+/g, ' ')
       .trim()
 
     // 限制长度，但保持句子完整性
