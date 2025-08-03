@@ -30,7 +30,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = tailwindStyles + styleText + styleOverride
+  style.textContent = tailwindStyles.replaceAll(':root', ':host(plasmo-csui)') + styleText + styleOverride
   return style
 }
 
@@ -296,11 +296,10 @@ function ArticleMindmapPanel() {
       <div className="flex border-b border-gray-200 bg-gray-50">
         <button
           onClick={() => setActiveTab("summary")}
-          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${
-            activeTab === "summary"
+          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${activeTab === "summary"
               ? "text-blue-600 border-b-2 border-blue-600 bg-white"
               : "text-gray-600 hover:text-blue-500"
-          }`}
+            }`}
         >
           {t("aiSummary")}
         </button>
@@ -311,11 +310,10 @@ function ArticleMindmapPanel() {
               mindElixirRef.current?.instance.toCenter()
             }, 200)
           }}
-          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${
-            activeTab === "mindmap"
+          className={`flex-1 py-2 px-3 text-[12px] font-medium transition-all duration-200 ${activeTab === "mindmap"
               ? "text-blue-600 border-b-2 border-blue-600 bg-white"
               : "text-gray-600 hover:text-blue-500"
-          }`}
+            }`}
         >
           {t("mindmap")}
         </button>
@@ -340,23 +338,21 @@ function ArticleMindmapPanel() {
                 <button
                   onClick={() => summarizeWithAI(false)}
                   disabled={aiLoading}
-                  className={`flex-1 px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${
-                    aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-                  } text-white`}
+                  className={`flex-1 px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+                    } text-white`}
                 >
                   {aiLoading
                     ? t("summarizing")
                     : aiSummary
-                    ? t("viewSummary")
-                    : t("generateAiSummary")}
+                      ? t("viewSummary")
+                      : t("generateAiSummary")}
                 </button>
                 {aiSummary && (
                   <button
                     onClick={() => summarizeWithAI(true)}
                     disabled={aiLoading}
-                    className={`px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${
-                      aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                    } text-white`}
+                    className={`px-3 py-2 text-[12px] border-none rounded cursor-pointer font-medium transition-all duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                      } text-white`}
                   >
                     {t("regenerate")}
                   </button>

@@ -1,12 +1,8 @@
 import styleText from "data-text:mind-elixir/style"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
 import tailwindStyles from "data-text:~style.css"
-import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
-import { createRoot } from "react-dom/client"
-
-import { Storage } from "@plasmohq/storage"
 import { t } from "~utils/i18n"
 
 import { SubtitlePanel as CommonSubtitlePanel } from "~components/SubtitlePanel"
@@ -179,6 +175,11 @@ function BilibiliSubtitlePanel() {
     }
   }
 
+  // 关闭面板
+  const handleClose = () => {
+    setIsVisible(false)
+  }
+
 
 
   useEffect(() => {
@@ -234,7 +235,7 @@ function BilibiliSubtitlePanel() {
       videoInfo={convertedVideoInfo}
       onJumpToTime={jumpToTime}
       platform="bilibili"
-      enableMindmap={true}
+      onClose={handleClose}
     />
   )
 }

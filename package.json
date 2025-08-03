@@ -13,11 +13,18 @@
     "@mind-elixir/export-mindmap": "^0.0.3",
     "@mind-elixir/open-desktop": "^0.0.1",
     "@plasmohq/storage": "^1.15.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.536.0",
     "mind-elixir": "5.0.4",
     "plasmo": "0.90.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^5.5.0",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.0"
   },
   "devDependencies": {

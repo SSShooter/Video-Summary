@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import type { MindElixirData } from "mind-elixir"
 import MindElixirReact, { type MindElixirReactRef } from "~components/MindElixirReact"
 import { aiService, type SubtitleSummary } from "~utils/ai-service"
@@ -8,6 +8,15 @@ import { Storage } from "@plasmohq/storage"
 import { launchMindElixir } from "@mind-elixir/open-desktop"
 import { options } from "~utils/mind-elixir"
 import { downloadMethodList } from "@mind-elixir/export-mindmap"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+} from "~components/ui/dropdown-menu"
+import { Button } from "~components/ui/button"
+import { Brain, RotateCcw, ExternalLink, Maximize, Download } from "lucide-react"
 
 export interface SubtitleItem {
   from?: number
@@ -38,8 +47,7 @@ export interface SubtitlePanelProps {
   videoInfo: VideoInfo | null
   onJumpToTime: (time: number) => void
   platform: 'bilibili' | 'youtube'
-  // 可选的额外功能
-  enableMindmap?: boolean
+  onClose?: () => void
 }
 
 export function SubtitlePanel({
@@ -49,7 +57,7 @@ export function SubtitlePanel({
   videoInfo,
   onJumpToTime,
   platform,
-  enableMindmap = false
+  onClose
 }: SubtitlePanelProps) {
   const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
@@ -62,6 +70,8 @@ export function SubtitlePanel({
   const [activeTab, setActiveTab] = useState<"subtitles" | "summary" | "mindmap">("subtitles")
   const [cacheLoaded, setCacheLoaded] = useState(false)
   const mindmapRef = useRef<MindElixirReactRef>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  console.log(panelRef, 'panelRef')
   const storage = new Storage()
 
   // 获取缓存键
@@ -270,11 +280,25 @@ export function SubtitlePanel({
   }, [videoInfo])
 
   return (
-    <div className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-[8px] p-[16px] font-sans shadow-lg fixed top-[80px] right-[20px] z-[9999] overflow-hidden flex flex-col">
+    <div ref={panelRef} className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-[8px] p-[16px] font-sans shadow-lg fixed top-[80px] right-[20px] z-[9999] overflow-hidden flex flex-col">
       <div className="mb-[12px]">
-        <h3 className="m-0 mb-[8px] text-[16px] font-semibold text-gray-900">
-          {platform === 'bilibili' ? t('videoAssistant') : t('youtubeSubtitle')}
-        </h3>
+        <div className="flex justify-between items-center mb-[8px]">
+          <h3 className="m-0 text-[16px] font-semibold text-gray-900">
+            {platform === 'bilibili' ? t('videoAssistant') : t('youtubeSubtitle')}
+          </h3>
+          {onClose && (
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="p-1 h-6 w-6 hover:bg-gray-100"
+              title={t('close') || '关闭'}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </Button>
+          )}
+        </div>
         {videoInfo && (
           <div className="text-[12px] text-gray-600 leading-relaxed mb-[12px]">
             {videoInfo.title}
@@ -283,37 +307,31 @@ export function SubtitlePanel({
 
         {/* Tab导航 */}
         <div className="flex border-b border-gray-300">
-          <button
+          <Button
             onClick={() => setActiveTab("subtitles")}
-            className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] bg-transparent border-none border-b-[2px] cursor-pointer transition-all duration-200 ${activeTab === "subtitles"
-              ? "text-blue-500 border-blue-500"
-              : "text-gray-600 border-transparent hover:text-blue-400"
-              }`}>
+            variant="ghost"
+            size="sm" >
             {t('subtitles')}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setActiveTab("summary")}
-            className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] bg-transparent border-none border-b-[2px] cursor-pointer transition-all duration-200 ${activeTab === "summary"
-              ? "text-blue-500 border-blue-500"
-              : "text-gray-600 border-transparent hover:text-blue-400"
-              }`}>
+            variant="ghost"
+            size="sm">
             {t('aiSummary')}
-          </button>
-          {enableMindmap && (
-            <button
-              onClick={() => {
-                setActiveTab("mindmap")
-                setTimeout(() => {
-                  mindmapRef.current?.instance.toCenter()
-                }, 200)
-              }}
-              className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] bg-transparent border-none border-b-[2px] cursor-pointer transition-all duration-200 ${activeTab === "mindmap"
-                ? "text-blue-500 border-blue-500"
-                : "text-gray-600 border-transparent hover:text-blue-400"
-                }`}>
-              {t('mindmap')}
-            </button>
-          )}
+          </Button>
+
+          <Button
+            onClick={() => {
+              setActiveTab("mindmap")
+              setTimeout(() => {
+                mindmapRef.current?.instance.toCenter()
+              }, 200)
+            }}
+            variant="ghost"
+            size="sm" >
+            {t('mindmap')}
+          </Button>
+
         </div>
       </div>
 
@@ -364,25 +382,25 @@ export function SubtitlePanel({
             {subtitles.length > 0 && (
               <div className="p-[12px]">
                 <div className="flex gap-[8px]">
-                  <button
+                  <Button
                     onClick={() => summarizeWithAI(false)}
                     disabled={aiLoading}
-                    className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
-                      } text-white`}>
+                    size="sm"
+                    className={`flex-1 text-xs ${aiLoading ? "" : "bg-blue-500 hover:bg-blue-600"}`}>
                     {aiLoading
                       ? t('summarizing')
                       : aiSummary
                         ? t('viewSummary')
                         : t('generateAiSummary')}
-                  </button>
+                  </Button>
                   {aiSummary && (
-                    <button
+                    <Button
                       onClick={() => summarizeWithAI(true)}
                       disabled={aiLoading}
-                      className={`py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${aiLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                        } text-white`}>
+                      size="sm"
+                      className={`text-xs ${aiLoading ? "" : "bg-green-500 hover:bg-green-600"}`}>
                       {t('regenerate')}
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {aiError && (
@@ -467,50 +485,72 @@ export function SubtitlePanel({
         )}
 
         {/* 思维导图Tab内容 */}
-        {enableMindmap && activeTab === "mindmap" && (
+        {activeTab === "mindmap" && (
           <>
             {/* 思维导图功能按钮 */}
             {subtitles.length > 0 && (
-              <div className="p-[12px]">
-                <div className="flex gap-[8px] mb-[8px]">
+              <div className="p-[0px]">
+                <div className="flex gap-[8px] mb-[8px] justify-center">
                   {!mindmapData ? (
-                    <button
+                    <Button
                       onClick={() => generateMindmap(false)}
                       disabled={mindmapLoading}
-                      className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
-                        } text-white`}>
-                      {mindmapLoading ? t('generating') : t('generateMindmapBtn')}
-                    </button>
+                      size="sm"
+                      title={mindmapLoading ? t('generating') : t('generateMindmapBtn')}>
+                      <Brain className="w-4 h-4" />
+                    </Button>
                   ) : (
-                    <button
+                    <Button
                       onClick={() => generateMindmap(true)}
                       disabled={mindmapLoading}
-                      className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] cursor-pointer transition-colors duration-200 ${mindmapLoading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                        } text-white`}>
-                      {t('regenerate')}
-                    </button>
+                      size="sm"
+                      title={t('regenerate')}>
+                      <RotateCcw className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {mindmapData && (
+                    <>
+                      <Button
+                        onClick={openInMindElixir}
+                        disabled={mindElixirLoading}
+                        size="sm"
+                        title={mindElixirLoading ? t('opening') : t('openInMindElixir')}>
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          fullscreen(mindmapRef.current?.instance!)
+                        }}
+                        size="sm"
+                        title={t('fullscreen')}>
+                        <Maximize className="w-4 h-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" title={t('download') || '下载'}>
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuPortal container={panelRef.current}>
+                          <DropdownMenuContent align="end">
+                            {downloadMethodList.map((method) => (
+                              <DropdownMenuItem
+                                key={method.type}
+                                onClick={() => {
+                                  if (mindmapRef.current?.instance) {
+                                    method.download(mindmapRef.current.instance)
+                                  }
+                                }}
+                              >
+                                {method.type}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenu>
+                    </>
                   )}
                 </div>
-                {mindmapData && (
-                  <div className="flex gap-[8px]">
-                    <button
-                      onClick={openInMindElixir}
-                      disabled={mindElixirLoading}
-                      className={`flex-1 py-[8px] px-[12px] m-0 text-[12px] border-none rounded-[4px] ${mindElixirLoading
-                        ? 'bg-gray-400 text-white cursor-not-allowed'
-                        : 'bg-cyan-500 text-white cursor-pointer hover:bg-cyan-600'
-                        }`}>
-                      {mindElixirLoading ? t('opening') : t('openInMindElixir')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        fullscreen(mindmapRef.current?.instance!)
-                      }}
-                      className="flex-1 py-[8px] px-[12px] m-0 text-[12px] bg-cyan-500 text-white border-none rounded-[4px] cursor-pointer hover:bg-cyan-600">
-                      {t('fullscreen')}
-                    </button>
-                  </div>
-                )}
                 {mindElixirError && (
                   <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
                     {mindElixirError}
