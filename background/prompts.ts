@@ -3,6 +3,8 @@
  * 包含所有用于AI分析的系统提示词和用户提示词模板
  */
 
+import { isChinese } from "~utils/i18n"
+
 export const PROMPTS = {
   /**
    * 字幕总结的系统提示词
@@ -23,7 +25,7 @@ export const PROMPTS = {
 }
 
 **注意事项：**
-- 使用中文输出
+- 输出语言：${ chrome.i18n.getUILanguage()}
 - 保持客观和准确
 - 避免重复内容
 - 确保JSON格式正确`,
@@ -121,7 +123,7 @@ export interface Arrow {
 - **直接的父子关系不需要使用 Arrow 链接**
 
 **注意事项：**
-- 使用中文输出
+- 输出语言：${ chrome.i18n.getUILanguage()}
 - 确保JSON格式正确，不要返回任何JSON以外的内容
 `,
 

@@ -347,6 +347,10 @@
     "message": "字幕逻辑失败:",
     "description": "字幕逻辑失败消息"
   },
+  "subtitleTimeout": {
+    "message": "获取字幕超时，请确保视频有字幕，或尝试刷新页面",
+    "description": "字幕获取超时错误消息"
+  },
   "youtubeSubtitleFormatError": {
     "message": "YouTube字幕数据格式错误:",
     "description": "YouTube字幕格式错误"

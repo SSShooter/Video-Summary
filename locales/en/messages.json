@@ -347,6 +347,10 @@
     "message": "Subtitle logic failed:",
     "description": "Subtitle logic failed message"
   },
+  "subtitleTimeout": {
+    "message": "Subtitle fetch timeout. Please ensure the video has subtitles or try refreshing the page",
+    "description": "Subtitle fetch timeout error message"
+  },
   "youtubeSubtitleFormatError": {
     "message": "YouTube subtitle data format error:",
     "description": "YouTube subtitle format error"

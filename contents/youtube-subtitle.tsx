@@ -159,7 +159,7 @@ function YouTubeSubtitlePanel() {
         if (isListening) {
           isListening = false
           chrome.runtime.onMessage.removeListener(urlListener)
-          setError('获取字幕超时，请确保视频有字幕')
+          setError(t('subtitleTimeout'))
           setLoading(false)
         }
       }, 15000)
