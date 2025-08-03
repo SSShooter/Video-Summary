@@ -64,12 +64,9 @@ export function SubtitlePanel({
 }: SubtitlePanelProps) {
   const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState<string | null>(null)
   const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
   const [mindmapLoading, setMindmapLoading] = useState(false)
-  const [mindmapError, setMindmapError] = useState<string | null>(null)
   const [mindElixirLoading, setMindElixirLoading] = useState(false)
-  const [mindElixirError, setMindElixirError] = useState<string | null>(null)
 
   const [cacheLoaded, setCacheLoaded] = useState(false)
   const mindmapRef = useRef<MindElixirReactRef>(null)
@@ -143,11 +140,8 @@ export function SubtitlePanel({
 
   // AI总结字幕
   const summarizeWithAI = async (forceRegenerate = false) => {
-    debugger
-    toast("Event has been created.")
-
     if (subtitles.length === 0) {
-      setAiError(t("noSubtitles"))
+      toast.error(t("noSubtitles"))
       return
     }
 
@@ -158,11 +152,13 @@ export function SubtitlePanel({
 
     try {
       setAiLoading(true)
-      setAiError(null)
+      toast.loading(t('generatingAiSummary'))
 
       const summary = await aiService.summarizeSubtitles(subtitles)
 
       setAiSummary(summary)
+      toast.dismiss()
+      toast.success(t('aiSummaryGenerated') || 'AI总结生成成功')
 
       // 保存到缓存
       await saveCacheData({
@@ -172,7 +168,8 @@ export function SubtitlePanel({
       })
     } catch (error) {
       console.error("AI总结失败:", error)
-      setAiError(
+      toast.dismiss()
+      toast.error(
         error instanceof Error ? error.message : "总结失败，请检查AI配置"
       )
     } finally {
@@ -183,7 +180,7 @@ export function SubtitlePanel({
   // 生成思维导图
   const generateMindmap = async (forceRegenerate = false) => {
     if (subtitles.length === 0) {
-      setMindmapError("没有字幕内容可以生成思维导图")
+      toast.error("没有字幕内容可以生成思维导图")
       return
     }
 
@@ -194,7 +191,7 @@ export function SubtitlePanel({
 
     try {
       setMindmapLoading(true)
-      setMindmapError(null)
+      toast.loading(t('generatingMindmap'))
 
       // 格式化字幕内容
       const formattedSubtitles = subtitles
@@ -222,6 +219,8 @@ export function SubtitlePanel({
 
       if (response.success) {
         setMindmapData(response.data)
+        toast.dismiss()
+        toast.success(t('mindmapGenerated') || '思维导图生成成功')
 
         // 保存到缓存
         await saveCacheData({
@@ -234,7 +233,8 @@ export function SubtitlePanel({
       }
     } catch (error) {
       console.error("生成思维导图失败:", error)
-      setMindmapError(
+      toast.dismiss()
+      toast.error(
         error instanceof Error
           ? error.message
           : "生成思维导图失败，请检查AI配置"
@@ -247,14 +247,17 @@ export function SubtitlePanel({
   const openInMindElixir = async () => {
     if (mindmapData) {
       setMindElixirLoading(true)
-      setMindElixirError(null)
+      toast.loading(t('opening') || '正在打开...')
 
       try {
         // 使用通用的 Mind Elixir 启动函数
         await launchMindElixir(mindmapData)
+        toast.dismiss()
+        toast.success(t('openedSuccessfully') || '打开成功')
       } catch (error) {
         console.error('打开 Mind Elixir 失败:', error)
-        setMindElixirError(error instanceof Error ? error.message : '打开 Mind Elixir 失败')
+        toast.dismiss()
+        toast.error(error instanceof Error ? error.message : '打开 Mind Elixir 失败')
       } finally {
         setMindElixirLoading(false)
       }
@@ -381,11 +384,6 @@ export function SubtitlePanel({
                   </Button>
                 )}
               </div>
-              {aiError && (
-                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                  {aiError}
-                </div>
-              )}
             </>
           )}
 
@@ -528,16 +526,6 @@ export function SubtitlePanel({
                   </>
                 )}
               </div>
-              {mindElixirError && (
-                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                  {mindElixirError}
-                </div>
-              )}
-              {mindmapError && (
-                <div className="mt-[8px] p-[8px] bg-red-50 border border-red-200 rounded-[4px] text-[12px] text-red-500">
-                  {mindmapError}
-                </div>
-              )}
             </div>
           )}
 

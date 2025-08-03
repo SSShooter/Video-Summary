@@ -86,7 +86,6 @@ class AIService {
       })
       .filter(text => text.length > 0)
       .join(' ')
-      .substring(0, 8000) // 限制长度避免超出API限制
   }
 }
 
