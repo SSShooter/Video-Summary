@@ -438,5 +438,13 @@
   "notSupportsAutoFetchModels": {
     "message": "该服务商暂不支持自动获取模型列表，可手动输入模型名称",
     "description": "不支持自动获取模型列表提示"
+  },
+  "aiReplyLanguage": {
+    "message": "AI回复语言",
+    "description": "AI回复语言选择标签"
+  },
+  "aiReplyLanguageTip": {
+    "message": "选择AI回复时使用的语言，自动检测将根据浏览器语言设置",
+    "description": "AI回复语言选择提示"
   }
 }

@@ -3,13 +3,63 @@
  * 包含所有用于AI分析的系统提示词和用户提示词模板
  */
 
-import { isChinese } from "~utils/i18n"
+import { Storage } from "@plasmohq/storage"
+
+// 语言映射表
+const LANGUAGE_MAP: Record<string, string> = {
+  "auto": chrome.i18n.getUILanguage(),
+  "zh-CN": "中文",
+  "en": "English", 
+  "ja": "日本語",
+  "ko": "한국어",
+  "fr": "Français",
+  "de": "Deutsch",
+  "es": "Español", 
+  "pt": "Português",
+  "ru": "Русский"
+}
+
+interface AIConfig {
+  enabled: boolean
+  provider: string
+  apiKeys: {
+    openai?: string
+    gemini?: string
+    claude?: string
+    "openai-compatible"?: string
+  }
+  model: string
+  baseUrl?: string
+  baseUrls?: {
+    openai?: string
+    gemini?: string
+    claude?: string
+    "openai-compatible"?: string
+  }
+  customModel?: string
+  replyLanguage?: string
+}
+
+// 获取用户设置的回复语言
+async function getReplyLanguage(): Promise<string> {
+  try {
+    const storage = new Storage()
+    const config = await storage.get<AIConfig>("aiConfig")
+    const languageCode = config?.replyLanguage || "auto"
+    return LANGUAGE_MAP[languageCode] || LANGUAGE_MAP["auto"]
+  } catch (error) {
+    console.error("Failed to get reply language:", error)
+    return LANGUAGE_MAP["auto"]
+  }
+}
 
 export const PROMPTS = {
   /**
    * 字幕总结的系统提示词
    */
-  SUBTITLE_SUMMARY_SYSTEM: `你是一个专业的视频内容分析师和知识提取专家。请仔细分析用户提供的视频字幕内容，并按照以下要求生成结构化的分析结果：
+  SUBTITLE_SUMMARY_SYSTEM: async () => {
+    const language = await getReplyLanguage()
+    return `你是一个知识提取专家。请仔细分析用户提供的内容，并按照以下要求生成结构化的分析结果：
 
 **分析要求：**
 1. **总结(summary)**：生成150-300字的精炼总结，概括视频的核心内容和主要观点
@@ -25,16 +75,17 @@ export const PROMPTS = {
 }
 
 **注意事项：**
-- 输出语言：${ chrome.i18n.getUILanguage()}
+- 输出语言：${language}
 - 保持客观和准确
 - 避免重复内容
-- 确保JSON格式正确`,
+- 确保JSON格式正确`
+  },
 
   /**
    * 字幕总结的用户提示词模板
    */
   SUBTITLE_SUMMARY_USER: (subtitles: string) =>
-    `请分析以下视频字幕内容：
+    `请分析以下内容：
 
 **字幕内容：**
 ${subtitles}
@@ -44,7 +95,9 @@ ${subtitles}
   /**
    * 思维导图生成的提示词
    */
-  MINDMAP_GENERATION: `
+  MINDMAP_GENERATION: async () => {
+    const language = await getReplyLanguage()
+    return `
 \`\`\`ts
 export interface NodeObj {
   topic: string
@@ -123,15 +176,16 @@ export interface Arrow {
 - 适当添加 Summary 和 Arrow
 
 **注意事项：**
-- 输出语言：${ chrome.i18n.getUILanguage()}
+- 输出语言：${language}
 - 确保JSON格式正确，不要返回任何JSON以外的内容
-`,
+`
+  },
 
   /**
    * 视频字幕思维导图用户提示词模板
    */
   MINDMAP_VIDEO_USER: (subtitles: string) =>
-    `请根据以下视频字幕内容生成思维导图：
+    `请根据以下内容生成思维导图：
 
 ${subtitles}`,
 

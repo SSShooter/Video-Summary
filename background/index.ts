@@ -23,6 +23,7 @@ interface AIConfig {
     "openai-compatible"?: string
   }
   customModel?: string
+  replyLanguage?: string
 }
 
 interface APIRequestConfig {
@@ -145,10 +146,7 @@ class BackgroundAIService {
   }
 
   // 从prompts文件导入提示词
-  private readonly SYSTEM_PROMPT = PROMPTS.SUBTITLE_SUMMARY_SYSTEM
   private readonly USER_PROMPT_TEMPLATE = PROMPTS.SUBTITLE_SUMMARY_USER
-
-  private readonly MINDMAP_PROMPT = PROMPTS.MINDMAP_GENERATION
 
   async getConfig(): Promise<AIConfig | null> {
     try {
@@ -194,20 +192,23 @@ class BackgroundAIService {
   }
 
   async summarizeSubtitles(subtitles: string): Promise<SubtitleSummary> {
+    const systemPrompt = await PROMPTS.SUBTITLE_SUMMARY_SYSTEM()
     const userPrompt = this.USER_PROMPT_TEMPLATE(subtitles)
-    const content = await this.callAI(this.SYSTEM_PROMPT, userPrompt)
+    const content = await this.callAI(systemPrompt, userPrompt)
     return ResponseParser.parseSubtitleSummaryResponse(content, { enableTextFallback: true })
   }
 
   async generateMindmap(subtitles: string): Promise<any> {
+    const mindmapPrompt = await PROMPTS.MINDMAP_GENERATION()
     const userPrompt = PROMPTS.MINDMAP_VIDEO_USER(subtitles)
-    const content = await this.callAI(this.MINDMAP_PROMPT, userPrompt)
+    const content = await this.callAI(mindmapPrompt, userPrompt)
     return ResponseParser.parseMindmapResponse(content)
   }
 
   async generateArticleMindmap(content: string, title: string): Promise<any> {
+    const mindmapPrompt = await PROMPTS.MINDMAP_GENERATION()
     const userPrompt = PROMPTS.MINDMAP_ARTICLE_USER(content, title)
-    const responseContent = await this.callAI(this.MINDMAP_PROMPT, userPrompt)
+    const responseContent = await this.callAI(mindmapPrompt, userPrompt)
     return ResponseParser.parseMindmapResponse(responseContent)
   }
 

@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+
 import { Storage } from "@plasmohq/storage"
+
 import { t } from "~utils/i18n"
+
 import "~style.css"
 
 interface AIProvider {
@@ -40,7 +43,11 @@ const AI_PROVIDERS: AIProvider[] = [
     name: "Anthropic Claude",
     apiKeyLabel: "API Key",
     baseUrl: "https://api.anthropic.com/v1",
-    models: ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+    models: [
+      "claude-3-opus-20240229",
+      "claude-3-sonnet-20240229",
+      "claude-3-haiku-20240307"
+    ],
     defaultModel: "claude-3-haiku-20240307",
     supportsModelFetch: false
   },
@@ -54,6 +61,19 @@ const AI_PROVIDERS: AIProvider[] = [
     modelsEndpoint: "/models",
     supportsModelFetch: true
   }
+]
+
+const REPLY_LANGUAGES = [
+  { id: "auto", name: "Auto Detect" },
+  { id: "en", name: "English" },
+  { id: "zh-CN", name: "中文" },
+  { id: "ja", name: "日本語" },
+  { id: "ko", name: "한국어" },
+  { id: "fr", name: "Français" },
+  { id: "de", name: "Deutsch" },
+  { id: "es", name: "Español" },
+  { id: "pt", name: "Português" },
+  { id: "ru", name: "Русский" }
 ]
 
 interface AIConfig {
@@ -74,6 +94,7 @@ interface AIConfig {
   }
   enabled: boolean
   customModel?: string
+  replyLanguage?: string
 }
 
 function OptionsPage() {
@@ -82,11 +103,14 @@ function OptionsPage() {
     apiKeys: {},
     model: "gpt-3.5-turbo",
     enabled: false,
-    baseUrls: {}
+    baseUrls: {},
+    replyLanguage: "auto"
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [availableModels, setAvailableModels] = useState<{ [key: string]: string[] }>({})
+  const [availableModels, setAvailableModels] = useState<{
+    [key: string]: string[]
+  }>({})
   const [fetchingModels, setFetchingModels] = useState(false)
   const [useCustomModel, setUseCustomModel] = useState(false)
   const storage = new Storage()
@@ -106,11 +130,12 @@ function OptionsPage() {
         }
 
         // 如果有API Key且支持获取模型，尝试获取模型列表
-        const provider = AI_PROVIDERS.find(p => p.id === config.provider)
-        const apiKey = config.apiKeys?.[config.provider as keyof typeof config.apiKeys]
+        const provider = AI_PROVIDERS.find((p) => p.id === config.provider)
+        const apiKey =
+          config.apiKeys?.[config.provider as keyof typeof config.apiKeys]
         if (provider && apiKey && provider.supportsModelFetch) {
-          fetchModels(provider, apiKey).then(models => {
-            setAvailableModels(prev => ({
+          fetchModels(provider, apiKey).then((models) => {
+            setAvailableModels((prev) => ({
               ...prev,
               [provider.id]: models
             }))
@@ -158,30 +183,41 @@ function OptionsPage() {
       const url = `${baseUrl}${provider.modelsEndpoint}`
 
       const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       }
 
-      if (provider.id === 'openai' || provider.id === 'openai-compatible') {
-        headers['Authorization'] = `Bearer ${apiKey}`
-      } else if (provider.id === 'gemini') {
+      if (provider.id === "openai" || provider.id === "openai-compatible") {
+        headers["Authorization"] = `Bearer ${apiKey}`
+      } else if (provider.id === "gemini") {
         // Gemini uses API key as query parameter and different endpoint
         const geminiUrl = `${provider.baseUrl}/models?key=${apiKey}`
         const response = await fetch(geminiUrl, { headers })
         const data = await response.json()
         // 过滤出支持 generateContent 的模型
-        const supportedModels = data.models?.filter((m: any) =>
-          m.supportedGenerationMethods?.includes('generateContent')
-        ).map((m: any) => m.name.replace('models/', '')) || provider.models
+        const supportedModels =
+          data.models
+            ?.filter((m: any) =>
+              m.supportedGenerationMethods?.includes("generateContent")
+            )
+            .map((m: any) => m.name.replace("models/", "")) || provider.models
         return supportedModels
       }
 
       const response = await fetch(url, { headers })
       const data = await response.json()
 
-      if (provider.id === 'openai' || provider.id === 'openai-compatible') {
-        return data.data?.map((m: any) => m.id).filter((id: string) =>
-          id.includes('gpt') || id.includes('text-davinci') || id.includes('claude') || id.includes('llama')
-        ) || provider.models
+      if (provider.id === "openai" || provider.id === "openai-compatible") {
+        return (
+          data.data
+            ?.map((m: any) => m.id)
+            .filter(
+              (id: string) =>
+                id.includes("gpt") ||
+                id.includes("text-davinci") ||
+                id.includes("claude") ||
+                id.includes("llama")
+            ) || provider.models
+        )
       }
 
       return provider.models
@@ -194,15 +230,18 @@ function OptionsPage() {
   }
 
   const handleProviderChange = async (providerId: string) => {
-    const provider = AI_PROVIDERS.find(p => p.id === providerId)
+    const provider = AI_PROVIDERS.find((p) => p.id === providerId)
     if (provider) {
       // 从存储中加载完整配置，以获取该服务商之前保存的baseUrl
       const savedConfig = await storage.get<AIConfig>("aiConfig")
 
       // 优先使用该服务商之前保存的baseUrl，否则使用默认的baseUrl
       let newBaseUrl = provider.baseUrl
-      if (savedConfig?.baseUrls?.[providerId as keyof typeof savedConfig.baseUrls]) {
-        newBaseUrl = savedConfig.baseUrls[providerId as keyof typeof savedConfig.baseUrls]
+      if (
+        savedConfig?.baseUrls?.[providerId as keyof typeof savedConfig.baseUrls]
+      ) {
+        newBaseUrl =
+          savedConfig.baseUrls[providerId as keyof typeof savedConfig.baseUrls]
       }
 
       setAiConfig({
@@ -214,10 +253,11 @@ function OptionsPage() {
       setUseCustomModel(false)
 
       // 如果有API Key，尝试获取模型列表
-      const apiKey = aiConfig.apiKeys?.[providerId as keyof typeof aiConfig.apiKeys]
+      const apiKey =
+        aiConfig.apiKeys?.[providerId as keyof typeof aiConfig.apiKeys]
       if (apiKey && provider.supportsModelFetch) {
-        fetchModels(provider, apiKey).then(models => {
-          setAvailableModels(prev => ({
+        fetchModels(provider, apiKey).then((models) => {
+          setAvailableModels((prev) => ({
             ...prev,
             [providerId]: models
           }))
@@ -233,10 +273,10 @@ function OptionsPage() {
     }
     setAiConfig({ ...aiConfig, apiKeys: newApiKeys })
 
-    const provider = AI_PROVIDERS.find(p => p.id === aiConfig.provider)
+    const provider = AI_PROVIDERS.find((p) => p.id === aiConfig.provider)
     if (provider && apiKey && provider.supportsModelFetch) {
-      fetchModels(provider, apiKey).then(models => {
-        setAvailableModels(prev => ({
+      fetchModels(provider, apiKey).then((models) => {
+        setAvailableModels((prev) => ({
           ...prev,
           [provider.id]: models
         }))
@@ -245,10 +285,14 @@ function OptionsPage() {
   }
 
   const handleModelChange = (model: string) => {
-    setAiConfig({ ...aiConfig, model, customModel: useCustomModel ? model : undefined })
+    setAiConfig({
+      ...aiConfig,
+      model,
+      customModel: useCustomModel ? model : undefined
+    })
   }
 
-  const currentProvider = AI_PROVIDERS.find(p => p.id === aiConfig.provider)
+  const currentProvider = AI_PROVIDERS.find((p) => p.id === aiConfig.provider)
 
   return (
     <div className="max-w-3xl mx-auto p-5 font-sans">
@@ -258,12 +302,16 @@ function OptionsPage() {
         <h2 className="text-lg mb-4 text-gray-800">{t("aiServiceConfig")}</h2>
 
         <div className="mb-4">
-          <label className="block mb-2 font-medium text-gray-600">{t("enableAiSummary")}</label>
+          <label className="block mb-2 font-medium text-gray-600">
+            {t("enableAiSummary")}
+          </label>
           <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
               checked={aiConfig.enabled}
-              onChange={(e) => setAiConfig({ ...aiConfig, enabled: e.target.checked })}
+              onChange={(e) =>
+                setAiConfig({ ...aiConfig, enabled: e.target.checked })
+              }
               className="mr-2"
             />
             {t("enableSubtitleAiSummary")}
@@ -273,13 +321,14 @@ function OptionsPage() {
         {aiConfig.enabled && (
           <>
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">{t("aiProvider")}</label>
+              <label className="block mb-2 font-medium text-gray-600">
+                {t("aiProvider")}
+              </label>
               <select
                 value={aiConfig.provider}
                 onChange={(e) => handleProviderChange(e.target.value)}
-                className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
-              >
-                {AI_PROVIDERS.map(provider => (
+                className="w-full py-2 px-3 border border-gray-300 rounded text-sm">
+                {AI_PROVIDERS.map((provider) => (
                   <option key={provider.id} value={provider.id}>
                     {provider.name}
                   </option>
@@ -288,12 +337,21 @@ function OptionsPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">{currentProvider?.apiKeyLabel || "API Key"}</label>
+              <label className="block mb-2 font-medium text-gray-600">
+                {currentProvider?.apiKeyLabel || "API Key"}
+              </label>
               <input
                 type="password"
-                value={aiConfig.apiKeys?.[aiConfig.provider as keyof typeof aiConfig.apiKeys] || ""}
+                value={
+                  aiConfig.apiKeys?.[
+                    aiConfig.provider as keyof typeof aiConfig.apiKeys
+                  ] || ""
+                }
                 onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder={t("enterApiKeyPlaceholder", currentProvider?.name || "")}
+                placeholder={t(
+                  "enterApiKeyPlaceholder",
+                  currentProvider?.name || ""
+                )}
                 className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
               />
               {currentProvider?.supportsModelFetch && (
@@ -304,7 +362,9 @@ function OptionsPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">{t("modelSelection")}</label>
+              <label className="block mb-2 font-medium text-gray-600">
+                {t("modelSelection")}
+              </label>
 
               <div className="mb-3">
                 <label className="flex items-center cursor-pointer mb-2">
@@ -325,36 +385,49 @@ function OptionsPage() {
                         value={aiConfig.model}
                         onChange={(e) => handleModelChange(e.target.value)}
                         disabled={fetchingModels}
-                        className="flex-1 py-2 px-3 border border-gray-300 rounded text-sm"
-                      >
-                        {(availableModels[aiConfig.provider] || currentProvider?.models || []).map(model => (
+                        className="flex-1 py-2 px-3 border border-gray-300 rounded text-sm">
+                        {(
+                          availableModels[aiConfig.provider] ||
+                          currentProvider?.models ||
+                          []
+                        ).map((model) => (
                           <option key={model} value={model}>
                             {model}
                           </option>
                         ))}
                       </select>
 
-                      {currentProvider?.supportsModelFetch && aiConfig.apiKeys?.[aiConfig.provider as keyof typeof aiConfig.apiKeys] && (
-                        <button
-                          onClick={() => {
-                            const provider = AI_PROVIDERS.find(p => p.id === aiConfig.provider)
-                            const apiKey = aiConfig.apiKeys?.[aiConfig.provider as keyof typeof aiConfig.apiKeys]
-                            if (provider && apiKey) {
-                              fetchModels(provider, apiKey).then(models => {
-                                setAvailableModels(prev => ({
-                                  ...prev,
-                                  [provider.id]: models
-                                }))
-                              })
-                            }
-                          }}
-                          disabled={fetchingModels}
-                          className={`py-2 px-3 border border-gray-300 rounded bg-gray-50 text-xs ${fetchingModels ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-gray-100'
-                            }`}
-                        >
-                          {fetchingModels ? t("refreshing") : t("refresh")}
-                        </button>
-                      )}
+                      {currentProvider?.supportsModelFetch &&
+                        aiConfig.apiKeys?.[
+                          aiConfig.provider as keyof typeof aiConfig.apiKeys
+                        ] && (
+                          <button
+                            onClick={() => {
+                              const provider = AI_PROVIDERS.find(
+                                (p) => p.id === aiConfig.provider
+                              )
+                              const apiKey =
+                                aiConfig.apiKeys?.[
+                                  aiConfig.provider as keyof typeof aiConfig.apiKeys
+                                ]
+                              if (provider && apiKey) {
+                                fetchModels(provider, apiKey).then((models) => {
+                                  setAvailableModels((prev) => ({
+                                    ...prev,
+                                    [provider.id]: models
+                                  }))
+                                })
+                              }
+                            }}
+                            disabled={fetchingModels}
+                            className={`py-2 px-3 border border-gray-300 rounded bg-gray-50 text-xs ${
+                              fetchingModels
+                                ? "cursor-not-allowed opacity-60"
+                                : "cursor-pointer hover:bg-gray-100"
+                            }`}>
+                            {fetchingModels ? t("refreshing") : t("refresh")}
+                          </button>
+                        )}
                     </div>
                   </div>
                 )}
@@ -398,11 +471,18 @@ function OptionsPage() {
 
             {currentProvider?.baseUrl && (
               <div className="mb-4">
-                <label className="block mb-2 font-medium text-gray-600">{t("apiAddress")}</label>
+                <label className="block mb-2 font-medium text-gray-600">
+                  {t("apiAddress")}
+                </label>
                 <input
                   type="text"
                   value={aiConfig.baseUrl || ""}
-                  onChange={(e) => setAiConfig({ ...aiConfig, baseUrl: e.target.value || undefined })}
+                  onChange={(e) =>
+                    setAiConfig({
+                      ...aiConfig,
+                      baseUrl: e.target.value || undefined
+                    })
+                  }
                   placeholder={currentProvider.baseUrl}
                   className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
                 />
@@ -411,22 +491,49 @@ function OptionsPage() {
                 </small>
               </div>
             )}
+
+            <div className="mb-4">
+              <label className="block mb-2 font-medium text-gray-600">
+                {t("aiReplyLanguage")}
+              </label>
+              <select
+                value={aiConfig.replyLanguage || "auto"}
+                onChange={(e) =>
+                  setAiConfig({ ...aiConfig, replyLanguage: e.target.value })
+                }
+                className="w-full py-2 px-3 border border-gray-300 rounded text-sm">
+                {REPLY_LANGUAGES.map((lang) => (
+                  <option key={lang.id} value={lang.id}>
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+              <small className="text-gray-600 text-xs block mt-1">
+                {t("aiReplyLanguageTip")}
+              </small>
+            </div>
           </>
         )}
 
         <button
           onClick={saveConfig}
           disabled={saving}
-          className={`${saved ? 'bg-green-600' : 'bg-blue-600'} text-white border-none py-2 px-5 rounded text-sm ${saving ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-            }`}
-        >
+          className={`${saved ? "bg-green-600" : "bg-blue-600"} text-white border-none py-2 px-5 rounded text-sm ${
+            saving ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+          }`}>
           {saving ? t("saving") : saved ? t("saved") : t("saveConfig")}
         </button>
       </div>
 
       <div className="bg-gray-200 p-4 rounded-lg text-sm text-gray-600">
-        <h3 className="mt-0 mb-3 text-base text-gray-800">{t("usageInstructions")}</h3>
-        <a href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+        <h3 className="mt-0 mb-3 text-base text-gray-800">
+          {t("usageInstructions")}
+        </h3>
+        <a
+          href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline">
           https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md
         </a>
       </div>

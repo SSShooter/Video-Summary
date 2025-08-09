@@ -20,6 +20,7 @@ export interface AIConfig {
   }
   enabled: boolean
   customModel?: string
+  replyLanguage?: string
 }
 
 export interface SubtitleSummary {

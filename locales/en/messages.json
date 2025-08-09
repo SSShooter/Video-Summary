@@ -438,5 +438,13 @@
   "notSupportsAutoFetchModels": {
     "message": "This provider does not support automatic model list fetching, you can manually enter model name",
     "description": "Not supports auto fetch models tip"
+  },
+  "aiReplyLanguage": {
+    "message": "AI Reply Language",
+    "description": "AI reply language selection label"
+  },
+  "aiReplyLanguageTip": {
+    "message": "Select the language for AI replies, auto detect will use browser language settings",
+    "description": "AI reply language selection tip"
   }
 }
