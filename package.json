@@ -1,7 +1,7 @@
 {
   "name": "video-mindmap",
   "displayName": "__MSG_extensionName__",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "__MSG_extensionDescription__",
   "author": "Dexter",
   "scripts": {
