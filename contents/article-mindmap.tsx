@@ -29,6 +29,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger
 } from "~components/ui/dropdown-menu"
+import { ScrollArea } from "~components/ui/scroll-area"
 import { Toaster } from "~components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
@@ -62,7 +63,7 @@ interface CachedData {
 
 function ArticleMindmapPanel() {
   const [articleInfo, setArticleInfo] = useState<ArticleInfo | null>(null)
-  const [loading, setLoading] = useState(false)
+
   const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
   const [mindmapLoading, setMindmapLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -269,8 +270,6 @@ function ArticleMindmapPanel() {
   // 初始化检测文章信息（但不显示面板）
   useEffect(() => {
     const initDetection = async () => {
-      setLoading(true)
-
       try {
         const detected = detectArticle()
         if (detected) {
@@ -290,8 +289,6 @@ function ArticleMindmapPanel() {
         }
       } catch (error) {
         console.error(t("articleDetectionFailed"), error)
-      } finally {
-        setLoading(false)
       }
     }
 
@@ -333,11 +330,9 @@ function ArticleMindmapPanel() {
             </svg>
           </Button>
         </div>
-        {articleInfo && (
-          <div className="text-[12px] text-gray-600 leading-relaxed">
-            {articleInfo.title}
-          </div>
-        )}
+        <div className="text-[12px] text-gray-600 leading-relaxed">
+          {articleInfo.title}
+        </div>
       </div>
 
       <Tabs
@@ -348,205 +343,193 @@ function ArticleMindmapPanel() {
           <TabsTrigger value="mindmap">{t("mindmap")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="summary" className="flex-1 overflow-auto mt-[12px]">
-          {/* AI总结功能按钮 */}
-          {articleInfo && (
-            <>
-              <div className="flex gap-[8px]">
-                <Button
-                  onClick={() => summarizeWithAI(false)}
-                  disabled={aiLoading}
-                  size="sm"
-                  className={`flex-1`}>
-                  {aiLoading
-                    ? t("summarizing")
-                    : aiSummary
-                      ? t("viewSummary")
-                      : t("generateAiSummary")}
-                </Button>
-                {aiSummary && (
-                  <Button
-                    onClick={() => summarizeWithAI(true)}
-                    disabled={aiLoading}
-                    size="sm">
-                    {t("regenerate")}
-                  </Button>
-                )}
-              </div>
-            </>
-          )}
-
-          {!aiSummary && !aiLoading && !articleInfo && (
-            <div className="text-center py-[40px] px-[20px] text-gray-600">
-              <div className="mb-[12px]">{t("noAiSummary")}</div>
-              <div className="text-[12px]">
-                {t("clickToGenerateArticleSummary")}
-              </div>
+        <TabsContent value="summary" className="overflow-hidden mt-[12px]">
+          <div className="flex-1 flex flex-col h-full">
+            {/* AI总结功能按钮 - 固定在顶部 */}
+            <div className="mb-[12px]">
+              <Button
+                onClick={() => summarizeWithAI(!!aiSummary)}
+                disabled={aiLoading}
+                size="sm"
+                className="w-full">
+                {aiLoading
+                  ? t("summarizing")
+                  : aiSummary
+                    ? t("regenerate")
+                    : t("generateAiSummary")}
+              </Button>
             </div>
-          )}
-
-          {aiLoading && (
-            <div className="text-center py-[40px] px-[20px] text-gray-600">
-              {t("generatingAiSummary")}
-            </div>
-          )}
-
-          {aiSummary && (
-            <div className="prose p-[12px] mt-[12px] bg-green-50 border border-green-300 rounded-[6px]">
-              <div className="flex justify-between items-center mb-[12px]">
-                <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
-                  {t("aiContentSummaryTitle")}
-                </h4>
-                {cacheLoaded && (
-                  <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
-                    {t("cached")}
-                  </span>
-                )}
-              </div>
-
-              <div className="mb-[12px]">
-                <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                  {t("summary")}
-                </div>
-                <div className="text-[12px] leading-relaxed text-gray-800">
-                  {aiSummary.summary}
-                </div>
-              </div>
-
-              {aiSummary.keyPoints.length > 0 && (
-                <div className="mb-[12px]">
-                  <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    {t("keyPoints")}
+            <ScrollArea className="flex-1">
+              {!aiSummary && !aiLoading && (
+                <div className="text-center py-[40px] px-[20px] text-gray-600">
+                  <div className="mb-[12px]">{t("noAiSummary")}</div>
+                  <div className="text-[12px]">
+                    {t("clickToGenerateArticleSummary")}
                   </div>
-                  <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
-                    {aiSummary.keyPoints.map((point, index) => (
-                      <li key={index} className="mb-[2px]">
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               )}
 
-              {aiSummary.topics.length > 0 && (
-                <div>
-                  <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    {t("mainTopics")}
-                  </div>
-                  <div className="flex flex-wrap gap-[4px]">
-                    {aiSummary.topics.map((topic, index) => (
-                      <span
-                        key={index}
-                        className="py-[2px] px-[6px] bg-blue-50 text-blue-500 text-[12px] rounded-full border border-blue-200">
-                        {topic}
+              {aiLoading && (
+                <div className="text-center py-[40px] px-[20px] text-gray-600">
+                  {t("generatingAiSummary")}
+                </div>
+              )}
+
+              {aiSummary && (
+                <div className="prose p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
+                  <div className="flex justify-between items-center mb-[12px]">
+                    <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
+                      {t("aiContentSummaryTitle")}
+                    </h4>
+                    {cacheLoaded && (
+                      <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
+                        {t("cached")}
                       </span>
-                    ))}
+                    )}
                   </div>
+
+                  <div className="mb-[12px]">
+                    <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
+                      {t("summary")}
+                    </div>
+                    <div className="text-[12px] leading-relaxed text-gray-800">
+                      {aiSummary.summary}
+                    </div>
+                  </div>
+
+                  {aiSummary.keyPoints.length > 0 && (
+                    <div className="mb-[12px]">
+                      <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
+                        {t("keyPoints")}
+                      </div>
+                      <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
+                        {aiSummary.keyPoints.map((point, index) => (
+                          <li key={index} className="mb-[2px]">
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {aiSummary.topics.length > 0 && (
+                    <div>
+                      <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
+                        {t("mainTopics")}
+                      </div>
+                      <div className="flex flex-wrap gap-[4px]">
+                        {aiSummary.topics.map((topic, index) => (
+                          <span
+                            key={index}
+                            className="py-[2px] px-[6px] bg-blue-50 text-blue-500 text-[12px] rounded-full border border-blue-200">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
+            </ScrollArea>
+          </div>
         </TabsContent>
 
-        <TabsContent value="mindmap" className="flex-1 overflow-auto mt-[12px]">
-          {/* 思维导图功能按钮 */}
-          {articleInfo && (
-            <div className="p-[0px]">
-              <div className="flex gap-[8px] mb-[8px] justify-center">
-                {!mindmapData ? (
+        <TabsContent value="mindmap" className="overflow-auto mt-[12px]">
+          <div className="flex-1 flex flex-col h-full">
+            <div className="flex mb-[8px] gap-2 justify-between">
+              <Button
+                className="flex-grow"
+                onClick={() => generateMindmap(!!mindmapData)}
+                disabled={mindmapLoading}
+                size="sm"
+                title={
+                  mindmapLoading
+                    ? t("generating")
+                    : mindmapData
+                      ? t("regenerate")
+                      : t("generateMindmapBtn")
+                }>
+                {mindmapLoading
+                  ? t("generating")
+                  : mindmapData
+                    ? t("regenerate")
+                    : t("generateMindmapBtn")}
+                {mindmapData ? (
+                  <RotateCcw className="w-4 h-4" />
+                ) : (
+                  <Brain className="w-4 h-4" />
+                )}
+              </Button>
+              {mindmapData && (
+                <>
                   <Button
-                    onClick={() => generateMindmap(false)}
-                    disabled={mindmapLoading}
+                    onClick={openInMindElixir}
+                    disabled={mindElixirLoading}
                     size="sm"
                     title={
-                      mindmapLoading ? t("generating") : t("generateMindmapBtn")
+                      mindElixirLoading ? t("opening") : t("openInMindElixir")
                     }>
-                    {mindmapLoading ? t("generating") : t("generateMindmapBtn")}
-                    <Brain className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4" />
                   </Button>
-                ) : (
                   <Button
-                    onClick={() => generateMindmap(true)}
-                    disabled={mindmapLoading}
+                    onClick={() => {
+                      fullscreen(mindElixirRef.current?.instance!)
+                    }}
                     size="sm"
-                    title={t("regenerate")}>
-                    {t("regenerate")}
-                    <RotateCcw className="w-4 h-4" />
+                    title={t("fullscreen")}>
+                    <Maximize className="w-4 h-4" />
                   </Button>
-                )}
-                {mindmapData && (
-                  <>
-                    <Button
-                      onClick={openInMindElixir}
-                      disabled={mindElixirLoading}
-                      size="sm"
-                      title={
-                        mindElixirLoading ? t("opening") : t("openInMindElixir")
-                      }>
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        fullscreen(mindElixirRef.current?.instance!)
-                      }}
-                      size="sm"
-                      title={t("fullscreen")}>
-                      <Maximize className="w-4 h-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="sm" title={t("download") || "下载"}>
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuPortal container={panelRef.current}>
-                        <DropdownMenuContent align="end">
-                          {downloadMethodList.map((method) => (
-                            <DropdownMenuItem
-                              key={method.type}
-                              onClick={() => {
-                                if (mindElixirRef.current?.instance) {
-                                  method.download(
-                                    mindElixirRef.current.instance
-                                  )
-                                }
-                              }}>
-                              {method.type}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenuPortal>
-                    </DropdownMenu>
-                  </>
-                )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="sm" title={t("download") || "下载"}>
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuPortal container={panelRef.current}>
+                      <DropdownMenuContent align="end">
+                        {downloadMethodList.map((method) => (
+                          <DropdownMenuItem
+                            key={method.type}
+                            onClick={() => {
+                              if (mindElixirRef.current?.instance) {
+                                method.download(mindElixirRef.current.instance)
+                              }
+                            }}>
+                            {method.type}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenu>
+                </>
+              )}
+            </div>
+
+            {!mindmapData && !mindmapLoading && (
+              <div className="text-center py-[40px] px-[20px] text-gray-600">
+                <div className="mb-[12px]">{t("noMindmap")}</div>
+                <div className="text-[12px]">
+                  {t("clickToGenerateArticleMindmap")}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {!mindmapData && !mindmapLoading && !articleInfo && (
-            <div className="text-center py-[40px] px-[20px] text-gray-600">
-              <div className="mb-[12px]">{t("noMindmap")}</div>
-              <div className="text-[12px]">
-                {t("clickToGenerateArticleMindmap")}
+            {mindmapLoading && (
+              <div className="text-center py-[40px] px-[20px] text-gray-600">
+                {t("generatingMindmap")}
               </div>
-            </div>
-          )}
+            )}
 
-          {mindmapLoading && (
-            <div className="text-center py-[40px] px-[20px] text-gray-600">
-              {t("generatingMindmap")}
-            </div>
-          )}
-
-          {mindmapData && (
-            <div className="h-[calc(100%-120px)] border border-gray-300 rounded-[6px] overflow-hidden mt-[12px]">
-              <MindElixirReact
-                data={mindmapData}
-                ref={mindElixirRef}
-                options={options}
-              />
-            </div>
-          )}
+            {mindmapData && (
+              <div className="flex-1 border border-gray-300 rounded-[6px] overflow-hidden">
+                <MindElixirReact
+                  data={mindmapData}
+                  ref={mindElixirRef}
+                  options={options}
+                />
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
       <Toaster />
