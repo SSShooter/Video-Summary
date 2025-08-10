@@ -2,24 +2,17 @@ import styleOverride from "data-text:./mind-elixir-css-override.css"
 import tailwindStyles from "data-text:~style.css"
 import styleText from "data-text:mind-elixir/style.css"
 import sonnerStyle from "data-text:sonner/dist/styles.css"
-import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 
 import { Storage } from "@plasmohq/storage"
 
-import { MindmapDisplay } from "~components/MindmapDisplay"
-import { SummaryDisplay } from "~components/SummaryDisplay"
-import { Button } from "~components/ui/button"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuTrigger
-} from "~components/ui/dropdown-menu"
-import { ScrollArea } from "~components/ui/scroll-area"
+  MindmapDisplay,
+  type MindmapGenerateConfig
+} from "~components/MindmapDisplay"
+import { SummaryDisplay, type SummaryGenerateConfig } from "~components/SummaryDisplay"
+import { Button } from "~components/ui/button"
 import { Toaster } from "~components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
@@ -43,40 +36,20 @@ export const getStyle: PlasmoGetStyle = () => {
   return style
 }
 
-interface CachedData {
-  mindmapData: MindElixirData | null
-  aiSummary: SubtitleSummary | null
-  timestamp: number
-}
+
 
 function ArticleMindmapPanel() {
   const [articleInfo, setArticleInfo] = useState<ArticleInfo | null>(null)
 
-  const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
-  const [mindmapLoading, setMindmapLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
-  const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
-  const [aiLoading, setAiLoading] = useState(false)
-  const [cacheLoaded, setCacheLoaded] = useState(false)
-  const storage = new Storage()
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // AI总结文章
-  const summarizeWithAI = async (forceRegenerate = false) => {
-    if (!articleInfo) {
-      toast.error(t("noArticleContent"))
-      return
-    }
-
-    // 如果不是强制重新生成且已有缓存数据，直接使用缓存
-    if (!forceRegenerate && aiSummary) {
-      return
-    }
-
-    try {
-      setAiLoading(true)
-      toast.loading(t("generatingAiSummary"))
+  // AI总结生成配置
+  const summaryGenerateConfig: SummaryGenerateConfig = {
+    action: "summarizeSubtitles",
+    getContent: () => {
+      if (!articleInfo) return null
 
       // 使用智能HTML到Markdown转换
       let markdownContent = detectAndConvertArticle()
@@ -86,64 +59,16 @@ function ArticleMindmapPanel() {
         markdownContent = articleInfo.content
       }
 
-      // 通过background脚本调用AI服务
-      const response = await new Promise<SubtitleSummary>((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          {
-            action: "summarizeSubtitles",
-            subtitles: markdownContent
-          },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message))
-              return
-            }
-
-            if (response.success) {
-              resolve(response.data)
-            } else {
-              reject(new Error(response.error))
-            }
-          }
-        )
-      })
-
-      setAiSummary(response)
-      toast.dismiss()
-      toast.success(t("aiSummaryGenerated") || "AI总结生成成功")
-
-      // 保存到缓存
-      const cacheKey = `article_mindmap_${btoa(articleInfo.url)}`
-      const cacheData: CachedData = {
-        mindmapData,
-        aiSummary: response,
-        timestamp: Date.now()
-      }
-      await storage.set(cacheKey, cacheData)
-    } catch (error) {
-      console.error("AI总结失败:", error)
-      toast.dismiss()
-      toast.error(error instanceof Error ? error.message : t("summaryFailed"))
-    } finally {
-      setAiLoading(false)
-    }
+      return markdownContent
+    },
+    additionalData: {}
   }
 
-  // 生成思维导图
-  const generateMindmap = async (forceRegenerate = false) => {
-    if (!articleInfo) {
-      toast.error("没有文章内容可以生成思维导图")
-      return
-    }
-
-    // 如果不是强制重新生成且已有缓存数据，直接使用缓存
-    if (!forceRegenerate && mindmapData) {
-      return
-    }
-
-    try {
-      setMindmapLoading(true)
-      toast.loading(t("generatingMindmap"))
+  // 思维导图生成配置
+  const mindmapGenerateConfig: MindmapGenerateConfig = {
+    action: "generateArticleMindmap",
+    getContent: () => {
+      if (!articleInfo) return null
 
       // 使用智能HTML到Markdown转换
       let markdownContent = detectAndConvertArticle()
@@ -154,68 +79,22 @@ function ArticleMindmapPanel() {
         markdownContent = articleInfo.content
       }
 
-      // 通过background脚本调用AI服务
-      const response = await new Promise<MindElixirData>((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          {
-            action: "generateArticleMindmap",
-            content: markdownContent,
-            title: articleInfo.title
-          },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message))
-              return
-            }
-
-            if (response.success) {
-              resolve(response.data)
-            } else {
-              reject(new Error(response.error))
-            }
-          }
-        )
-      })
-
-      setMindmapData(response)
-      toast.dismiss()
-      toast.success(t("mindmapGenerated") || "思维导图生成成功")
-
-      // 缓存结果
-      const cacheKey = `article_mindmap_${btoa(articleInfo.url)}`
-      const cacheData: CachedData = {
-        mindmapData: response,
-        aiSummary,
-        timestamp: Date.now()
-      }
-      await storage.set(cacheKey, cacheData)
-    } catch (error) {
-      console.error("生成思维导图失败:", error)
-      toast.dismiss()
-      toast.error(
-        error instanceof Error ? error.message : t("generateMindmapFailed")
-      )
-    } finally {
-      setMindmapLoading(false)
-    }
+      return markdownContent
+    },
+    getTitle: () => articleInfo?.title || "",
+    additionalData: {}
   }
 
-  // 检查缓存
-  const checkCache = async (url: string): Promise<CachedData | null> => {
-    try {
-      const cacheKey = `article_mindmap_${btoa(url)}`
-      const cached = await storage.get<CachedData>(cacheKey)
+  // 获取AI总结缓存键
+  const getSummaryCacheKey = () => {
+    if (!articleInfo) return undefined
+    return `summary_${btoa(articleInfo.url)}`
+  }
 
-      if (cached) {
-        const isExpired = Date.now() - cached.timestamp > 24 * 60 * 60 * 1000 // 24小时过期
-        if (!isExpired) {
-          return cached
-        }
-      }
-    } catch (error) {
-      console.error(t("checkCacheFailed"), error)
-    }
-    return null
+  // 获取思维导图缓存键
+  const getMindmapCacheKey = () => {
+    if (!articleInfo) return undefined
+    return `mindmap_${btoa(articleInfo.url)}`
   }
 
   // 监听来自popup的消息
@@ -237,18 +116,6 @@ function ArticleMindmapPanel() {
         const detected = detectArticle()
         if (detected) {
           setArticleInfo(detected)
-
-          // 检查缓存
-          const cachedData = await checkCache(detected.url)
-          if (cachedData) {
-            if (cachedData.mindmapData) {
-              setMindmapData(cachedData.mindmapData)
-            }
-            if (cachedData.aiSummary) {
-              setAiSummary(cachedData.aiSummary)
-            }
-            setCacheLoaded(true)
-          }
         }
       } catch (error) {
         console.error(t("articleDetectionFailed"), error)
@@ -308,22 +175,18 @@ function ArticleMindmapPanel() {
 
         <TabsContent value="summary" className="overflow-hidden mt-[12px]">
           <SummaryDisplay
-            aiSummary={aiSummary}
-            aiLoading={aiLoading}
-            cacheLoaded={cacheLoaded}
-            onGenerate={() => summarizeWithAI(!!aiSummary)}
+            generateConfig={summaryGenerateConfig}
+            cacheKey={getSummaryCacheKey()}
             noSummaryText={t("noAiSummary")}
             generatePromptText={t("clickToGenerateArticleSummary")}
           />
         </TabsContent>
 
-        <TabsContent value="mindmap" className="overflow-auto mt-[12px]">
+        <TabsContent value="mindmap" className="overflow-hidden mt-[12px]">
           <MindmapDisplay
-            mindmapData={mindmapData}
-            mindmapLoading={mindmapLoading}
-            onGenerate={() => generateMindmap(!!mindmapData)}
             panelRef={panelRef}
-            generatePromptText={t("clickToGenerateArticleMindmap")}
+            generateConfig={mindmapGenerateConfig}
+            cacheKey={getMindmapCacheKey()}
           />
         </TabsContent>
       </Tabs>

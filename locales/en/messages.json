@@ -303,6 +303,10 @@
     "message": "Generating mindmap...",
     "description": "Generating mindmap status"
   },
+  "mindmapGenerated": {
+    "message": "Mindmap generated successfully",
+    "description": "Mindmap generated successfully message"
+  },
   "openInMindElixir": {
     "message": "Open in Mind Elixir",
     "description": "Open in Mind Elixir button"

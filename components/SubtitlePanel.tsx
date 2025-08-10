@@ -1,17 +1,12 @@
-import type { MindElixirData } from "mind-elixir"
-import React, { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
-
-import { Storage } from "@plasmohq/storage"
+import React, { useRef } from "react"
 
 import { Button } from "~components/ui/button"
 import { Toaster } from "~components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
-import { aiService, type SubtitleSummary } from "~utils/ai-service"
-import { formatTime as formatTimeI18n, t } from "~utils/i18n"
+import { t } from "~utils/i18n"
 
-import { MindmapDisplay } from "./MindmapDisplay"
-import { SummaryDisplay } from "./SummaryDisplay"
+import { MindmapDisplay, type MindmapGenerateConfig } from "./MindmapDisplay"
+import { SummaryDisplay, type SummaryGenerateConfig } from "./SummaryDisplay"
 import { ScrollArea } from "./ui/scroll-area"
 
 export interface SubtitleItem {
@@ -30,11 +25,7 @@ export interface VideoInfo {
   title: string
 }
 
-interface CachedData {
-  aiSummary: SubtitleSummary | null
-  mindmapData: MindElixirData | null
-  timestamp: number
-}
+
 
 export interface SubtitlePanelProps {
   subtitles: SubtitleItem[]
@@ -55,51 +46,27 @@ export function SubtitlePanel({
   platform,
   onClose
 }: SubtitlePanelProps) {
-  const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
-  const [aiLoading, setAiLoading] = useState(false)
-  const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
-  const [mindmapLoading, setMindmapLoading] = useState(false)
 
-  const [cacheLoaded, setCacheLoaded] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
-  console.log(panelRef, "panelRef")
-  const storage = new Storage()
 
-  // 获取缓存键
-  const getCacheKey = (): string | null => {
+  // 获取思维导图缓存键
+  const getMindmapCacheKey = () => {
     if (platform === "bilibili" && videoInfo?.bvid) {
-      return `video_cache_${videoInfo.bvid}`
+      return `mindmap_${videoInfo.bvid}`
     } else if (platform === "youtube" && videoInfo?.videoId) {
-      return `video_cache_${videoInfo.videoId}`
+      return `mindmap_${videoInfo.videoId}`
     }
-    return null
+    return undefined
   }
 
-  // 保存缓存数据
-  const saveCacheData = async (data: CachedData) => {
-    try {
-      const cacheKey = getCacheKey()
-      if (cacheKey) {
-        await storage.set(cacheKey, data)
-      }
-    } catch (error) {
-      console.error("保存缓存失败:", error)
+  // 获取AI总结缓存键
+  const getSummaryCacheKey = () => {
+    if (platform === "bilibili" && videoInfo?.bvid) {
+      return `summary_${videoInfo.bvid}`
+    } else if (platform === "youtube" && videoInfo?.videoId) {
+      return `summary_${videoInfo.videoId}`
     }
-  }
-
-  // 加载缓存数据
-  const loadCacheData = async (): Promise<CachedData | null> => {
-    try {
-      const cacheKey = getCacheKey()
-      if (cacheKey) {
-        const cached = await storage.get<CachedData>(cacheKey)
-        return cached || null
-      }
-      return null
-    } catch (error) {
-      console.error("加载缓存失败:", error)
-      return null
-    }
+    return undefined
   }
 
   // 格式化时间
@@ -129,131 +96,39 @@ export function SubtitlePanel({
     return subtitle.content || subtitle.text || ""
   }
 
-  // AI总结字幕
-  const summarizeWithAI = async (forceRegenerate = false) => {
-    if (subtitles.length === 0) {
-      toast.error(t("noSubtitles"))
-      return
-    }
-
-    // 如果不是强制重新生成且已有缓存数据，直接使用缓存
-    if (!forceRegenerate && aiSummary) {
-      return
-    }
-
-    try {
-      setAiLoading(true)
-      toast.loading(t("generatingAiSummary"))
-
-      const summary = await aiService.summarizeSubtitles(subtitles)
-
-      setAiSummary(summary)
-      toast.dismiss()
-      toast.success(t("aiSummaryGenerated") || "AI总结生成成功")
-
-      // 保存到缓存
-      await saveCacheData({
-        aiSummary: summary,
-        mindmapData,
-        timestamp: Date.now()
-      })
-    } catch (error) {
-      console.error("AI总结失败:", error)
-      toast.dismiss()
-      toast.error(
-        error instanceof Error ? error.message : "总结失败，请检查AI配置"
-      )
-    } finally {
-      setAiLoading(false)
-    }
-  }
-
-  // 生成思维导图
-  const generateMindmap = async (forceRegenerate = false) => {
-    if (subtitles.length === 0) {
-      toast.error("没有字幕内容可以生成思维导图")
-      return
-    }
-
-    // 如果不是强制重新生成且已有缓存数据，直接使用缓存
-    if (!forceRegenerate && mindmapData) {
-      return
-    }
-
-    try {
-      setMindmapLoading(true)
-      toast.loading(t("generatingMindmap"))
+  // AI总结生成配置
+  const summaryGenerateConfig: SummaryGenerateConfig = {
+    action: "summarizeSubtitles",
+    getContent: () => {
+      if (subtitles.length === 0) return null
 
       // 格式化字幕内容
-      const formattedSubtitles = subtitles
+      return subtitles
         .map((subtitle) => getSubtitleContent(subtitle))
         .join(" ")
         .replace(/\s+/g, " ")
         .trim()
-
-      // 发送消息到background script生成思维导图
-      const response = await new Promise<any>((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          {
-            action: "generateMindmap",
-            subtitles: formattedSubtitles
-          },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message))
-            } else {
-              resolve(response)
-            }
-          }
-        )
-      })
-
-      if (response.success) {
-        setMindmapData(response.data)
-        toast.dismiss()
-        toast.success(t("mindmapGenerated") || "思维导图生成成功")
-
-        // 保存到缓存
-        await saveCacheData({
-          aiSummary,
-          mindmapData: response.data,
-          timestamp: Date.now()
-        })
-      } else {
-        throw new Error(response.error || "生成思维导图失败")
-      }
-    } catch (error) {
-      console.error("生成思维导图失败:", error)
-      toast.dismiss()
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "生成思维导图失败，请检查AI配置"
-      )
-    } finally {
-      setMindmapLoading(false)
-    }
+    },
+    additionalData: {}
   }
 
-  // 加载缓存数据
-  useEffect(() => {
-    const loadCache = async () => {
-      if (videoInfo) {
-        const cached = await loadCacheData()
-        if (cached) {
-          if (cached.aiSummary) {
-            setAiSummary(cached.aiSummary)
-          }
-          if (cached.mindmapData) {
-            setMindmapData(cached.mindmapData)
-          }
-          setCacheLoaded(true)
-        }
-      }
-    }
+  // 思维导图生成配置
+  const mindmapGenerateConfig: MindmapGenerateConfig = {
+    action: "generateMindmap",
+    getContent: () => {
+      if (subtitles.length === 0) return null
 
-    loadCache()
-  }, [videoInfo])
+      // 格式化字幕内容
+      return subtitles
+        .map((subtitle) => getSubtitleContent(subtitle))
+        .join(" ")
+        .replace(/\s+/g, " ")
+        .trim()
+    },
+    additionalData: {}
+  }
+
+
 
   return (
     <div
@@ -342,19 +217,16 @@ export function SubtitlePanel({
 
         <TabsContent value="summary" className="overflow-hidden mt-[12px]">
           <SummaryDisplay
-            aiSummary={aiSummary}
-            aiLoading={aiLoading}
-            cacheLoaded={cacheLoaded}
-            onGenerate={() => summarizeWithAI(!!aiSummary)}
+            generateConfig={summaryGenerateConfig}
+            cacheKey={getSummaryCacheKey()}
           />
         </TabsContent>
 
-        <TabsContent value="mindmap" className="overflow-auto mt-[12px]">
+        <TabsContent value="mindmap" className="overflow-hidden mt-[12px]">
           <MindmapDisplay
-            mindmapData={mindmapData}
-            mindmapLoading={mindmapLoading}
-            onGenerate={() => generateMindmap(!!mindmapData)}
             panelRef={panelRef}
+            generateConfig={mindmapGenerateConfig}
+            cacheKey={getMindmapCacheKey()}
           />
         </TabsContent>
       </Tabs>

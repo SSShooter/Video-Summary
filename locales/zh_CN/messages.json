@@ -303,6 +303,10 @@
     "message": "正在生成思维导图...",
     "description": "生成思维导图状态"
   },
+  "mindmapGenerated": {
+    "message": "思维导图生成成功",
+    "description": "思维导图生成成功提示"
+  },
   "openInMindElixir": {
     "message": "在 Mind Elixir 打开",
     "description": "在Mind Elixir打开按钮"
