@@ -2,6 +2,25 @@ import { useEffect, useState } from "react"
 
 import { Storage } from "@plasmohq/storage"
 
+import { Button } from "~components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "~components/ui/card"
+import { Checkbox } from "~components/ui/checkbox"
+import { Input } from "~components/ui/input"
+import { Label } from "~components/ui/label"
+import { RadioGroup, RadioGroupItem } from "~components/ui/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "~components/ui/select"
 import { t } from "~utils/i18n"
 
 import "~style.css"
@@ -295,248 +314,265 @@ function OptionsPage() {
   const currentProvider = AI_PROVIDERS.find((p) => p.id === aiConfig.provider)
 
   return (
-    <div className="max-w-3xl mx-auto p-5 font-sans">
-      <h1 className="text-2xl mb-5 text-gray-800">{t("optionsTitle")}</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {t("optionsTitle")}
+        </h1>
+      </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg mb-5">
-        <h2 className="text-lg mb-4 text-gray-800">{t("aiServiceConfig")}</h2>
-
-        <div className="mb-4">
-          <label className="block mb-2 font-medium text-gray-600">
-            {t("enableAiSummary")}
-          </label>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={aiConfig.enabled}
-              onChange={(e) =>
-                setAiConfig({ ...aiConfig, enabled: e.target.checked })
-              }
-              className="mr-2"
-            />
-            {t("enableSubtitleAiSummary")}
-          </label>
-        </div>
-
-        {aiConfig.enabled && (
-          <>
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">
-                {t("aiProvider")}
-              </label>
-              <select
-                value={aiConfig.provider}
-                onChange={(e) => handleProviderChange(e.target.value)}
-                className="w-full py-2 px-3 border border-gray-300 rounded text-sm">
-                {AI_PROVIDERS.map((provider) => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">
-                {currentProvider?.apiKeyLabel || "API Key"}
-              </label>
-              <input
-                type="password"
-                value={
-                  aiConfig.apiKeys?.[
-                    aiConfig.provider as keyof typeof aiConfig.apiKeys
-                  ] || ""
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>{t("aiServiceConfig")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-base font-medium">
+              {t("enableAiSummary")}
+            </Label>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="enable-ai"
+                checked={aiConfig.enabled}
+                onCheckedChange={(checked) =>
+                  setAiConfig({ ...aiConfig, enabled: !!checked })
                 }
-                onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder={t(
-                  "enterApiKeyPlaceholder",
-                  currentProvider?.name || ""
-                )}
-                className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
               />
-              {currentProvider?.supportsModelFetch && (
-                <small className="text-gray-600 text-xs block mt-1">
-                  {t("autoFetchModelsTip")}
-                </small>
-              )}
+              <Label htmlFor="enable-ai" className="cursor-pointer">
+                {t("enableSubtitleAiSummary")}
+              </Label>
             </div>
+          </div>
 
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">
-                {t("modelSelection")}
-              </label>
-
-              <div className="mb-3">
-                <label className="flex items-center cursor-pointer mb-2">
-                  <input
-                    type="radio"
-                    name="modelType"
-                    checked={!useCustomModel}
-                    onChange={() => setUseCustomModel(false)}
-                    className="mr-2"
-                  />
-                  {t("usePresetModel")}
-                </label>
-
-                {!useCustomModel && (
-                  <div className="ml-6">
-                    <div className="flex gap-2 items-center">
-                      <select
-                        value={aiConfig.model}
-                        onChange={(e) => handleModelChange(e.target.value)}
-                        disabled={fetchingModels}
-                        className="flex-1 py-2 px-3 border border-gray-300 rounded text-sm">
-                        {(
-                          availableModels[aiConfig.provider] ||
-                          currentProvider?.models ||
-                          []
-                        ).map((model) => (
-                          <option key={model} value={model}>
-                            {model}
-                          </option>
-                        ))}
-                      </select>
-
-                      {currentProvider?.supportsModelFetch &&
-                        aiConfig.apiKeys?.[
-                          aiConfig.provider as keyof typeof aiConfig.apiKeys
-                        ] && (
-                          <button
-                            onClick={() => {
-                              const provider = AI_PROVIDERS.find(
-                                (p) => p.id === aiConfig.provider
-                              )
-                              const apiKey =
-                                aiConfig.apiKeys?.[
-                                  aiConfig.provider as keyof typeof aiConfig.apiKeys
-                                ]
-                              if (provider && apiKey) {
-                                fetchModels(provider, apiKey).then((models) => {
-                                  setAvailableModels((prev) => ({
-                                    ...prev,
-                                    [provider.id]: models
-                                  }))
-                                })
-                              }
-                            }}
-                            disabled={fetchingModels}
-                            className={`py-2 px-3 border border-gray-300 rounded bg-gray-50 text-xs ${
-                              fetchingModels
-                                ? "cursor-not-allowed opacity-60"
-                                : "cursor-pointer hover:bg-gray-100"
-                            }`}>
-                            {fetchingModels ? t("refreshing") : t("refresh")}
-                          </button>
-                        )}
-                    </div>
-                  </div>
-                )}
-
-                {fetchingModels && (
-                  <small className="text-gray-600 text-xs block mt-1 ml-6">
-                    {t("fetchingModels")}
-                  </small>
-                )}
+          {aiConfig.enabled && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="ai-provider">{t("aiProvider")}</Label>
+                <Select
+                  value={aiConfig.provider}
+                  onValueChange={handleProviderChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AI_PROVIDERS.map((provider) => (
+                      <SelectItem key={provider.id} value={provider.id}>
+                        {provider.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className="flex items-center cursor-pointer mb-2">
-                  <input
-                    type="radio"
-                    name="modelType"
-                    checked={useCustomModel}
-                    onChange={() => setUseCustomModel(true)}
-                    className="mr-2"
-                  />
-                  {t("useCustomModel")}
-                </label>
-
-                {useCustomModel && (
-                  <input
-                    type="text"
-                    value={aiConfig.customModel || aiConfig.model}
-                    onChange={(e) => handleModelChange(e.target.value)}
-                    placeholder={t("enterCustomModelName")}
-                    className="w-full py-2 px-3 border border-gray-300 rounded text-sm ml-6"
-                  />
-                )}
-              </div>
-
-              <small className="text-gray-600 text-xs block mt-2">
-                {currentProvider?.supportsModelFetch
-                  ? t("supportsAutoFetchModels")
-                  : t("notSupportsAutoFetchModels")}
-              </small>
-            </div>
-
-            {currentProvider?.baseUrl && (
-              <div className="mb-4">
-                <label className="block mb-2 font-medium text-gray-600">
-                  {t("apiAddress")}
-                </label>
-                <input
-                  type="text"
-                  value={aiConfig.baseUrl || ""}
-                  onChange={(e) =>
-                    setAiConfig({
-                      ...aiConfig,
-                      baseUrl: e.target.value || undefined
-                    })
+              <div className="space-y-2">
+                <Label htmlFor="api-key">
+                  {currentProvider?.apiKeyLabel || "API Key"}
+                </Label>
+                <Input
+                  id="api-key"
+                  type="password"
+                  value={
+                    aiConfig.apiKeys?.[
+                      aiConfig.provider as keyof typeof aiConfig.apiKeys
+                    ] || ""
                   }
-                  placeholder={currentProvider.baseUrl}
-                  className="w-full py-2 px-3 border border-gray-300 rounded text-sm"
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
+                  placeholder={t(
+                    "enterApiKeyPlaceholder",
+                    currentProvider?.name || ""
+                  )}
                 />
-                <small className="text-gray-600 text-xs block mt-1">
-                  {t("customApiAddressTip")}
-                </small>
+                {currentProvider?.supportsModelFetch && (
+                  <p className="text-xs text-muted-foreground">
+                    {t("autoFetchModelsTip")}
+                  </p>
+                )}
               </div>
-            )}
 
-            <div className="mb-4">
-              <label className="block mb-2 font-medium text-gray-600">
-                {t("aiReplyLanguage")}
-              </label>
-              <select
-                value={aiConfig.replyLanguage || "auto"}
-                onChange={(e) =>
-                  setAiConfig({ ...aiConfig, replyLanguage: e.target.value })
-                }
-                className="w-full py-2 px-3 border border-gray-300 rounded text-sm">
-                {REPLY_LANGUAGES.map((lang) => (
-                  <option key={lang.id} value={lang.id}>
-                    {lang.name}
-                  </option>
-                ))}
-              </select>
-              <small className="text-gray-600 text-xs block mt-1">
-                {t("aiReplyLanguageTip")}
-              </small>
-            </div>
-          </>
-        )}
+              <div className="space-y-4">
+                <Label className="text-base font-medium">
+                  {t("modelSelection")}
+                </Label>
 
-        <button
-          onClick={saveConfig}
-          disabled={saving}
-          className={`${saved ? "bg-green-600" : "bg-blue-600"} text-white border-none py-2 px-5 rounded text-sm ${
-            saving ? "cursor-not-allowed opacity-60" : "cursor-pointer"
-          }`}>
-          {saving ? t("saving") : saved ? t("saved") : t("saveConfig")}
-        </button>
-      </div>
+                <RadioGroup
+                  value={useCustomModel ? "custom" : "preset"}
+                  onValueChange={(value) =>
+                    setUseCustomModel(value === "custom")
+                  }
+                  className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="preset" id="preset-model" />
+                      <Label htmlFor="preset-model" className="cursor-pointer">
+                        {t("usePresetModel")}
+                      </Label>
+                    </div>
 
-      <div className="bg-gray-200 p-4 rounded-lg text-sm text-gray-600">
-        <h3 className="mt-0 mb-3 text-base text-gray-800">
-          {t("usageInstructions")}
-        </h3>
-        <a
-          href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline">
-          https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md
-        </a>
-      </div>
+                    {!useCustomModel && (
+                      <div className="ml-6 space-y-2">
+                        <div className="flex gap-2 items-center">
+                          <Select
+                            value={aiConfig.model}
+                            onValueChange={handleModelChange}
+                            disabled={fetchingModels}>
+                            <SelectTrigger className="flex-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {(
+                                availableModels[aiConfig.provider] ||
+                                currentProvider?.models ||
+                                []
+                              ).map((model) => (
+                                <SelectItem key={model} value={model}>
+                                  {model}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
+                          {currentProvider?.supportsModelFetch &&
+                            aiConfig.apiKeys?.[
+                              aiConfig.provider as keyof typeof aiConfig.apiKeys
+                            ] && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const provider = AI_PROVIDERS.find(
+                                    (p) => p.id === aiConfig.provider
+                                  )
+                                  const apiKey =
+                                    aiConfig.apiKeys?.[
+                                      aiConfig.provider as keyof typeof aiConfig.apiKeys
+                                    ]
+                                  if (provider && apiKey) {
+                                    fetchModels(provider, apiKey).then(
+                                      (models) => {
+                                        setAvailableModels((prev) => ({
+                                          ...prev,
+                                          [provider.id]: models
+                                        }))
+                                      }
+                                    )
+                                  }
+                                }}
+                                disabled={fetchingModels}>
+                                {fetchingModels
+                                  ? t("refreshing")
+                                  : t("refresh")}
+                              </Button>
+                            )}
+                        </div>
+
+                        {fetchingModels && (
+                          <p className="text-xs text-muted-foreground ml-0">
+                            {t("fetchingModels")}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="custom" id="custom-model" />
+                      <Label htmlFor="custom-model" className="cursor-pointer">
+                        {t("useCustomModel")}
+                      </Label>
+                    </div>
+
+                    {useCustomModel && (
+                      <div className="ml-6">
+                        <Input
+                          value={aiConfig.customModel || aiConfig.model}
+                          onChange={(e) => handleModelChange(e.target.value)}
+                          placeholder={t("enterCustomModelName")}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </RadioGroup>
+
+                <p className="text-xs text-muted-foreground">
+                  {currentProvider?.supportsModelFetch
+                    ? t("supportsAutoFetchModels")
+                    : t("notSupportsAutoFetchModels")}
+                </p>
+              </div>
+
+              {currentProvider?.baseUrl && (
+                <div className="space-y-2">
+                  <Label htmlFor="api-address">{t("apiAddress")}</Label>
+                  <Input
+                    id="api-address"
+                    type="text"
+                    value={aiConfig.baseUrl || ""}
+                    onChange={(e) =>
+                      setAiConfig({
+                        ...aiConfig,
+                        baseUrl: e.target.value || undefined
+                      })
+                    }
+                    placeholder={currentProvider.baseUrl}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t("customApiAddressTip")}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="reply-language">{t("aiReplyLanguage")}</Label>
+                <Select
+                  value={aiConfig.replyLanguage || "auto"}
+                  onValueChange={(value) =>
+                    setAiConfig({ ...aiConfig, replyLanguage: value })
+                  }>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REPLY_LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.id} value={lang.id}>
+                        {lang.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t("aiReplyLanguageTip")}
+                </p>
+              </div>
+            </>
+          )}
+
+          <div className="pt-4">
+            <Button
+              onClick={saveConfig}
+              disabled={saving}
+              variant={saved ? "default" : "default"}
+              className={saved ? "bg-green-600 hover:bg-green-700" : ""}>
+              {saving ? t("saving") : saved ? t("saved") : t("saveConfig")}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t("usageInstructions")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <a
+            href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline">
+            https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md
+          </a>
+        </CardContent>
+      </Card>
     </div>
   )
 }

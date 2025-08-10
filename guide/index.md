@@ -48,6 +48,18 @@
 
 ### 3. OpenRouter
 
+https://openrouter.ai/
+
+对于[免费模型](https://openrouter.ai/models?max_price=0)（型号ID以"-free"结尾）。
+
+每日请求限制分为两种情况：
+
+- 如果你购买的信用点数少于50点，每天限制100次免费模型请求
+- 如果你购买了至少50点信用，每日限制会提高到300次免费模型请求
+- 如果你的账户信用点数为负数，即使是免费模型也会收到402 Payment Required错误。需要添加信用点数使余额大于零才能继续使用。
+
+创建额外的账号或API密钥不会影响你的使用限制，因为系统是全局控制的。不过不同模型有不同的限制，所以可以通过使用不同模型来分散负载。
+
 ### 4. GPT_API_free
 
 https://github.com/chatanywhere/GPT_API_free
