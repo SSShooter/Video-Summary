@@ -8,7 +8,10 @@ import {
   MindmapDisplay,
   type MindmapGenerateConfig
 } from "~components/MindmapDisplay"
-import { SummaryDisplay, type SummaryGenerateConfig } from "~components/SummaryDisplay"
+import {
+  SummaryDisplay,
+  type SummaryGenerateConfig
+} from "~components/SummaryDisplay"
 import { Button } from "~components/ui/button"
 import { Toaster } from "~components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"

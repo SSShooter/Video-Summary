@@ -245,6 +245,11 @@ function YouTubeSubtitlePanel() {
     }
   }
 
+  // 关闭面板
+  const handleClose = () => {
+    setIsVisible(false)
+  }
+
   useEffect(() => {
     const videoId = extractVideoId()
     if (videoId) {
@@ -311,6 +316,7 @@ function YouTubeSubtitlePanel() {
       videoInfo={videoInfo}
       onJumpToTime={jumpToTime}
       platform="youtube"
+      onClose={handleClose}
     />
   )
 }

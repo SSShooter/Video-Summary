@@ -25,8 +25,6 @@ export interface VideoInfo {
   title: string
 }
 
-
-
 export interface SubtitlePanelProps {
   subtitles: SubtitleItem[]
   loading: boolean
@@ -34,7 +32,7 @@ export interface SubtitlePanelProps {
   videoInfo: VideoInfo | null
   onJumpToTime: (time: number) => void
   platform: "bilibili" | "youtube"
-  onClose?: () => void
+  onClose: () => void
 }
 
 export function SubtitlePanel({
@@ -46,7 +44,6 @@ export function SubtitlePanel({
   platform,
   onClose
 }: SubtitlePanelProps) {
-
   const panelRef = useRef<HTMLDivElement>(null)
 
   // 获取思维导图缓存键
@@ -128,8 +125,6 @@ export function SubtitlePanel({
     additionalData: {}
   }
 
-
-
   return (
     <div
       ref={panelRef}
@@ -141,27 +136,25 @@ export function SubtitlePanel({
               ? t("videoAssistant")
               : t("youtubeSubtitle")}
           </h3>
-          {onClose && (
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="p-1 h-6 w-6 hover:bg-gray-100"
-              title={t("close") || "关闭"}>
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </Button>
-          )}
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="p-1 h-6 w-6 hover:bg-gray-100"
+            title={t("close") || "关闭"}>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </Button>
         </div>
         {videoInfo && (
           <div className="text-[12px] text-gray-600 leading-relaxed">
