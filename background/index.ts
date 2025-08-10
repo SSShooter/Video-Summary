@@ -7,7 +7,7 @@ import type { SubtitleSummary } from "../utils/types"
 import { PROMPTS } from "./prompts"
 
 interface AIConfig {
-  enabled: boolean
+
   provider: string
   apiKeys: {
     openai?: string
@@ -198,8 +198,8 @@ class BackgroundAIService {
     const apiKey =
       config?.apiKeys?.[config.provider as keyof typeof config.apiKeys]
 
-    if (!config || !config.enabled || !apiKey) {
-      throw new Error("AI功能未配置或未启用")
+    if (!config || !apiKey) {
+      throw new Error("AI功能未配置")
     }
 
     const provider = this.providers[config.provider]

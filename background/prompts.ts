@@ -20,7 +20,7 @@ const LANGUAGE_MAP: Record<string, string> = {
 }
 
 interface AIConfig {
-  enabled: boolean
+
   provider: string
   apiKeys: {
     openai?: string

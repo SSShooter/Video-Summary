@@ -23,7 +23,10 @@ function IndexPopup() {
   const loadAIStatus = async () => {
     try {
       const config = await storage.get<AIConfig>("aiConfig")
-      setAiEnabled(config?.enabled || false)
+      // 检查是否有配置的API密钥
+      const hasApiKey = config && config.apiKeys && 
+        config.apiKeys[config.provider as keyof typeof config.apiKeys]
+      setAiEnabled(!!hasApiKey)
     } catch (error) {
       console.error("加载AI配置失败:", error)
     } finally {
@@ -206,7 +209,7 @@ function IndexPopup() {
             disabled={!pageInfo.available || panelTriggering}
             variant={pageInfo.available ? "default" : "secondary"}
             size="lg"
-            className="w-full h-12">
+            className="w-full">
             {panelTriggering ? (
               <>
                 <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>

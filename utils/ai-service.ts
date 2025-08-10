@@ -6,7 +6,6 @@ export interface AIConfig {
     openai?: string
     gemini?: string
     claude?: string
-    zhipu?: string
     "openai-compatible"?: string
   }
   model: string
@@ -15,10 +14,9 @@ export interface AIConfig {
     openai?: string
     gemini?: string
     claude?: string
-    zhipu?: string
     "openai-compatible"?: string
   }
-  enabled: boolean
+
   customModel?: string
   replyLanguage?: string
 }
@@ -45,8 +43,8 @@ class AIService {
     const config = await this.getConfig()
     const apiKey =
       config.apiKeys?.[config.provider as keyof typeof config.apiKeys]
-    if (!config || !config.enabled || !apiKey) {
-      throw new Error("AI功能未配置或未启用")
+    if (!config || !apiKey) {
+      throw new Error("AI功能未配置")
     }
 
     const formattedSubtitles = this.formatSubtitlesForAI(subtitles)
