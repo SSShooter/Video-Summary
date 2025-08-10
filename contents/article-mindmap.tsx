@@ -4,9 +4,6 @@ import styleText from "data-text:mind-elixir/style.css"
 import sonnerStyle from "data-text:sonner/dist/styles.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
-
-import { Storage } from "@plasmohq/storage"
-
 import {
   MindmapDisplay,
   type MindmapGenerateConfig
@@ -18,7 +15,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { t } from "~utils/i18n"
-import type { SubtitleSummary } from "~utils/types"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
@@ -35,8 +31,6 @@ export const getStyle: PlasmoGetStyle = () => {
   style.textContent = tailwindStyles + styleText + styleOverride + sonnerStyle
   return style
 }
-
-
 
 function ArticleMindmapPanel() {
   const [articleInfo, setArticleInfo] = useState<ArticleInfo | null>(null)

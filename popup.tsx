@@ -1,11 +1,9 @@
 import iconBase64 from "data-base64:~assets/icon.png"
 import { useEffect, useState } from "react"
-
 import { Storage } from "@plasmohq/storage"
-
+import { Button } from "~components/ui/button"
 import type { AIConfig } from "~utils/ai-service"
 import { t } from "~utils/i18n"
-
 import "~style.css"
 
 function IndexPopup() {
@@ -203,43 +201,37 @@ function IndexPopup() {
 
         {/* 快速操作区域 */}
         <div className="space-y-2 mb-3">
-          <button
+          <Button
             onClick={triggerPanel}
             disabled={!pageInfo.available || panelTriggering}
-            className={`w-full p-3 rounded-lg border-2 transition-all duration-200 ${
-              pageInfo.available && !panelTriggering
-                ? "border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 text-blue-700"
-                : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
-            }`}>
-            <div className="flex items-center justify-center">
-              {panelTriggering ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
-                  <span className="text-sm font-medium">{t("starting")}</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-base mr-2">
-                    {pageInfo.available ? "🚀" : "🚫"}
-                  </span>
-                  <span className="text-sm font-medium">
-                    {pageInfo.actionText}
-                  </span>
-                </>
-              )}
-            </div>
-          </button>
+            variant={pageInfo.available ? "default" : "secondary"}
+            size="lg"
+            className="w-full h-12">
+            {panelTriggering ? (
+              <>
+                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+                <span>{t("starting")}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-base mr-2">
+                  {pageInfo.available ? "🚀" : "🚫"}
+                </span>
+                <span>{pageInfo.actionText}</span>
+              </>
+            )}
+          </Button>
 
-          <button
+          <Button
             onClick={openOptionsPage}
-            className="w-full p-2 bg-white border-2 border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-all duration-200">
-            <div className="flex items-center justify-center text-gray-700">
-              <span className="text-base mr-2">⚙️</span>
-              <span className="text-sm font-medium">
-                {aiEnabled ? t("aiConfigManagement") : t("configureAiService")}
-              </span>
-            </div>
-          </button>
+            variant="outline"
+            size="default"
+            className="w-full">
+            <span className="text-base mr-2">⚙️</span>
+            <span>
+              {aiEnabled ? t("aiConfigManagement") : t("configureAiService")}
+            </span>
+          </Button>
         </div>
 
         {/* 功能说明 */}
