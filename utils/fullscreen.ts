@@ -7,15 +7,19 @@ export const fullscreen = (mei: MindElixirInstance) => {
     console.log(mei)
     mei.scaleFit()
     mei.toCenter()
-    el.addEventListener('fullscreenchange', () => {
-      console.log('fullscreenchange');
-      if (!document.fullscreenElement) {
-        console.log('元素已退出全屏');
-        mei.scale(0.5)
-        mei.toCenter()
+    el.addEventListener(
+      "fullscreenchange",
+      () => {
+        console.log("fullscreenchange")
+        if (!document.fullscreenElement) {
+          console.log("元素已退出全屏")
+          mei.scale(0.5)
+          mei.toCenter()
+        }
+      },
+      {
+        once: true
       }
-    }, {
-      once: true
-    });
+    )
   }, 100)
 }

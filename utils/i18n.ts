@@ -27,7 +27,7 @@ export function getCurrentLanguage(): string {
  */
 export function isChinese(): boolean {
   const lang = getCurrentLanguage().toLowerCase()
-  return lang.includes('zh') || lang.includes('cn')
+  return lang.includes("zh") || lang.includes("cn")
 }
 
 /**
@@ -36,7 +36,7 @@ export function isChinese(): boolean {
  */
 export function isEnglish(): boolean {
   const lang = getCurrentLanguage().toLowerCase()
-  return lang.includes('en')
+  return lang.includes("en")
 }
 
 /**
@@ -50,9 +50,9 @@ export function formatTime(seconds: number): string {
   const secs = Math.floor(seconds % 60)
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   } else {
-    return `${minutes}:${secs.toString().padStart(2, '0')}`
+    return `${minutes}:${secs.toString().padStart(2, "0")}`
   }
 }
 
@@ -67,10 +67,10 @@ export function getRelativeTimeDescription(seconds: number): string {
   const secs = Math.floor(seconds % 60)
 
   if (hours > 0) {
-    return `${hours}${t('hours')}${minutes}${t('minutes')}${secs}${t('seconds')}`
+    return `${hours}${t("hours")}${minutes}${t("minutes")}${secs}${t("seconds")}`
   } else if (minutes > 0) {
-    return `${minutes}${t('minutes')}${secs}${t('seconds')}`
+    return `${minutes}${t("minutes")}${secs}${t("seconds")}`
   } else {
-    return `${secs}${t('seconds')}`
+    return `${secs}${t("seconds")}`
   }
 }

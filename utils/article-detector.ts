@@ -11,26 +11,29 @@ export interface ArticleInfo {
 export const detectArticle = (): ArticleInfo | null => {
   // 常见的文章容器选择器
   const articleSelectors = [
-    'article',
+    "article",
     '[role="main"]',
-    '.post-content',
-    '.article-content',
-    '.entry-content',
-    '.content',
-    '.post-body',
-    '.article-body',
-    'main',
-    '.markdown-body',
-    '.prose'
+    ".post-content",
+    ".article-content",
+    ".entry-content",
+    ".content",
+    ".post-body",
+    ".article-body",
+    "main",
+    ".markdown-body",
+    ".prose"
   ]
-
 
   let articleElement: Element | null = null
 
   // 查找文章容器
   for (const selector of articleSelectors) {
     const element = document.querySelector(selector)
-    if (element && element.textContent && element.textContent.trim().length > 500) {
+    if (
+      element &&
+      element.textContent &&
+      element.textContent.trim().length > 500
+    ) {
       articleElement = element
       break
     }
@@ -38,9 +41,9 @@ export const detectArticle = (): ArticleInfo | null => {
 
   // 如果没找到明确的文章容器，尝试查找包含大量文本的元素
   if (!articleElement) {
-    const allElements = document.querySelectorAll('div, section, main')
+    const allElements = document.querySelectorAll("div, section, main")
     for (const element of allElements) {
-      const textContent = element.textContent || ''
+      const textContent = element.textContent || ""
       const childElements = element.children.length
       // 判断是否为文章：文本长度 > 1000 且子元素不太多（避免选中整个页面）
       if (textContent.trim().length > 1000 && childElements < 50) {
@@ -54,8 +57,8 @@ export const detectArticle = (): ArticleInfo | null => {
     return null
   }
 
-  const title = document.title || '未知标题'
-  const content = articleElement.textContent?.trim() || ''
+  const title = document.title || "未知标题"
+  const content = articleElement.textContent?.trim() || ""
 
   // 最终验证：确保内容足够长
   if (content.length < 500) {

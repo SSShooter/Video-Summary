@@ -100,7 +100,7 @@ const MindElixirReact = forwardRef<MindElixirReactRef, MindElixirReactProps>(
           sanitizeNodeData(data.nodeData)
           meInstance.current.init(data)
           meInstance.current.toCenter()
-          meInstance.current.scale(0.5)          
+          meInstance.current.scale(0.5)
           fitPage && meInstance.current.scaleFit()
           meInstance.current.map.style.opacity = "1"
         }

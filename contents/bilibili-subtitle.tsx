@@ -1,12 +1,12 @@
-import styleText from "data-text:mind-elixir/style.css"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
-import sonnerStyle from 'data-text:sonner/dist/styles.css';
 import tailwindStyles from "data-text:~style.css"
+import styleText from "data-text:mind-elixir/style.css"
+import sonnerStyle from "data-text:sonner/dist/styles.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
-import { t } from "~utils/i18n"
 
 import { SubtitlePanel as CommonSubtitlePanel } from "~components/SubtitlePanel"
+import { t } from "~utils/i18n"
 
 export const config: PlasmoCSConfig = {
   matches: [
@@ -155,7 +155,9 @@ function BilibiliSubtitlePanel() {
 
       if (subtitleData.body && Array.isArray(subtitleData.body)) {
         setSubtitles(subtitleData.body)
-        console.log(t("subtitleLoadedCount", subtitleData.body.length.toString()))
+        console.log(
+          t("subtitleLoadedCount", subtitleData.body.length.toString())
+        )
       } else {
         console.error("字幕数据不是数组格式:", subtitleData.body)
         setError(t("subtitleFormatError"))
@@ -180,8 +182,6 @@ function BilibiliSubtitlePanel() {
   const handleClose = () => {
     setIsVisible(false)
   }
-
-
 
   useEffect(() => {
     const bvid = extractBVID()
@@ -208,25 +208,25 @@ function BilibiliSubtitlePanel() {
     }
   }, [])
 
-
-
   if (!isVisible) {
     return null
   }
 
   // 转换字幕格式以适配共用组件
-  const convertedSubtitles = subtitles.map(subtitle => ({
+  const convertedSubtitles = subtitles.map((subtitle) => ({
     from: subtitle.from,
     to: subtitle.to,
     content: subtitle.content
   }))
 
   // 转换视频信息格式
-  const convertedVideoInfo = videoInfo ? {
-    bvid: videoInfo.bvid,
-    cid: videoInfo.cid,
-    title: videoInfo.title
-  } : null
+  const convertedVideoInfo = videoInfo
+    ? {
+        bvid: videoInfo.bvid,
+        cid: videoInfo.cid,
+        title: videoInfo.title
+      }
+    : null
 
   return (
     <CommonSubtitlePanel

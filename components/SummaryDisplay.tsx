@@ -1,8 +1,9 @@
 import React from "react"
-import { ScrollArea } from "~components/ui/scroll-area"
+
 import { Button } from "~components/ui/button"
-import { t } from "~utils/i18n"
+import { ScrollArea } from "~components/ui/scroll-area"
 import type { SubtitleSummary } from "~utils/ai-service"
+import { t } from "~utils/i18n"
 
 interface SummaryDisplayProps {
   aiSummary: SubtitleSummary | null
@@ -33,27 +34,29 @@ export function SummaryDisplay({
           size="sm"
           className="w-full">
           {aiLoading
-            ? t('summarizing')
+            ? t("summarizing")
             : aiSummary
-              ? t('regenerate')
-              : generateButtonText || t('generateAiSummary')}
+              ? t("regenerate")
+              : generateButtonText || t("generateAiSummary")}
         </Button>
       </div>
-      
+
       <div className="flex-1 overflow-auto">
         <ScrollArea className="h-full">
           {!aiSummary && !aiLoading && (
             <div className="text-center py-[40px] px-[20px] text-gray-600">
-              <div className="mb-[12px]">{noSummaryText || t('noAiSummary')}</div>
+              <div className="mb-[12px]">
+                {noSummaryText || t("noAiSummary")}
+              </div>
               <div className="text-[12px]">
-                {generatePromptText || t('clickToGenerateVideoSummary')}
+                {generatePromptText || t("clickToGenerateVideoSummary")}
               </div>
             </div>
           )}
 
           {aiLoading && (
             <div className="text-center py-[40px] px-[20px] text-gray-600">
-              {t('generatingAiSummary')}
+              {t("generatingAiSummary")}
             </div>
           )}
 
@@ -61,18 +64,18 @@ export function SummaryDisplay({
             <div className="prose p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
               <div className="flex justify-between items-center mb-[12px]">
                 <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
-                  {t('aiContentSummaryTitle')}
+                  {t("aiContentSummaryTitle")}
                 </h4>
                 {cacheLoaded && (
                   <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
-                    {t('cached')}
+                    {t("cached")}
                   </span>
                 )}
               </div>
 
               <div className="mb-[12px]">
                 <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                  {t('summary')}
+                  {t("summary")}
                 </div>
                 <div className="text-[12px] leading-relaxed text-gray-800">
                   {aiSummary.summary}
@@ -82,7 +85,7 @@ export function SummaryDisplay({
               {aiSummary.keyPoints.length > 0 && (
                 <div className="mb-[12px]">
                   <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    {t('keyPoints')}
+                    {t("keyPoints")}
                   </div>
                   <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
                     {aiSummary.keyPoints.map((point, index) => (
@@ -97,7 +100,7 @@ export function SummaryDisplay({
               {aiSummary.topics.length > 0 && (
                 <div>
                   <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                    {t('mainTopics')}
+                    {t("mainTopics")}
                   </div>
                   <div className="flex flex-wrap gap-[4px]">
                     {aiSummary.topics.map((topic, index) => (

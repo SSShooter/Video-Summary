@@ -1,11 +1,12 @@
+import styleOverride from "data-text:./mind-elixir-css-override.css"
+import tailwindStyles from "data-text:~style.css"
+import styleText from "data-text:mind-elixir/style.css"
+import sonnerStyle from "data-text:sonner/dist/styles.css"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useState } from "react"
-import styleText from "data-text:mind-elixir/style.css"
-import styleOverride from "data-text:./mind-elixir-css-override.css"
-import sonnerStyle from 'data-text:sonner/dist/styles.css';
-import tailwindStyles from "data-text:~style.css"
-import { t } from "~utils/i18n"
+
 import { SubtitlePanel } from "~components/SubtitlePanel"
+import { t } from "~utils/i18n"
 
 export const config: PlasmoCSConfig = {
   matches: ["https://www.youtube.com/watch*"],
@@ -29,8 +30,6 @@ interface VideoInfo {
   title: string
 }
 
-
-
 function YouTubeSubtitlePanel() {
   const [subtitles, setSubtitles] = useState<SubtitleItem[]>([])
   const [loading, setLoading] = useState(false)
@@ -47,27 +46,32 @@ function YouTubeSubtitlePanel() {
 
   // 获取视频标题
   const getVideoTitle = (): string => {
-    const titleElement = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, h1.title')
-    return titleElement?.textContent || t('unknownTitle')
+    const titleElement = document.querySelector(
+      "h1.ytd-watch-metadata yt-formatted-string, h1.title"
+    )
+    return titleElement?.textContent || t("unknownTitle")
   }
 
   // 等待CC按钮加载并启动字幕
   const waitForCCButtonAndEnable = async (): Promise<boolean> => {
     return new Promise((resolve) => {
       const checkCCButton = () => {
-        const ccButton = document.querySelector('.ytp-subtitles-button, .ytp-caption-button, button[aria-label*="字幕"], button[aria-label*="Subtitles"], button[aria-label*="Captions"]') as HTMLButtonElement
+        const ccButton = document.querySelector(
+          '.ytp-subtitles-button, .ytp-caption-button, button[aria-label*="字幕"], button[aria-label*="Subtitles"], button[aria-label*="Captions"]'
+        ) as HTMLButtonElement
 
         if (ccButton) {
           // 检查字幕是否已经开启
-          const isSubtitleEnabled = ccButton.getAttribute('aria-pressed') === 'true' ||
-            ccButton.classList.contains('ytp-button-active') ||
-            ccButton.classList.contains('ytp-subtitles-button-active')
+          const isSubtitleEnabled =
+            ccButton.getAttribute("aria-pressed") === "true" ||
+            ccButton.classList.contains("ytp-button-active") ||
+            ccButton.classList.contains("ytp-subtitles-button-active")
 
           if (!isSubtitleEnabled) {
-            console.log('启动YouTube CC字幕')
+            console.log("启动YouTube CC字幕")
             ccButton.click()
           } else {
-            console.log('YouTube CC字幕已经开启')
+            console.log("YouTube CC字幕已经开启")
           }
           resolve(true)
         } else {
@@ -81,19 +85,21 @@ function YouTubeSubtitlePanel() {
   }
 
   // 合并字幕片段
-  const mergeSubtitleSegments = (rawSubtitles: SubtitleItem[]): SubtitleItem[] => {
+  const mergeSubtitleSegments = (
+    rawSubtitles: SubtitleItem[]
+  ): SubtitleItem[] => {
     if (rawSubtitles.length === 0) return []
 
     const merged: SubtitleItem[] = []
     let currentGroup: SubtitleItem[] = []
-    let currentGroupText = ''
+    let currentGroupText = ""
 
     for (let i = 0; i < rawSubtitles.length; i++) {
       const current = rawSubtitles[i]
       const next = rawSubtitles[i + 1]
 
       currentGroup.push(current)
-      currentGroupText += (currentGroupText ? ' ' : '') + current.text
+      currentGroupText += (currentGroupText ? " " : "") + current.text
 
       // 判断是否应该结束当前组
       const shouldEndGroup =
@@ -102,7 +108,7 @@ function YouTubeSubtitlePanel() {
         // 没有下一个片段了
         !next ||
         // 下一个片段与当前片段时间间隔太大（超过2秒）
-        (next.start - (current.start + current.dur)) > 2 ||
+        next.start - (current.start + current.dur) > 2 ||
         // 当前组文本已经很长了（避免单行过长）
         currentGroupText.length >= 120 ||
         // 检测到句子结束标点
@@ -115,13 +121,13 @@ function YouTubeSubtitlePanel() {
 
         merged.push({
           start: firstItem.start,
-          dur: (lastItem.start + lastItem.dur) - firstItem.start,
+          dur: lastItem.start + lastItem.dur - firstItem.start,
           text: currentGroupText.trim()
         })
 
         // 重置当前组
         currentGroup = []
-        currentGroupText = ''
+        currentGroupText = ""
       }
     }
 
@@ -133,13 +139,13 @@ function YouTubeSubtitlePanel() {
     try {
       setLoading(true)
       setError(null)
-      console.log('开始字幕逻辑，视频ID:', videoId)
+      console.log("开始字幕逻辑，视频ID:", videoId)
 
       // 开始监听字幕URL
       let isListening = true
       const urlListener = (message: any) => {
         if (message.type === "SUBTITLE_URL_CAPTURED" && isListening) {
-          console.log('收到字幕URL:', message.url)
+          console.log("收到字幕URL:", message.url)
           isListening = false // 停止监听
           chrome.runtime.onMessage.removeListener(urlListener)
           loadSubtitleContent(message.url)
@@ -159,14 +165,13 @@ function YouTubeSubtitlePanel() {
         if (isListening) {
           isListening = false
           chrome.runtime.onMessage.removeListener(urlListener)
-          setError(t('subtitleTimeout'))
+          setError(t("subtitleTimeout"))
           setLoading(false)
         }
       }, 15000)
-
     } catch (error) {
-      console.error(t('subtitleLogicFailed'), error)
-      setError(t('fetchSubtitlesFailed') + ' ' + (error as Error).message)
+      console.error(t("subtitleLogicFailed"), error)
+      setError(t("fetchSubtitlesFailed") + " " + (error as Error).message)
       setLoading(false)
     }
   }
@@ -174,12 +179,12 @@ function YouTubeSubtitlePanel() {
   // 加载字幕内容
   const loadSubtitleContent = async (subtitleUrl: string) => {
     try {
-      console.log('加载字幕内容:', subtitleUrl)
+      console.log("加载字幕内容:", subtitleUrl)
 
       // 确保URL包含JSON格式参数
       const url = new URL(subtitleUrl)
-      if (!url.searchParams.has('fmt')) {
-        url.searchParams.set('fmt', 'json3')
+      if (!url.searchParams.has("fmt")) {
+        url.searchParams.set("fmt", "json3")
       }
 
       const response = await fetch(url.toString())
@@ -188,7 +193,7 @@ function YouTubeSubtitlePanel() {
       }
 
       const data = await response.json()
-      console.log('字幕数据:', data)
+      console.log("字幕数据:", data)
 
       if (data.events && Array.isArray(data.events)) {
         // 处理YouTube的字幕格式
@@ -202,7 +207,7 @@ function YouTubeSubtitlePanel() {
                 rawSubtitles.push({
                   start: event.tStartMs / 1000,
                   dur: event.dDurationMs / 1000,
-                  text: seg.utf8.replace(/\n/g, ' ').trim()
+                  text: seg.utf8.replace(/\n/g, " ").trim()
                 })
               }
             }
@@ -214,24 +219,27 @@ function YouTubeSubtitlePanel() {
 
         setSubtitles(mergedSubtitles)
         setLoading(false)
-        console.log(t('youtubeSubtitleLoadedCount', [rawSubtitles.length.toString(), mergedSubtitles.length.toString()]))
+        console.log(
+          t("youtubeSubtitleLoadedCount", [
+            rawSubtitles.length.toString(),
+            mergedSubtitles.length.toString()
+          ])
+        )
       } else {
-        console.error(t('youtubeSubtitleFormatError'), data)
-        setError(t('expectedEventsArray'))
+        console.error(t("youtubeSubtitleFormatError"), data)
+        setError(t("expectedEventsArray"))
         setLoading(false)
       }
     } catch (error) {
-      console.error(t('loadSubtitleContentFailed'), error)
-      setError(t('loadSubtitleContentFailed') + ' ' + (error as Error).message)
+      console.error(t("loadSubtitleContentFailed"), error)
+      setError(t("loadSubtitleContentFailed") + " " + (error as Error).message)
       setLoading(false)
     }
   }
 
-
-
   // 跳转到指定时间
   const jumpToTime = (time: number) => {
-    const video = document.querySelector('video') as HTMLVideoElement
+    const video = document.querySelector("video") as HTMLVideoElement
     if (video) {
       video.currentTime = time
     }
@@ -261,8 +269,6 @@ function YouTubeSubtitlePanel() {
     }
   }, [])
 
-
-
   // 监听页面变化
   useEffect(() => {
     const handleUrlChange = () => {
@@ -285,11 +291,11 @@ function YouTubeSubtitlePanel() {
       setTimeout(handleUrlChange, 1000)
     }
 
-    window.addEventListener('popstate', handleUrlChange)
+    window.addEventListener("popstate", handleUrlChange)
 
     return () => {
       history.pushState = originalPushState
-      window.removeEventListener('popstate', handleUrlChange)
+      window.removeEventListener("popstate", handleUrlChange)
     }
   }, [videoInfo?.videoId])
 

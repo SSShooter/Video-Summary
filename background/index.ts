@@ -1,9 +1,10 @@
 // Background script to handle AI API requests and avoid CORS issues
 
 import { Storage } from "@plasmohq/storage"
-import { PROMPTS } from "./prompts"
+
 import { ResponseParser } from "../utils/response-parser"
 import type { SubtitleSummary } from "../utils/types"
+import { PROMPTS } from "./prompts"
 
 interface AIConfig {
   enabled: boolean
@@ -34,11 +35,15 @@ interface APIRequestConfig {
 
 interface ProviderConfig {
   getDefaultBaseUrl(): string
-  buildRequestConfig(config: AIConfig, systemPrompt: string, userPrompt: string, model: string, apiKey: string): APIRequestConfig
+  buildRequestConfig(
+    config: AIConfig,
+    systemPrompt: string,
+    userPrompt: string,
+    model: string,
+    apiKey: string
+  ): APIRequestConfig
   extractContent(response: any): string
 }
-
-
 
 // 提供商配置类
 class OpenAIProvider implements ProviderConfig {
@@ -46,7 +51,13 @@ class OpenAIProvider implements ProviderConfig {
     return "https://api.openai.com/v1"
   }
 
-  buildRequestConfig(config: AIConfig, systemPrompt: string, userPrompt: string, model: string, apiKey: string): APIRequestConfig {
+  buildRequestConfig(
+    config: AIConfig,
+    systemPrompt: string,
+    userPrompt: string,
+    model: string,
+    apiKey: string
+  ): APIRequestConfig {
     const baseUrl = config.baseUrl || this.getDefaultBaseUrl()
 
     const messages = []
@@ -59,7 +70,7 @@ class OpenAIProvider implements ProviderConfig {
       url: `${baseUrl}/chat/completions`,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`
       },
       body: {
         model: model,
@@ -70,7 +81,7 @@ class OpenAIProvider implements ProviderConfig {
   }
 
   extractContent(response: any): string {
-    return response.choices[0]?.message?.content || ''
+    return response.choices[0]?.message?.content || ""
   }
 }
 
@@ -79,12 +90,22 @@ class GeminiProvider implements ProviderConfig {
     return "https://generativelanguage.googleapis.com/v1beta"
   }
 
-  buildRequestConfig(config: AIConfig, systemPrompt: string, userPrompt: string, model: string, apiKey: string): APIRequestConfig {
+  buildRequestConfig(
+    config: AIConfig,
+    systemPrompt: string,
+    userPrompt: string,
+    model: string,
+    apiKey: string
+  ): APIRequestConfig {
     const baseUrl = config.baseUrl || this.getDefaultBaseUrl()
-    const fullModelName = model.startsWith('models/') ? model : `models/${model}`
+    const fullModelName = model.startsWith("models/")
+      ? model
+      : `models/${model}`
 
     // Gemini 不支持分离的系统提示词，需要合并
-    const combinedPrompt = systemPrompt ? `${systemPrompt}\n\n${userPrompt}` : userPrompt
+    const combinedPrompt = systemPrompt
+      ? `${systemPrompt}\n\n${userPrompt}`
+      : userPrompt
 
     return {
       url: `${baseUrl}/${fullModelName}:generateContent?key=${apiKey}`,
@@ -92,9 +113,11 @@ class GeminiProvider implements ProviderConfig {
         "Content-Type": "application/json"
       },
       body: {
-        contents: [{
-          parts: [{ text: combinedPrompt }]
-        }],
+        contents: [
+          {
+            parts: [{ text: combinedPrompt }]
+          }
+        ],
         generationConfig: {
           temperature: 0.3,
           responseMimeType: "application/json"
@@ -104,7 +127,7 @@ class GeminiProvider implements ProviderConfig {
   }
 
   extractContent(response: any): string {
-    return response.candidates[0]?.content?.parts[0]?.text || ''
+    return response.candidates[0]?.content?.parts[0]?.text || ""
   }
 }
 
@@ -113,7 +136,13 @@ class ClaudeProvider implements ProviderConfig {
     return "https://api.anthropic.com/v1"
   }
 
-  buildRequestConfig(config: AIConfig, systemPrompt: string, userPrompt: string, model: string, apiKey: string): APIRequestConfig {
+  buildRequestConfig(
+    config: AIConfig,
+    systemPrompt: string,
+    userPrompt: string,
+    model: string,
+    apiKey: string
+  ): APIRequestConfig {
     const baseUrl = config.baseUrl || this.getDefaultBaseUrl()
 
     return {
@@ -132,17 +161,17 @@ class ClaudeProvider implements ProviderConfig {
   }
 
   extractContent(response: any): string {
-    return response.content[0]?.text || ''
+    return response.content[0]?.text || ""
   }
 }
 
 class BackgroundAIService {
   private storage = new Storage()
   private providers: Record<string, ProviderConfig> = {
-    'openai': new OpenAIProvider(),
-    'openai-compatible': new OpenAIProvider(),
-    'gemini': new GeminiProvider(),
-    'claude': new ClaudeProvider()
+    openai: new OpenAIProvider(),
+    "openai-compatible": new OpenAIProvider(),
+    gemini: new GeminiProvider(),
+    claude: new ClaudeProvider()
   }
 
   // 从prompts文件导入提示词
@@ -161,9 +190,13 @@ class BackgroundAIService {
   /**
    * 统一的API调用方法
    */
-  private async callAI(systemPrompt: string, userPrompt: string): Promise<string> {
+  private async callAI(
+    systemPrompt: string,
+    userPrompt: string
+  ): Promise<string> {
     const config = await this.getConfig()
-    const apiKey = config?.apiKeys?.[config.provider as keyof typeof config.apiKeys]
+    const apiKey =
+      config?.apiKeys?.[config.provider as keyof typeof config.apiKeys]
 
     if (!config || !config.enabled || !apiKey) {
       throw new Error("AI功能未配置或未启用")
@@ -175,7 +208,13 @@ class BackgroundAIService {
     }
 
     const model = config.customModel || config.model
-    const requestConfig = provider.buildRequestConfig(config, systemPrompt, userPrompt, model, apiKey)
+    const requestConfig = provider.buildRequestConfig(
+      config,
+      systemPrompt,
+      userPrompt,
+      model,
+      apiKey
+    )
 
     const response = await fetch(requestConfig.url, {
       method: "POST",
@@ -184,7 +223,9 @@ class BackgroundAIService {
     })
 
     if (!response.ok) {
-      throw new Error(`${config.provider} API请求失败: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `${config.provider} API请求失败: ${response.status} ${response.statusText}`
+      )
     }
 
     const data = await response.json()
@@ -195,7 +236,9 @@ class BackgroundAIService {
     const systemPrompt = await PROMPTS.SUBTITLE_SUMMARY_SYSTEM()
     const userPrompt = this.USER_PROMPT_TEMPLATE(subtitles)
     const content = await this.callAI(systemPrompt, userPrompt)
-    return ResponseParser.parseSubtitleSummaryResponse(content, { enableTextFallback: true })
+    return ResponseParser.parseSubtitleSummaryResponse(content, {
+      enableTextFallback: true
+    })
   }
 
   async generateMindmap(subtitles: string): Promise<any> {
@@ -219,16 +262,17 @@ class BackgroundAIService {
    */
   formatSubtitlesForAI(subtitles: any[]): string {
     if (!Array.isArray(subtitles) || subtitles.length === 0) {
-      throw new Error('字幕数据为空或格式不正确')
+      throw new Error("字幕数据为空或格式不正确")
     }
 
     const formattedText = subtitles
-      .map(subtitle => {
+      .map((subtitle) => {
         // 支持多种字幕格式
-        const text = subtitle.text || subtitle.content || subtitle.transcript || ''
+        const text =
+          subtitle.text || subtitle.content || subtitle.transcript || ""
         return text.trim()
       })
-      .filter(text => text.length > 0)
+      .filter((text) => text.length > 0)
       // 去除重复的相邻文本
       .filter((text, index, array) => {
         if (index === 0) return true
@@ -242,16 +286,16 @@ class BackgroundAIService {
           const last = acc[acc.length - 1]
           // 如果当前句子很短且上一句也很短，则合并
           if (current.length < 20 && last.length < 50) {
-            acc[acc.length - 1] = last + ' ' + current
+            acc[acc.length - 1] = last + " " + current
           } else {
             acc.push(current)
           }
         }
         return acc
       }, [])
-      .join(' ')
+      .join(" ")
       // 清理多余的空格和标点
-      .replace(/\s+/g, ' ')
+      .replace(/\s+/g, " ")
       .trim()
 
     // 限制长度，但保持句子完整性
@@ -261,11 +305,11 @@ class BackgroundAIService {
 
     // 如果超长，尝试在句号处截断
     const truncated = formattedText.substring(0, 8000)
-    const lastPeriod = truncated.lastIndexOf('。')
-    const lastSpace = truncated.lastIndexOf(' ')
+    const lastPeriod = truncated.lastIndexOf("。")
+    const lastSpace = truncated.lastIndexOf(" ")
 
-    const cutPoint = lastPeriod > 7000 ? lastPeriod + 1 :
-      lastSpace > 7000 ? lastSpace : 8000
+    const cutPoint =
+      lastPeriod > 7000 ? lastPeriod + 1 : lastSpace > 7000 ? lastSpace : 8000
 
     return formattedText.substring(0, cutPoint).trim()
   }
@@ -282,21 +326,26 @@ chrome.webRequest.onBeforeRequest.addListener(
     const url = new URL(details.url)
 
     // 检查是否是YouTube的timedtext API请求
-    if (url.hostname === "www.youtube.com" && url.pathname === "/api/timedtext") {
+    if (
+      url.hostname === "www.youtube.com" &&
+      url.pathname === "/api/timedtext"
+    ) {
       // 检查是否包含pot参数（表示这是一个有效的字幕请求）
-      if (url.searchParams.has('pot')) {
-        console.log('捕获到YouTube字幕URL:', details.url)
+      if (url.searchParams.has("pot")) {
+        console.log("捕获到YouTube字幕URL:", details.url)
         capturedSubtitleUrl = details.url
 
         // 通知content script字幕URL已捕获
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           if (tabs[0]?.id) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-              type: "SUBTITLE_URL_CAPTURED",
-              url: details.url
-            }).catch(() => {
-              // 忽略发送失败的错误（可能content script还未加载）
-            })
+            chrome.tabs
+              .sendMessage(tabs[0].id, {
+                type: "SUBTITLE_URL_CAPTURED",
+                url: details.url
+              })
+              .catch(() => {
+                // 忽略发送失败的错误（可能content script还未加载）
+              })
           }
         })
       }
@@ -310,38 +359,43 @@ chrome.webRequest.onBeforeRequest.addListener(
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "summarizeSubtitles") {
-    backgroundAIService.summarizeSubtitles(request.subtitles)
-      .then(result => {
+    backgroundAIService
+      .summarizeSubtitles(request.subtitles)
+      .then((result) => {
         sendResponse({ success: true, data: result })
       })
-      .catch(error => {
+      .catch((error) => {
         sendResponse({ success: false, error: error.message })
       })
     return true // Keep the message channel open for async response
   }
 
   if (request.action === "generateMindmap") {
-    backgroundAIService.generateMindmap(request.subtitles)
-      .then(result => {
+    backgroundAIService
+      .generateMindmap(request.subtitles)
+      .then((result) => {
         sendResponse({ success: true, data: result })
       })
-      .catch(error => {
+      .catch((error) => {
         sendResponse({ success: false, error: error.message })
       })
     return true // Keep the message channel open for async response
   }
 
   if (request.action === "formatSubtitles") {
-    const formatted = backgroundAIService.formatSubtitlesForAI(request.subtitles)
+    const formatted = backgroundAIService.formatSubtitlesForAI(
+      request.subtitles
+    )
     sendResponse({ success: true, data: formatted })
   }
 
   if (request.action === "generateArticleMindmap") {
-    backgroundAIService.generateArticleMindmap(request.content, request.title)
-      .then(result => {
+    backgroundAIService
+      .generateArticleMindmap(request.content, request.title)
+      .then((result) => {
         sendResponse({ success: true, data: result })
       })
-      .catch(error => {
+      .catch((error) => {
         sendResponse({ success: false, error: error.message })
       })
     return true // Keep the message channel open for async response

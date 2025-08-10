@@ -43,13 +43,14 @@ class AIService {
 
   async summarizeSubtitles(subtitles: any[]): Promise<SubtitleSummary> {
     const config = await this.getConfig()
-    const apiKey = config.apiKeys?.[config.provider as keyof typeof config.apiKeys]
+    const apiKey =
+      config.apiKeys?.[config.provider as keyof typeof config.apiKeys]
     if (!config || !config.enabled || !apiKey) {
       throw new Error("AI功能未配置或未启用")
     }
 
     const formattedSubtitles = this.formatSubtitlesForAI(subtitles)
-    
+
     // 通过background脚本发送请求避免CORS问题
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
@@ -62,7 +63,7 @@ class AIService {
             reject(new Error(chrome.runtime.lastError.message))
             return
           }
-          
+
           if (response.success) {
             resolve(response.data)
           } else {
@@ -76,17 +77,17 @@ class AIService {
   // 格式化字幕文本用于AI分析
   formatSubtitlesForAI(subtitles: any[]): string {
     if (!Array.isArray(subtitles)) {
-      console.error('formatSubtitlesForAI: 输入参数不是数组:', subtitles)
-      return ''
+      console.error("formatSubtitlesForAI: 输入参数不是数组:", subtitles)
+      return ""
     }
-    
+
     return subtitles
-      .map(subtitle => {
-        const text = subtitle.text || subtitle.content || ''
+      .map((subtitle) => {
+        const text = subtitle.text || subtitle.content || ""
         return text.trim()
       })
-      .filter(text => text.length > 0)
-      .join(' ')
+      .filter((text) => text.length > 0)
+      .join(" ")
   }
 }
 

@@ -41,7 +41,7 @@ export interface ParseResult<T> {
   /** 解析成功的数据 */
   data: T
   /** 使用的解析方法 */
-  method: 'direct' | 'codeblock' | 'bracket' | 'text-fallback'
+  method: "direct" | "codeblock" | "bracket" | "text-fallback"
   /** 是否有警告信息 */
   hasWarnings: boolean
   /** 警告信息列表 */

@@ -7,16 +7,16 @@ import { Storage } from "@plasmohq/storage"
 
 // 语言映射表
 const LANGUAGE_MAP: Record<string, string> = {
-  "auto": chrome.i18n.getUILanguage(),
+  auto: chrome.i18n.getUILanguage(),
   "zh-CN": "中文",
-  "en": "English", 
-  "ja": "日本語",
-  "ko": "한국어",
-  "fr": "Français",
-  "de": "Deutsch",
-  "es": "Español", 
-  "pt": "Português",
-  "ru": "Русский"
+  en: "English",
+  ja: "日本語",
+  ko: "한국어",
+  fr: "Français",
+  de: "Deutsch",
+  es: "Español",
+  pt: "Português",
+  ru: "Русский"
 }
 
 interface AIConfig {
