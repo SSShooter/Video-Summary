@@ -1,16 +1,7 @@
-import { downloadMethodList } from "@mind-elixir/export-mindmap"
-import { launchMindElixir } from "@mind-elixir/open-desktop"
 import styleOverride from "data-text:./mind-elixir-css-override.css"
 import tailwindStyles from "data-text:~style.css"
 import styleText from "data-text:mind-elixir/style.css"
 import sonnerStyle from "data-text:sonner/dist/styles.css"
-import {
-  Brain,
-  Download,
-  ExternalLink,
-  Maximize,
-  RotateCcw
-} from "lucide-react"
 import type { MindElixirData } from "mind-elixir"
 import type { PlasmoCSConfig, PlasmoGetStyle } from "plasmo"
 import { useEffect, useRef, useState } from "react"
@@ -18,9 +9,7 @@ import { toast } from "sonner"
 
 import { Storage } from "@plasmohq/storage"
 
-import MindElixirReact, {
-  type MindElixirReactRef
-} from "~components/MindElixirReact"
+import { MindmapDisplay } from "~components/MindmapDisplay"
 import { SummaryDisplay } from "~components/SummaryDisplay"
 import { Button } from "~components/ui/button"
 import {
@@ -34,10 +23,8 @@ import { ScrollArea } from "~components/ui/scroll-area"
 import { Toaster } from "~components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~components/ui/tabs"
 import { detectArticle, type ArticleInfo } from "~utils/article-detector"
-import { fullscreen } from "~utils/fullscreen"
 import { detectAndConvertArticle } from "~utils/html-to-markdown"
 import { t } from "~utils/i18n"
-import { options } from "~utils/mind-elixir"
 import type { SubtitleSummary } from "~utils/types"
 
 export const config: PlasmoCSConfig = {
@@ -68,12 +55,11 @@ function ArticleMindmapPanel() {
   const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
   const [mindmapLoading, setMindmapLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const [mindElixirLoading, setMindElixirLoading] = useState(false)
+
   const [aiSummary, setAiSummary] = useState<SubtitleSummary | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [cacheLoaded, setCacheLoaded] = useState(false)
   const storage = new Storage()
-  const mindElixirRef = useRef<MindElixirReactRef>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   // AI总结文章
@@ -214,29 +200,6 @@ function ArticleMindmapPanel() {
     }
   }
 
-  // 在 Mind Elixir 中打开思维导图
-  const openInMindElixir = async () => {
-    if (mindmapData) {
-      setMindElixirLoading(true)
-      toast.loading(t("opening") || "正在打开...")
-
-      try {
-        // 使用通用的 Mind Elixir 启动函数
-        await launchMindElixir(mindmapData)
-        toast.dismiss()
-        toast.success(t("openedSuccessfully") || "打开成功")
-      } catch (error) {
-        console.error("打开 Mind Elixir 失败:", error)
-        toast.dismiss()
-        toast.error(
-          error instanceof Error ? error.message : t("openMindElixirFailed")
-        )
-      } finally {
-        setMindElixirLoading(false)
-      }
-    }
-  }
-
   // 检查缓存
   const checkCache = async (url: string): Promise<CachedData | null> => {
     try {
@@ -344,128 +307,24 @@ function ArticleMindmapPanel() {
         </TabsList>
 
         <TabsContent value="summary" className="overflow-hidden mt-[12px]">
-          <div className="flex-1 flex flex-col h-full">
-            {/* AI总结功能按钮 - 固定在顶部 */}
-            <div className="mb-[12px]">
-              <Button
-                onClick={() => summarizeWithAI(!!aiSummary)}
-                disabled={aiLoading}
-                size="sm"
-                className="w-full">
-                {aiLoading
-                  ? t("summarizing")
-                  : aiSummary
-                    ? t("regenerate")
-                    : t("generateAiSummary")}
-              </Button>
-            </div>
-            <SummaryDisplay
-              aiSummary={aiSummary}
-              aiLoading={aiLoading}
-              cacheLoaded={cacheLoaded}
-              onGenerate={() => summarizeWithAI(!!aiSummary)}
-              noSummaryText={t("noAiSummary")}
-              generatePromptText={t("clickToGenerateArticleSummary")}
-            />
-          </div>
+          <SummaryDisplay
+            aiSummary={aiSummary}
+            aiLoading={aiLoading}
+            cacheLoaded={cacheLoaded}
+            onGenerate={() => summarizeWithAI(!!aiSummary)}
+            noSummaryText={t("noAiSummary")}
+            generatePromptText={t("clickToGenerateArticleSummary")}
+          />
         </TabsContent>
 
         <TabsContent value="mindmap" className="overflow-auto mt-[12px]">
-          <div className="flex-1 flex flex-col h-full">
-            <div className="flex mb-[8px] gap-2 justify-between">
-              <Button
-                className="flex-grow"
-                onClick={() => generateMindmap(!!mindmapData)}
-                disabled={mindmapLoading}
-                size="sm"
-                title={
-                  mindmapLoading
-                    ? t("generating")
-                    : mindmapData
-                      ? t("regenerate")
-                      : t("generateMindmapBtn")
-                }>
-                {mindmapLoading
-                  ? t("generating")
-                  : mindmapData
-                    ? t("regenerate")
-                    : t("generateMindmapBtn")}
-                {mindmapData ? (
-                  <RotateCcw className="w-4 h-4" />
-                ) : (
-                  <Brain className="w-4 h-4" />
-                )}
-              </Button>
-              {mindmapData && (
-                <>
-                  <Button
-                    onClick={openInMindElixir}
-                    disabled={mindElixirLoading}
-                    size="sm"
-                    title={
-                      mindElixirLoading ? t("opening") : t("openInMindElixir")
-                    }>
-                    <ExternalLink className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      fullscreen(mindElixirRef.current?.instance!)
-                    }}
-                    size="sm"
-                    title={t("fullscreen")}>
-                    <Maximize className="w-4 h-4" />
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="sm" title={t("download") || "下载"}>
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuPortal container={panelRef.current}>
-                      <DropdownMenuContent align="end">
-                        {downloadMethodList.map((method) => (
-                          <DropdownMenuItem
-                            key={method.type}
-                            onClick={() => {
-                              if (mindElixirRef.current?.instance) {
-                                method.download(mindElixirRef.current.instance)
-                              }
-                            }}>
-                            {method.type}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenu>
-                </>
-              )}
-            </div>
-
-            {!mindmapData && !mindmapLoading && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                <div className="mb-[12px]">{t("noMindmap")}</div>
-                <div className="text-[12px]">
-                  {t("clickToGenerateArticleMindmap")}
-                </div>
-              </div>
-            )}
-
-            {mindmapLoading && (
-              <div className="text-center py-[40px] px-[20px] text-gray-600">
-                {t("generatingMindmap")}
-              </div>
-            )}
-
-            {mindmapData && (
-              <div className="flex-1 border border-gray-300 rounded-[6px] overflow-hidden">
-                <MindElixirReact
-                  data={mindmapData}
-                  ref={mindElixirRef}
-                  options={options}
-                />
-              </div>
-            )}
-          </div>
+          <MindmapDisplay
+            mindmapData={mindmapData}
+            mindmapLoading={mindmapLoading}
+            onGenerate={() => generateMindmap(!!mindmapData)}
+            panelRef={panelRef}
+            generatePromptText={t("clickToGenerateArticleMindmap")}
+          />
         </TabsContent>
       </Tabs>
       <Toaster />
