@@ -21,6 +21,7 @@ import { Storage } from "@plasmohq/storage"
 import MindElixirReact, {
   type MindElixirReactRef
 } from "~components/MindElixirReact"
+import { SummaryDisplay } from "~components/SummaryDisplay"
 import { Button } from "~components/ui/button"
 import {
   DropdownMenu,
@@ -189,7 +190,6 @@ function ArticleMindmapPanel() {
           }
         )
       })
-      console.log("生成思维导图成功", response)
 
       setMindmapData(response)
       toast.dismiss()
@@ -359,78 +359,14 @@ function ArticleMindmapPanel() {
                     : t("generateAiSummary")}
               </Button>
             </div>
-            <ScrollArea className="flex-1">
-              {!aiSummary && !aiLoading && (
-                <div className="text-center py-[40px] px-[20px] text-gray-600">
-                  <div className="mb-[12px]">{t("noAiSummary")}</div>
-                  <div className="text-[12px]">
-                    {t("clickToGenerateArticleSummary")}
-                  </div>
-                </div>
-              )}
-
-              {aiLoading && (
-                <div className="text-center py-[40px] px-[20px] text-gray-600">
-                  {t("generatingAiSummary")}
-                </div>
-              )}
-
-              {aiSummary && (
-                <div className="prose p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
-                  <div className="flex justify-between items-center mb-[12px]">
-                    <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
-                      {t("aiContentSummaryTitle")}
-                    </h4>
-                    {cacheLoaded && (
-                      <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
-                        {t("cached")}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="mb-[12px]">
-                    <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                      {t("summary")}
-                    </div>
-                    <div className="text-[12px] leading-relaxed text-gray-800">
-                      {aiSummary.summary}
-                    </div>
-                  </div>
-
-                  {aiSummary.keyPoints.length > 0 && (
-                    <div className="mb-[12px]">
-                      <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                        {t("keyPoints")}
-                      </div>
-                      <ul className="m-0 pl-[16px] text-[12px] leading-relaxed text-gray-800">
-                        {aiSummary.keyPoints.map((point, index) => (
-                          <li key={index} className="mb-[2px]">
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {aiSummary.topics.length > 0 && (
-                    <div>
-                      <div className="text-[12px] text-gray-600 mb-[4px] font-medium">
-                        {t("mainTopics")}
-                      </div>
-                      <div className="flex flex-wrap gap-[4px]">
-                        {aiSummary.topics.map((topic, index) => (
-                          <span
-                            key={index}
-                            className="py-[2px] px-[6px] bg-blue-50 text-blue-500 text-[12px] rounded-full border border-blue-200">
-                            {topic}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </ScrollArea>
+            <SummaryDisplay
+              aiSummary={aiSummary}
+              aiLoading={aiLoading}
+              cacheLoaded={cacheLoaded}
+              onGenerate={() => summarizeWithAI(!!aiSummary)}
+              noSummaryText={t("noAiSummary")}
+              generatePromptText={t("clickToGenerateArticleSummary")}
+            />
           </div>
         </TabsContent>
 
