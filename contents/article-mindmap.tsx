@@ -131,7 +131,7 @@ function ArticleMindmapPanel() {
   return (
     <div
       ref={panelRef}
-      className="w-[350px] h-[600px] bg-white border border-gray-300 rounded-[8px] p-[16px] font-sans shadow-lg fixed top-[80px] right-[20px] z-[9999] overflow-hidden flex flex-col">
+      className="w-[350px] h-[600px] bg-white border border-gray-300 border border-gray-300 rounded p-2 shadow-lg fixed top-[80px] right-[20px] z-[9999] overflow-hidden flex flex-col">
       <div className="mb-[12px]">
         <div className="flex justify-between items-center mb-[8px]">
           <h3 className="m-0 text-[16px] font-semibold text-gray-900">
@@ -170,7 +170,7 @@ function ArticleMindmapPanel() {
           <TabsTrigger value="mindmap">{t("mindmap")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="summary" className="overflow-hidden mt-[12px]">
+        <TabsContent value="summary" className="overflow-hidden mt-2">
           <SummaryDisplay
             generateConfig={summaryGenerateConfig}
             cacheKey={getSummaryCacheKey()}
@@ -179,7 +179,7 @@ function ArticleMindmapPanel() {
           />
         </TabsContent>
 
-        <TabsContent value="mindmap" className="overflow-hidden mt-[12px]">
+        <TabsContent value="mindmap" className="overflow-hidden mt-2">
           <MindmapDisplay
             panelRef={panelRef}
             generateConfig={mindmapGenerateConfig}

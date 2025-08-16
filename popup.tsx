@@ -1,9 +1,12 @@
 import iconBase64 from "data-base64:~assets/icon.png"
 import { useEffect, useState } from "react"
+
 import { Storage } from "@plasmohq/storage"
+
 import { Button } from "~components/ui/button"
 import type { AIConfig } from "~utils/ai-service"
 import { t } from "~utils/i18n"
+
 import "~style.css"
 
 function IndexPopup() {
@@ -24,7 +27,9 @@ function IndexPopup() {
     try {
       const config = await storage.get<AIConfig>("aiConfig")
       // 检查是否有配置的API密钥
-      const hasApiKey = config && config.apiKeys && 
+      const hasApiKey =
+        config &&
+        config.apiKeys &&
         config.apiKeys[config.provider as keyof typeof config.apiKeys]
       setAiEnabled(!!hasApiKey)
     } catch (error) {
@@ -125,9 +130,9 @@ function IndexPopup() {
   const pageInfo = getPageTypeInfo()
 
   return (
-    <div className="w-80 bg-white">
+    <div className="w-80 bg-blue-100">
       {/* 头部区域 */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 text-white">
+      <div className="bg-gradient-to-r from-purple-950 to-indigo-950 p-3 text-white">
         <div className="flex items-center mb-2">
           <img
             src={iconBase64}
@@ -136,7 +141,7 @@ function IndexPopup() {
           />
           <div>
             <h1 className="m-0 text-base font-semibold">{t("popupTitle")}</h1>
-            <p className="m-0 text-xs text-blue-100">{t("popupSubtitle")}</p>
+            <p className="m-0 text-xs text-purple-100">{t("popupSubtitle")}</p>
           </div>
         </div>
 
@@ -147,7 +152,7 @@ function IndexPopup() {
               <span className="text-lg mr-2">{pageInfo.icon}</span>
               <div>
                 <div className="text-xs font-medium">{pageInfo.type}</div>
-                <div className="text-xs text-blue-100">
+                <div className="text-xs text-purple-100">
                   {pageInfo.description}
                 </div>
               </div>
@@ -164,8 +169,8 @@ function IndexPopup() {
         <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
-              <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
-                <span className="text-blue-600 text-xs">🤖</span>
+              <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center mr-2">
+                <span className="text-purple-600 text-xs">🤖</span>
               </div>
               <div>
                 <div className="text-xs font-medium text-gray-800">
@@ -178,7 +183,7 @@ function IndexPopup() {
             </div>
             {loading ? (
               <div className="flex items-center">
-                <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-1"></div>
+                <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mr-1"></div>
                 <span className="text-xs text-gray-600">{t("detecting")}</span>
               </div>
             ) : (
@@ -208,7 +213,6 @@ function IndexPopup() {
             onClick={triggerPanel}
             disabled={!pageInfo.available || panelTriggering}
             variant={pageInfo.available ? "default" : "secondary"}
-            size="lg"
             className="w-full">
             {panelTriggering ? (
               <>
@@ -217,9 +221,6 @@ function IndexPopup() {
               </>
             ) : (
               <>
-                <span className="text-base mr-2">
-                  {pageInfo.available ? "🚀" : "🚫"}
-                </span>
                 <span>{pageInfo.actionText}</span>
               </>
             )}
@@ -228,38 +229,11 @@ function IndexPopup() {
           <Button
             onClick={openOptionsPage}
             variant="outline"
-            size="default"
             className="w-full">
-            <span className="text-base mr-2">⚙️</span>
             <span>
               {aiEnabled ? t("aiConfigManagement") : t("configureAiService")}
             </span>
           </Button>
-        </div>
-
-        {/* 功能说明 */}
-        <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-          <div className="text-xs font-medium text-blue-800 mb-2">
-            {t("features")}
-          </div>
-          <div className="space-y-1 text-xs text-blue-700">
-            <div className="flex items-center">
-              <span className="w-1 h-1 bg-blue-400 rounded-full mr-2"></span>
-              <span>{t("autoSubtitleExtraction")}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-1 h-1 bg-blue-400 rounded-full mr-2"></span>
-              <span>{t("aiContentSummary")}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-1 h-1 bg-blue-400 rounded-full mr-2"></span>
-              <span>{t("articleMindmap")}</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-1 h-1 bg-blue-400 rounded-full mr-2"></span>
-              <span>{t("oneClickJump")}</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

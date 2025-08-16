@@ -147,13 +147,19 @@ export function SummaryDisplay({
   }, [cacheKey])
   return (
     <div className="flex-1 flex flex-col h-full">
-      {/* AI总结功能按钮 - 固定在顶部 */}
-      <div className="mb-[12px]">
+      <div className="flex mb-2 gap-2 justify-between">
         <Button
+          className="flex-grow"
           onClick={() => generateSummary(!!aiSummary)}
           disabled={aiLoading}
           size="sm"
-          className="w-full">
+          title={
+            aiLoading
+              ? t("summarizing")
+              : aiSummary
+                ? t("regenerate")
+                : generateButtonText || t("generateAiSummary")
+          }>
           {aiLoading
             ? t("summarizing")
             : aiSummary
@@ -182,13 +188,13 @@ export function SummaryDisplay({
           )}
 
           {aiSummary && (
-            <div className="prose p-[12px] bg-green-50 border border-green-300 rounded-[6px]">
+            <div className="prose p-[12px] border border-blue-300 rounded-[6px]">
               <div className="flex justify-between items-center mb-[12px]">
                 <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
                   {t("aiContentSummaryTitle")}
                 </h4>
                 {cacheLoaded && (
-                  <span className="text-[12px] text-green-500 bg-green-50 py-[2px] px-[6px] rounded-full border border-green-300">
+                  <span className="text-[12px] text-blue-500 bg-blue-50 py-[2px] px-[6px] rounded-full border border-blue-300">
                     {t("cached")}
                   </span>
                 )}

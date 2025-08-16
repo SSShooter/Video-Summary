@@ -3,12 +3,7 @@ import { useEffect, useState } from "react"
 import { Storage } from "@plasmohq/storage"
 
 import { Button } from "~components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from "~components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "~components/ui/card"
 import { Input } from "~components/ui/input"
 import { Label } from "~components/ui/label"
 import { RadioGroup, RadioGroupItem } from "~components/ui/radio-group"
@@ -529,16 +524,40 @@ function OptionsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t("usageInstructions")}</CardTitle>
+          <CardTitle>{t("usageInstructions")}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <a
-            href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline">
-            https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md
-          </a>
+        <CardContent className="space-y-4">
+          <div>
+            <a
+              href="https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline">
+              https://github.com/SSShooter/Video-Summary/blob/master/guide/index.md
+            </a>
+          </div>
+
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-medium mb-3">{t("features")}</h4>
+            <div className="grid gap-2">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                <span>{t("autoSubtitleExtraction")}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                <span>{t("oneClickJump")}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                <span>{t("aiContentSummary")}</span>
+              </div>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full mr-3 flex-shrink-0"></div>
+                <span>{t("articleMindmap")}</span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -24,6 +24,7 @@ import {
   DropdownMenuPortal,
   DropdownMenuTrigger
 } from "~components/ui/dropdown-menu"
+import { ScrollArea } from "~components/ui/scroll-area"
 import { fullscreen } from "~utils/fullscreen"
 import { t } from "~utils/i18n"
 import { options } from "~utils/mind-elixir"
@@ -55,6 +56,7 @@ export function MindmapDisplay({
   const [mindElixirLoading, setMindElixirLoading] = useState(false)
   const [mindmapLoading, setMindmapLoading] = useState(false)
   const [mindmapData, setMindmapData] = useState<MindElixirData | null>(null)
+  const [cacheLoaded, setCacheLoaded] = useState(false)
   const storage = new Storage()
 
   // 加载缓存数据
@@ -70,6 +72,7 @@ export function MindmapDisplay({
         const isExpired = Date.now() - cached.timestamp > 24 * 60 * 60 * 1000 // 24小时过期
         if (!isExpired) {
           setMindmapData(cached.mindmapData)
+          setCacheLoaded(true)
         }
       }
     } catch (error) {
@@ -147,6 +150,7 @@ export function MindmapDisplay({
       })
 
       setMindmapData(response)
+      setCacheLoaded(false)
 
       // 保存到缓存
       await saveCacheData(response)
@@ -199,7 +203,7 @@ export function MindmapDisplay({
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      <div className="flex mb-[8px] gap-2 justify-between">
+      <div className="flex mb-2 gap-2 justify-between">
         <Button
           className="flex-grow"
           onClick={handleGenerate}
@@ -282,7 +286,7 @@ export function MindmapDisplay({
       )}
 
       {mindmapData && (
-        <div className="flex-1 border border-gray-300 rounded-[6px] overflow-hidden">
+        <div className="flex-1 w-full border border-gray-300 rounded-[6px] overflow-hidden">
           <MindElixirReact
             data={mindmapData}
             ref={mindmapRef}
