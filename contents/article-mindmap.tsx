@@ -141,8 +141,8 @@ function ArticleMindmapPanel() {
             onClick={() => setIsVisible(false)}
             variant="ghost"
             size="sm"
-            className="p-1 h-6 w-6 hover:bg-gray-100"
-            title={t("close") || "关闭"}>
+            className="p-1 h-6 w-6"
+            title={t("close")}>
             <svg
               className="w-4 h-4"
               fill="none"

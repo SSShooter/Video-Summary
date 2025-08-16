@@ -1,8 +1,10 @@
 # Intelligent Content Analysis Assistant
 
+**🎯 Transform Any Content Into Insights - Instantly!**
+
 [中文文档](./README.zh.md) | English
 
-A powerful Chrome browser extension that integrates AI technology to provide intelligent analysis and visualization of video and article content.
+A powerful browser extension that integrates AI technology to provide intelligent analysis and visualization of video and article content.
 
 ## 🚀 Three Core Features
 

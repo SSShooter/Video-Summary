@@ -188,7 +188,7 @@ export function SummaryDisplay({
           )}
 
           {aiSummary && (
-            <div className="prose p-[12px] border border-blue-300 rounded-[6px]">
+            <div className="prose p-[12px] bg-blue-50 rounded-[6px]">
               <div className="flex justify-between items-center mb-[12px]">
                 <h4 className="m-0 text-[14px] text-blue-500 font-semibold">
                   {t("aiContentSummaryTitle")}
