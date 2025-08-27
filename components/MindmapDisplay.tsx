@@ -171,17 +171,17 @@ export function MindmapDisplay({
   const openInMindElixir = async () => {
     if (mindmapData) {
       setMindElixirLoading(true)
-      toast.loading(t("opening") || "正在打开...")
+      toast.loading(t("opening"))
 
       try {
         await launchMindElixir(mindmapData)
         toast.dismiss()
-        toast.success(t("openedSuccessfully") || "打开成功")
+        toast.success(t("openedSuccessfully"))
       } catch (error) {
         console.error("打开 Mind Elixir 失败:", error)
         toast.dismiss()
         toast.error(
-          error instanceof Error ? error.message : "打开 Mind Elixir 失败"
+          error instanceof Error ? error.message : t("openMindElixirFailed")
         )
       } finally {
         setMindElixirLoading(false)

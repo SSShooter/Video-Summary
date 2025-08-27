@@ -129,12 +129,12 @@ export function SummaryDisplay({
       await saveCacheData(summary)
 
       toast.dismiss()
-      toast.success(t("aiSummaryGenerated") || "AI总结生成成功")
+      toast.success(t("aiSummaryGenerated"))
     } catch (error) {
       console.error("生成AI总结失败:", error)
       toast.dismiss()
       toast.error(
-        error instanceof Error ? error.message : "总结失败，请检查AI配置"
+        error instanceof Error ? error.message : t("summaryFailed")
       )
     } finally {
       setAiLoading(false)

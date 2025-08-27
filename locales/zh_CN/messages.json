@@ -32,7 +32,7 @@
     "description": "视频页面功能描述"
   },
   "articlePageDescription": {
-    "message": "支持生成思维导图",
+    "message": "支持AI总结和思维导图生成",
     "description": "文章页面功能描述"
   },
   "unsupportedPageDescription": {
@@ -44,8 +44,8 @@
     "description": "启动字幕面板按钮文字"
   },
   "generateMindmap": {
-    "message": "生成思维导图",
-    "description": "生成思维导图按钮文字"
+    "message": "打开面板",
+    "description": "打开面板按钮文字"
   },
   "cannotUse": {
     "message": "无法使用",
@@ -306,6 +306,14 @@
   "mindmapGenerated": {
     "message": "思维导图生成成功",
     "description": "思维导图生成成功提示"
+  },
+  "aiSummaryGenerated": {
+    "message": "AI总结生成成功",
+    "description": "AI总结生成成功提示"
+  },
+  "openedSuccessfully": {
+    "message": "打开成功",
+    "description": "打开成功提示"
   },
   "openInMindElixir": {
     "message": "在 Mind Elixir 打开",

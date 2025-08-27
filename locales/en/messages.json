@@ -32,7 +32,7 @@
     "description": "Video page feature description"
   },
   "articlePageDescription": {
-    "message": "Supports mindmap generation",
+    "message": "Supports AI summary and mindmap generation",
     "description": "Article page feature description"
   },
   "unsupportedPageDescription": {
@@ -44,8 +44,8 @@
     "description": "Start subtitle panel button text"
   },
   "generateMindmap": {
-    "message": "Generate Mindmap",
-    "description": "Generate mindmap button text"
+    "message": "Open Panel",
+    "description": "Open panel button text"
   },
   "cannotUse": {
     "message": "Cannot Use",
@@ -306,6 +306,14 @@
   "mindmapGenerated": {
     "message": "Mindmap generated successfully",
     "description": "Mindmap generated successfully message"
+  },
+  "aiSummaryGenerated": {
+    "message": "AI summary generated successfully",
+    "description": "AI summary generated successfully tip"
+  },
+  "openedSuccessfully": {
+    "message": "Opened successfully",
+    "description": "Opened successfully tip"
   },
   "openInMindElixir": {
     "message": "Open in Mind Elixir",
