@@ -50,19 +50,15 @@
 
 https://openrouter.ai/
 
-对于[免费模型](https://openrouter.ai/models?max_price=0)（型号ID以"-free"结尾）。
+对于[免费模型](https://openrouter.ai/models?max_price=0)（型号ID以 `:free` 结尾）。
 
-每日请求限制分为两种情况：
+目前，比较热门的免费模型包括 [x-ai/grok-4-fast:free](https://openrouter.ai/x-ai/grok-4-fast:free) 和 [deepseek/deepseek-chat-v3.1:free](https://openrouter.ai/deepseek/deepseek-chat-v3.1:free)
 
-- 如果你购买的信用点数少于50点，每天限制100次免费模型请求
-- 如果你购买了至少50点信用，每日限制会提高到300次免费模型请求
-- 如果你的账户信用点数为负数，即使是免费模型也会收到402 Payment Required错误。需要添加信用点数使余额大于零才能继续使用。
+对于免费模型，请求速率限制取决于你已购买的积分数量。如果你购买了至少 10 个积分，你的免费模型请求速率限制将是每天 1000 次。否则，你的免费模型 API 请求将被限制为每天 50 次。
 
-创建额外的账号或API密钥不会影响你的使用限制，因为系统是全局控制的。不过不同模型有不同的限制，所以可以通过使用不同模型来分散负载。
+推荐充值 10 积分，这个额度对于日常使用和开发测试是完全足够的。同时可以配置 Credit limit 为 0 的 Token 避免误用积分。
 
-### 4. GPT_API_free
-
-https://github.com/chatanywhere/GPT_API_free
+![openrouter](./openrouter.jpg)
 
 ## 💰 付费方案
 
