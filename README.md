@@ -1,21 +1,23 @@
-# Intelligent Content Analysis Assistant
+# M10C
 
-**🎯 Transform Any Content Into Insights - Instantly!**
+![M10C Main Image](./assets/Main.jpg)
 
-[中文文档](./README.zh.md) | English
+[Download Link](https://chromewebstore.google.com/detail/ioadcalaliollffeejdkcncckkjieobp?authuser=0&hl=en)
 
-A powerful browser extension that integrates AI technology to provide intelligent analysis and visualization of video and article content.
+A Chrome extension that analyzes video and article content to generate summaries and mind maps.
 
 ## 🚀 Three Core Features
 
 ### 🎬 Intelligent Video Content Summarization
 
-**Supports Both YouTube and Bilibili Platforms**
+**Supports YouTube and Bilibili Platforms**
 
 - Automatically extracts video subtitle content with multi-language subtitle switching support
 - One-click AI-powered video content summarization including overview, key points, and main topics
 - Click subtitles to jump directly to corresponding video timestamps, improving viewing efficiency
 - Smart caching mechanism to avoid duplicate generation and save API call costs
+
+![M10C Feature1](./assets/Feat1.jpg)
 
 ### 📄 Intelligent Article Content Analysis
 
@@ -26,6 +28,8 @@ A powerful browser extension that integrates AI technology to provide intelligen
 - Provides structured content analysis including main viewpoints, key information, and topic tags
 - Supports multiple AI model selection to meet different accuracy and cost requirements
 
+![M10C Feature2](./assets/Feat2.jpg)
+
 ### 🧠 Visual Mind Map Generation
 
 **Transform Content into Intuitive Mind Maps**
@@ -35,11 +39,12 @@ A powerful browser extension that integrates AI technology to provide intelligen
 - Provides clear information hierarchy for better understanding and memory
 - Integrates professional mind map components with interactive browsing and editing support
 
+![M10C Feature3](./assets/Feat3.jpg)
+
 ## ✨ Technical Highlights
 
 - 🔒 **Privacy & Security**: API Keys stored locally only, no server uploads
 - 💾 **Smart Caching**: Automatically saves analysis results for enhanced user experience
-- 🎨 **Unified UI Design**: Consistent visual style and interactive experience
 - 🌐 **Multi-Platform Support**: YouTube, Bilibili, and other mainstream video platforms
 - ⚡ **High Performance**: Optimized data processing and rendering mechanisms
 
@@ -52,7 +57,7 @@ A powerful browser extension that integrates AI technology to provide intelligen
 **Quick Recommendations:**
 
 - 🌟 **First Choice**: Google Gemini (Free, excellent results)
-- 🔄 **Alternative**: SiliconFlow, partially free OpenRouter
+- 🔄 **Alternative**: SiliconFlow, OpenRouter
 - 💰 **Premium**: OpenAI GPT or Anthropic Claude (Paid, best performance)
 
 ## Technical Architecture
